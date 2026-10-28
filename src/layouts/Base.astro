@@ -1,19 +1,30 @@
 ---
 import '../styles/global.css';
 import { site, nav } from '../data/site';
-interface Props { title: string; description?: string; }
-const { title, description = `${site.name} : hôtel 3 étoiles aux Almadies, Dakar. Chambres, restaurant, piscine et salles de séminaire.` } = Astro.props;
+interface Props { title: string; description?: string; schema?: object[]; }
+const { title, description = `${site.name} : hôtel 3 étoiles aux Almadies, Dakar. Chambres, restaurant, piscine et salles de séminaire.`, schema = [] } = Astro.props;
 const path = Astro.url.pathname;
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Hotel',
+  '@id': 'https://lodgedesalmadies.com/#hotel',
   name: site.name,
+  description: 'Hôtel 3 étoiles de 36 chambres aux Almadies, Dakar, avec restaurant, piscine, room service, salles de séminaire et boutiques.',
   telephone: site.phone,
   email: site.email,
   url: 'https://lodgedesalmadies.com',
   image: 'https://lodgedesalmadies.com/img/hotel.jpg',
+  logo: 'https://lodgedesalmadies.com/img/logo.png',
+  starRating: { '@type': 'Rating', ratingValue: '3' },
+  numberOfRooms: 36,
+  inLanguage: 'fr',
+  currenciesAccepted: 'XOF, EUR, USD',
+  paymentAccepted: 'Espèces, cartes bancaires',
+  sameAs: [site.tripadvisor],
   address: { '@type': 'PostalAddress', streetAddress: 'Route des Almadies', addressLocality: 'Dakar', addressCountry: 'SN' },
+  amenityFeature: ['Piscine', 'Restaurant', 'Room service', 'Wi-Fi gratuit', 'Réception 24h/24', 'Parking surveillé', 'Groupe électrogène', 'Salles de séminaire', 'Petit-déjeuner buffet'].map((name) => ({ '@type': 'LocationFeatureSpecification', name, value: true })),
 };
+const graph = [jsonLd, ...schema];
 ---
 <!doctype html>
 <html lang="fr">
@@ -28,7 +39,7 @@ const jsonLd = {
   <meta property="og:image" content="https://lodgedesalmadies.com/img/hotel.jpg" />
   <meta property="og:locale" content="fr_FR" />
   <link rel="icon" href="/img/logo.png" />
-  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(graph)} />
 </head>
 <body>
   <a class="skip" href="#main">Aller au contenu</a>

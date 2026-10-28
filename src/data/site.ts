@@ -16,6 +16,7 @@ export const nav = [
   { href: '/chambres/twin/', label: 'Twin' },
   { href: '/seminaires/', label: 'Séminaires' },
   { href: '/galerie/', label: 'Galerie' },
+  { href: '/faq/', label: 'FAQ' },
   { href: '/contact/', label: 'Contact' },
 ];
 

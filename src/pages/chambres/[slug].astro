@@ -3,8 +3,25 @@ import Base from '../../layouts/Base.astro';
 import { rooms } from '../../data/site';
 export function getStaticPaths() { return rooms.map((r) => ({ params: { slug: r.slug }, props: { r } })); }
 const { r } = Astro.props;
+const schema = [{
+  '@context': 'https://schema.org',
+  '@type': 'HotelRoom',
+  name: r.name,
+  description: r.intro,
+  bed: { '@type': 'BedDetails', typeOfBed: r.beds },
+  occupancy: { '@type': 'QuantitativeValue', maxValue: 2 },
+  image: r.images.map((i) => `https://lodgedesalmadies.com/img/${i}.jpg`),
+  amenityFeature: r.equipment.map((name) => ({ '@type': 'LocationFeatureSpecification', name, value: true })),
+  containedInPlace: { '@id': 'https://lodgedesalmadies.com/#hotel' },
+  makesOffer: r.prices.map((p) => ({
+    '@type': 'Offer',
+    name: p.label,
+    priceCurrency: 'XOF',
+    price: p.fcfa.replace(/\D/g, ''),
+  })),
+}];
 ---
-<Base title={`${r.name} | Lodge des Almadies, Dakar`} description={r.intro.slice(0, 155)}>
+<Base title={`${r.name} | Lodge des Almadies, Dakar`} description={r.intro.slice(0, 155)} schema={schema}>
   <section class="page-hero"><img src={`/img/${r.images[0]}.jpg`} alt="" /><h1>{r.name}</h1></section>
   <section>
     <div class="wrap">

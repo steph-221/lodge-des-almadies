@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+const faq = [
+  ['Où se trouve le Lodge des Almadies ?', 'Route des Almadies, à Dakar, à environ 15 minutes du centre-ville, à proximité de restaurants, banques, commerces et plages.'],
+  ['Combien de chambres compte l’hôtel ?', 'L’hôtel compte 36 chambres : suites, chambres double et chambres twin.'],
+  ['Quels sont les tarifs ?', 'De 49 000 FCFA (environ 75 €) pour une double ou une twin côté route, jusqu’à 89 000 FCFA (environ 136 €) pour une suite côté cour, par nuit.'],
+  ['Y a-t-il une piscine et un restaurant ?', 'Oui. La piscine est située sur la terrasse du restaurant L’ENVERS (cuisine européenne et africaine). Le room service et le petit-déjeuner buffet sont proposés.'],
+  ['Le Wi-Fi est-il gratuit ?', 'Oui, le Wi-Fi haut débit est gratuit. La réception est ouverte 24h/24 et le parking est surveillé.'],
+  ['Peut-on organiser un séminaire ?', 'Oui. Deux salles climatisées et équipées : l’une jusqu’à 40 personnes, l’autre pour 15 personnes. Restauration et hébergement sur place.'],
+  ['Quels moyens de paiement sont acceptés ?', 'FCFA, euro, dollar américain et cartes bancaires.'],
+  ['Propose-t-on une navette depuis l’aéroport ?', 'Oui, une navette taxi aéroport est disponible en supplément.'],
+];
+const schema = [{
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
+}];
+---
+<Base title="Questions fréquentes | Lodge des Almadies, Dakar" description="Tarifs, emplacement, piscine, séminaires, paiement : les réponses aux questions fréquentes sur le Lodge des Almadies." schema={schema}>
+  <section class="page-hero"><img src="/img/hotel.jpg" alt="" /><h1>Questions fréquentes</h1></section>
+  <section><div class="wrap" style="max-width:760px">
+    {faq.map(([q, a]) => <details style="border-bottom:1px solid var(--line);padding:14px 0"><summary style="cursor:pointer;font-weight:600">{q}</summary><p>{a}</p></details>)}
+  </div></section>
+</Base>
