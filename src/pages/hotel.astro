@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+const items = ['36 chambres', 'Réception 24h/24', 'Wi-Fi gratuit', 'Groupe électrogène', 'Parking surveillé', 'Piscine', 'Restaurant L’ENVERS', 'Room service', 'Petit-déjeuner buffet', '2 salles de séminaire', '2 boutiques', 'Paiement : FCFA, euro, dollar, cartes bancaires'];
+---
+<Base title="L'hôtel | Lodge des Almadies, Dakar" description="36 chambres, restaurant, piscine, séminaires et boutiques aux Almadies, Dakar.">
+  <section class="page-hero"><img src="/img/hotel.jpg" alt="" /><h1>L’hôtel</h1></section>
+  <section>
+    <div class="wrap">
+      <p class="lead">Le Lodge des Almadies est un hôtel de 36 chambres à environ 15 minutes du centre-ville de Dakar. Calme, propreté et accueil du personnel en sont les maîtres mots.</p>
+      <ul class="ticks">{items.map((i) => <li>{i}</li>)}</ul>
+    </div>
+  </section>
+  <section class="alt"><div class="wrap grid g2">
+    <article class="card"><img src="/img/svc-restaurant.jpg" alt="Restaurant" loading="lazy" /><div class="b"><h3>Restaurant L’ENVERS</h3><p>Cuisine européenne et africaine, sur la terrasse au bord de la piscine.</p></div></article>
+    <article class="card"><img src="/img/svc-boutique.jpg" alt="Boutiques" loading="lazy" /><div class="b"><h3>Boutiques</h3><p>LAPESCHARDIÈRE (bijoux faits main) et ZAMANI (créateurs, produits africains).</p></div></article>
+  </div></section>
+</Base>

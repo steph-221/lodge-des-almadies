@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import { rooms } from '../../data/site';
+export function getStaticPaths() { return rooms.map((r) => ({ params: { slug: r.slug }, props: { r } })); }
+const { r } = Astro.props;
+---
+<Base title={`${r.name} | Lodge des Almadies, Dakar`} description={r.intro.slice(0, 155)}>
+  <section class="page-hero"><img src={`/img/${r.images[0]}.jpg`} alt="" /><h1>{r.name}</h1></section>
+  <section>
+    <div class="wrap">
+      <p class="lead">{r.intro}</p>
+      <p class="center"><strong>{r.guests}</strong> · {r.beds} · 1 nuit minimum</p>
+      <div class="grid g3 thumbs" style="margin:32px 0">
+        {r.images.map((i) => <img src={`/img/${i}.jpg`} alt={r.name} loading="lazy" />)}
+      </div>
+      <div class="grid g2">
+        <div><h2>Équipements</h2><ul class="ticks one">{r.equipment.map((e) => <li>{e}</li>)}</ul></div>
+        <div><h2>Tarifs par nuit</h2>
+          {r.prices.map((p) => <div class="price"><span>{p.label}</span><strong>{p.fcfa} <small>{p.eur}</small></strong></div>)}
+          <p><small>Navette taxi aéroport disponible en supplément.</small></p>
+          <a class="btn" href="/contact/">Réserver</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>

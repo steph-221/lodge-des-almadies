@@ -1,0 +1,8 @@
+---
+import Base from '../layouts/Base.astro';
+import { gallery } from '../data/site';
+---
+<Base title="Galerie | Lodge des Almadies, Dakar" description="Photos de l’hôtel, des chambres, du restaurant, de la piscine et des boutiques.">
+  <section class="page-hero"><img src="/img/g-decor.jpg" alt="" /><h1>Galerie</h1></section>
+  <section><div class="wrap gal">{gallery.map((g) => <img src={`/img/${g.src}.jpg`} alt={g.alt} loading="lazy" />)}</div></section>
+</Base>

@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Séminaires | Lodge des Almadies, Dakar" description="Deux salles de séminaire (40 et 15 personnes) climatisées et équipées, avec restauration et hébergement sur place.">
+  <section class="page-hero"><img src="/img/sem-01.jpg" alt="" /><h1>Séminaires</h1></section>
+  <section><div class="wrap">
+    <p class="lead">Un espace de travail lumineux, calme et climatisé pour vos réunions et formations.</p>
+    <div class="grid g2">
+      <div>
+        <h2>Salles</h2>
+        <ul class="ticks one"><li>Salle 1 : jusqu’à 40 personnes</li><li>Salle 2 : 15 personnes</li></ul>
+        <h2>Équipements</h2>
+        <ul class="ticks one"><li>Vidéoprojecteur</li><li>Micro</li><li>Paperboard</li><li>Wi-Fi</li><li>Téléphone</li></ul>
+      </div>
+      <div>
+        <h2>Services (en supplément)</h2>
+        <ul class="ticks one"><li>Pauses-café (deux formules) et repas de groupe</li><li>Menu entrée, plat, dessert</li><li>Forfait boissons avec ou sans alcool</li><li>Bouteilles d’eau individuelles</li><li>Carnet et stylo personnalisés à votre logo</li><li>Hébergement : suites, doubles et twins</li></ul>
+        <a class="btn" href="/contact/">Demander un devis</a>
+      </div>
+    </div>
+    <div class="grid g3 thumbs" style="margin-top:40px">
+      {['sem-02', 'sem-03', 'sem-04'].map((i) => <img src={`/img/${i}.jpg`} alt="Salle de séminaire" loading="lazy" />)}
+    </div>
+  </div></section>
+</Base>

@@ -1,0 +1,63 @@
+---
+import '../styles/global.css';
+import { site, nav } from '../data/site';
+interface Props { title: string; description?: string; }
+const { title, description = `${site.name} : hôtel 3 étoiles aux Almadies, Dakar. Chambres, restaurant, piscine et salles de séminaire.` } = Astro.props;
+const path = Astro.url.pathname;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Hotel',
+  name: site.name,
+  telephone: site.phone,
+  email: site.email,
+  url: 'https://lodgedesalmadies.com',
+  image: 'https://lodgedesalmadies.com/img/hotel.jpg',
+  address: { '@type': 'PostalAddress', streetAddress: 'Route des Almadies', addressLocality: 'Dakar', addressCountry: 'SN' },
+};
+---
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={new URL(path, Astro.site)} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content="https://lodgedesalmadies.com/img/hotel.jpg" />
+  <meta property="og:locale" content="fr_FR" />
+  <link rel="icon" href="/img/logo.png" />
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</head>
+<body>
+  <a class="skip" href="#main">Aller au contenu</a>
+  <header class="top">
+    <div class="wrap">
+      <a href="/"><img src="/img/logo.png" alt={site.name} height="48" /></a>
+      <button class="burger" aria-expanded="false" aria-controls="menu" id="burger">Menu</button>
+      <nav id="menu" aria-label="Navigation principale">
+        <ul>
+          {nav.map((n) => <li><a href={n.href} aria-current={path === n.href ? 'page' : undefined}>{n.label}</a></li>)}
+          <li><a class="btn" href="/contact/">Réserver</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <main id="main"><slot /></main>
+  <footer>
+    <div class="wrap">
+      <div class="grid">
+        <div><h3>{site.name}</h3><p>{site.address}<br />À 15 minutes du centre-ville.</p></div>
+        <div><h3>Navigation</h3><ul>{nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}</ul></div>
+        <div><h3>Contact</h3><p><a href={`tel:${site.phoneHref}`}>{site.phone}</a><br /><a href={`mailto:${site.email}`}>{site.email}</a><br /><a href={site.tripadvisor} rel="noopener" target="_blank">Avis Tripadvisor</a></p></div>
+      </div>
+      <p class="copy">© {new Date().getFullYear()} {site.name}</p>
+    </div>
+  </footer>
+  <script is:inline>
+    const b = document.getElementById('burger'), m = document.getElementById('menu');
+    b.addEventListener('click', () => { const o = m.classList.toggle('open'); b.setAttribute('aria-expanded', o); });
+  </script>
+</body>
+</html>

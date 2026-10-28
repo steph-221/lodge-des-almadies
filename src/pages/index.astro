@@ -1,0 +1,47 @@
+---
+import Base from '../layouts/Base.astro';
+const tiles = [
+  ['Restaurant', 'restaurant', '/hotel/'], ['Room service', 'room-service', '/hotel/'],
+  ['Séminaires', 'seminaires', '/seminaires/'], ['Suites', 'suites', '/chambres/suites/'],
+  ['L’hôtel', 'hotel', '/hotel/'], ['Boutiques', 'boutique', '/hotel/'],
+];
+const services = [
+  ['Séminaires', 'svc-seminaires', 'Une salle de séminaire pour 40 personnes, lumineuse, calme et climatisée.'],
+  ['Les boutiques', 'svc-boutique', 'LAPESCHARDIÈRE (bijoux faits main) et ZAMANI (créateurs et produits africains).'],
+  ['Restaurant', 'svc-restaurant', 'L’ENVERS, restaurant indépendant : cuisine européenne et africaine, produits de qualité.'],
+  ['Piscine', 'svc-piscine', 'Une piscine sur la terrasse du restaurant pour vous détendre.'],
+];
+---
+<Base title="Lodge des Almadies | Hôtel Dakar | Restaurant | Séminaires | Piscine">
+  <section class="hero">
+    <img src="/img/hotel.jpg" alt="" fetchpriority="high" />
+    <div class="in">
+      <h1>Une oasis de sérénité dans un univers raffiné</h1>
+      <p>Hôtel 3 étoiles aux Almadies, à 15 minutes du centre de Dakar.</p>
+      <a class="btn" href="/contact/">Réserver</a>
+    </div>
+  </section>
+  <section>
+    <div class="wrap center">
+      <h2>Bienvenue au Lodge des Almadies</h2>
+      <p class="lead">Au cœur du quartier des Almadies, à proximité de restaurants, banques, commerces et plages, le Lodge vous offre une atmosphère calme, raffinée et familiale, et l’accueil chaleureux de son équipe.</p>
+    </div>
+  </section>
+  <section class="alt">
+    <div class="wrap grid g3">
+      {tiles.map(([t, img, href]) => (
+        <a class="card" href={href}><img src={`/img/${img}.jpg`} alt={t} loading="lazy" /><div class="b"><h3>{t}</h3></div></a>
+      ))}
+    </div>
+  </section>
+  <section>
+    <div class="wrap">
+      <h2 class="center">Nos services</h2>
+      <div class="grid g2">
+        {services.map(([t, img, d]) => (
+          <article class="card"><img src={`/img/${img}.jpg`} alt={t} loading="lazy" /><div class="b"><h3>{t}</h3><p>{d}</p></div></article>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
