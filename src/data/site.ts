@@ -4,6 +4,7 @@ export const site = {
   phone: '(+221) 33 869 03 45',
   phoneHref: '+221338690345',
   email: 'hotel@lodgedesalmadies.com',
+  maps: 'https://www.google.com/maps/place/Le+Lodge+des+Almadies/@14.7399266,-17.5150638,17z',
   tripadvisor:
     'https://www.tripadvisor.fr/Hotel_Review-g293831-d1554223-Reviews-Le_Lodge_des_Almadies-Dakar_Dakar_Region.html',
 };

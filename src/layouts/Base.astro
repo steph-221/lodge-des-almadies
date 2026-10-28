@@ -20,7 +20,9 @@ const jsonLd = {
   inLanguage: 'fr',
   currenciesAccepted: 'XOF, EUR, USD',
   paymentAccepted: 'Espèces, cartes bancaires',
-  sameAs: [site.tripadvisor],
+  sameAs: [site.tripadvisor, site.maps],
+  hasMap: site.maps,
+  geo: { '@type': 'GeoCoordinates', latitude: 14.7399266, longitude: -17.5150638 },
   address: { '@type': 'PostalAddress', streetAddress: 'Route des Almadies', addressLocality: 'Dakar', addressCountry: 'SN' },
   amenityFeature: ['Piscine', 'Restaurant', 'Room service', 'Wi-Fi gratuit', 'Réception 24h/24', 'Parking surveillé', 'Groupe électrogène', 'Salles de séminaire', 'Petit-déjeuner buffet'].map((name) => ({ '@type': 'LocationFeatureSpecification', name, value: true })),
 };

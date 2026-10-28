@@ -20,7 +20,8 @@ import { site } from '../data/site';
       <h2>Coordonnées</h2>
       <p>{site.address}</p>
       <p><a href={`tel:${site.phoneHref}`}>{site.phone}</a><br /><a href={`mailto:${site.email}`}>{site.email}</a></p>
-      <iframe title="Plan d’accès" loading="lazy" style="border:0;width:100%;height:300px;border-radius:12px" src="https://www.openstreetmap.org/export/embed.html?bbox=-17.5200%2C14.7300%2C-17.4800%2C14.7600&amp;layer=mapnik"></iframe>
+      <iframe title="Plan d’accès" loading="lazy" style="border:0;width:100%;height:300px;border-radius:12px" src="https://www.openstreetmap.org/export/embed.html?bbox=-17.5190%2C14.7375%2C-17.5110%2C14.7425&amp;layer=mapnik&amp;marker=14.7399266%2C-17.5150638"></iframe>
+      <p><a href={site.maps} target="_blank" rel="noopener">Itinéraire sur Google Maps</a></p>
       <p><a href={site.tripadvisor} target="_blank" rel="noopener">Voir les avis Tripadvisor</a></p>
     </div>
   </div></section>
