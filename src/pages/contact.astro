@@ -1,19 +1,39 @@
 ---
 import Base from '../layouts/Base.astro';
-import { site } from '../data/site';
+import { getContent, imgSrc } from '../lib/content';
+const { site, pageHeroes } = await getContent();
+const sitekey = (import.meta.env as any).PUBLIC_TURNSTILE_SITEKEY ?? process.env.PUBLIC_TURNSTILE_SITEKEY ?? '';
+const objet = Astro.url.searchParams.get('objet') === 'seminaire' ? 'seminaire' : 'sejour';
 ---
-<Base title="Contact et réservation | Lodge des Almadies, Dakar" description="Contactez le Lodge des Almadies pour réserver : Route des Almadies, Dakar. Tél. (+221) 33 869 03 45.">
-  <section class="page-hero"><img src="/img/g-reception.jpg" alt="" /><h1>Contact et réservation</h1></section>
+<Base title="Contact et réservation | Lodge des Almadies, Dakar" description="Contactez le Lodge des Almadies pour réserver ou demander un devis séminaire : Route de l’OCI, Dakar. Tél. (+221) 33 869 03 45.">
+  <section class="page-hero"><img src={imgSrc(pageHeroes.contact)} alt="" /><h1>Contact et réservation</h1></section>
   <section><div class="wrap grid g2">
     <div>
       <h2>Nous écrire</h2>
-      <form action={`mailto:${site.email}`} method="post" enctype="text/plain">
-        <label>Nom<input name="nom" required autocomplete="name" /></label>
-        <label>E-mail<input type="email" name="email" required autocomplete="email" /></label>
-        <label>Arrivée<input type="date" name="arrivee" /></label>
-        <label>Départ<input type="date" name="depart" /></label>
-        <label>Message<textarea name="message" rows="5" required></textarea></label>
+      <form id="contact-form" action={`mailto:${site.email}`} method="post" enctype="text/plain" data-sitekey={sitekey} data-mailto={site.email}>
+        <label>Objet de la demande
+          <select name="objet" id="objet">
+            <option value="sejour" selected={objet === 'sejour'}>Séjour / réservation</option>
+            <option value="seminaire" selected={objet === 'seminaire'}>Séminaire</option>
+            <option value="autre">Autre</option>
+          </select>
+        </label>
+        <label>Nom<input name="nom" required autocomplete="name" maxlength="120" /></label>
+        <label>E-mail<input type="email" name="email" required autocomplete="email" maxlength="160" /></label>
+        <label>Téléphone (facultatif)<input type="tel" name="telephone" autocomplete="tel" maxlength="40" /></label>
+        <div id="sejour-fields">
+          <label>Arrivée<input type="date" name="arrivee" /></label>
+          <label>Départ<input type="date" name="depart" /></label>
+        </div>
+        <div id="seminaire-fields" hidden>
+          <label>Date souhaitée<input type="date" name="date_seminaire" /></label>
+          <label>Nombre de participants<input type="number" name="participants" min="1" max="40" placeholder="40 maximum" /></label>
+        </div>
+        <label>Message<textarea name="message" rows="5" required maxlength="3000" id="message" placeholder="Dites-nous ce dont vous avez besoin : dates, nombre de personnes…"></textarea></label>
+        <p class="hp" aria-hidden="true" style="position:absolute;left:-9999px"><label>Ne pas remplir<input name="website" tabindex="-1" autocomplete="off" /></label></p>
+        {sitekey && <div class="cf-turnstile" data-sitekey={sitekey}></div>}
         <button class="btn" type="submit">Envoyer</button>
+        <p id="form-status" role="status" aria-live="polite"></p>
       </form>
     </div>
     <div>
@@ -25,4 +45,48 @@ import { site } from '../data/site';
       <p><a href={site.tripadvisor} target="_blank" rel="noopener">Voir les avis Tripadvisor</a></p>
     </div>
   </div></section>
+  {sitekey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
+  <script is:inline>
+    (function () {
+      var f = document.getElementById('contact-form');
+      var sel = document.getElementById('objet');
+      var sem = document.getElementById('seminaire-fields');
+      var sej = document.getElementById('sejour-fields');
+      var msg = document.getElementById('message');
+      var status = document.getElementById('form-status');
+      var t0 = Date.now();
+      var hints = {
+        sejour: 'Dites-nous ce dont vous avez besoin : dates, nombre de personnes, type de chambre…',
+        seminaire: 'Pour votre devis : type d’événement, nombre de participants, date, pauses-café, déjeuner, hébergement des participants…',
+        autre: 'Votre message'
+      };
+      function sync() {
+        var v = sel.value;
+        sem.hidden = v !== 'seminaire';
+        sej.hidden = v === 'seminaire';
+        msg.placeholder = hints[v] || '';
+      }
+      sel.addEventListener('change', sync); sync();
+      f.addEventListener('submit', function (e) {
+        e.preventDefault();
+        status.textContent = 'Envoi en cours…';
+        var data = Object.fromEntries(new FormData(f).entries());
+        data.elapsed = Date.now() - t0;
+        fetch('/api/contact', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) })
+          .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; }); })
+          .then(function (res) {
+            if (res.ok) { status.textContent = 'Merci, votre message a bien été envoyé. Nous vous répondons rapidement.'; f.reset(); sync(); if (window.turnstile) turnstile.reset(); return; }
+            if (res.j && res.j.error === 'not_configured') {
+              var body = ['Nom : ' + data.nom, 'E-mail : ' + data.email, 'Téléphone : ' + (data.telephone || ''), '', data.message].join('\n');
+              location.href = 'mailto:' + f.dataset.mailto + '?subject=' + encodeURIComponent('Demande : ' + data.objet) + '&body=' + encodeURIComponent(body);
+              status.textContent = 'Votre messagerie va s’ouvrir pour envoyer la demande.';
+              return;
+            }
+            status.textContent = (res.j && res.j.message) || 'Envoi impossible. Merci de réessayer ou de nous écrire à ' + f.dataset.mailto + '.';
+            if (window.turnstile) turnstile.reset();
+          })
+          .catch(function () { status.textContent = 'Erreur réseau. Merci de réessayer.'; });
+      });
+    })();
+  </script>
 </Base>

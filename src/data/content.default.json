@@ -1,0 +1,567 @@
+{
+  "site": {
+    "name": "Le Lodge des Almadies",
+    "address": "Route de l’OCI, Almadies, Dakar, Sénégal",
+    "phone": "(+221) 33 869 03 45",
+    "phoneHref": "+221338690345",
+    "email": "hotel@lodgedesalmadies.com",
+    "restaurantPhone": "",
+    "maps": "https://www.google.com/maps/place/Le+Lodge+des+Almadies/@14.7399266,-17.5150638,17z",
+    "tripadvisor": "https://www.tripadvisor.fr/Hotel_Review-g293831-d1554223-Reviews-Le_Lodge_des_Almadies-Dakar_Dakar_Region.html"
+  },
+  "booking": {
+    "enabled": false,
+    "url": ""
+  },
+  "rate": 650,
+  "nav": [
+    {
+      "href": "/",
+      "label": "Accueil"
+    },
+    {
+      "href": "/hotel/",
+      "label": "L'hôtel"
+    },
+    {
+      "href": "/chambres/suites/",
+      "label": "Suites"
+    },
+    {
+      "href": "/chambres/double/",
+      "label": "Double"
+    },
+    {
+      "href": "/chambres/twin/",
+      "label": "Twin"
+    },
+    {
+      "href": "/tarifs/",
+      "label": "Tarifs"
+    },
+    {
+      "href": "/seminaires/",
+      "label": "Séminaires"
+    },
+    {
+      "href": "/galerie/",
+      "label": "Galerie"
+    },
+    {
+      "href": "/faq/",
+      "label": "FAQ"
+    },
+    {
+      "href": "/contact/",
+      "label": "Contact"
+    }
+  ],
+  "home": {
+    "heroImage": "hotel",
+    "title": "Une oasis de sérénité dans un univers raffiné",
+    "subtitle": "Hôtel 3 étoiles aux Almadies, à 15 minutes du centre de Dakar.",
+    "welcomeTitle": "Bienvenue au Lodge des Almadies",
+    "welcomeText": "Au cœur du quartier des Almadies, à proximité de restaurants, banques, commerces et plages, le Lodge vous offre une atmosphère calme, raffinée et familiale, et l’accueil chaleureux de son équipe.",
+    "carousel": [
+      "hotel",
+      "g-reception",
+      "g-relax",
+      "g-apero"
+    ],
+    "tiles": [
+      {
+        "title": "Restaurant",
+        "img": "restaurant",
+        "href": "/hotel/"
+      },
+      {
+        "title": "Séminaires",
+        "img": "seminaires",
+        "href": "/seminaires/"
+      },
+      {
+        "title": "Suites",
+        "img": "suites",
+        "href": "/chambres/suites/"
+      },
+      {
+        "title": "L’hôtel",
+        "img": "hotel",
+        "href": "/hotel/"
+      },
+      {
+        "title": "Boutiques",
+        "img": "boutique",
+        "href": "/hotel/"
+      }
+    ],
+    "services": [
+      {
+        "title": "Séminaires",
+        "img": "svc-seminaires",
+        "text": "Une salle de séminaire de 70 m² pour 40 personnes, lumineuse, calme et climatisée."
+      },
+      {
+        "title": "Les boutiques",
+        "img": "svc-boutique",
+        "text": "LAPESCHARDIÈRE (bijoux faits main) et ZAMANI (créateurs et produits africains)."
+      },
+      {
+        "title": "Restaurant",
+        "img": "svc-restaurant",
+        "text": "L’ENVERS, restaurant indépendant : cuisine européenne et africaine, service en continu tous les jours, bar ouvert toute la journée."
+      },
+      {
+        "title": "Piscine",
+        "img": "svc-piscine",
+        "text": "Une piscine en accès libre pour les clients, sur la terrasse du restaurant (non surveillée)."
+      }
+    ]
+  },
+  "hotel": {
+    "heroImage": "hotel",
+    "intro": "Le Lodge des Almadies est un hôtel de 36 chambres et suites, réparties sur deux bâtiments (côté route ou côté piscine), à environ 15 minutes du centre-ville de Dakar. Calme, propreté et accueil du personnel en sont les maîtres mots. Tout pour travailler et se reposer au même endroit.",
+    "items": [
+      "36 chambres et suites",
+      "Réception 24h/24",
+      "Wi-Fi haut débit gratuit",
+      "Climatisation, écran plat, coffre-fort, bouilloire dans chaque chambre",
+      "Groupe électrogène",
+      "Parking à l’hôtel, quartier calme et sécurisé",
+      "Piscine en accès libre (non surveillée)",
+      "Restaurant L’ENVERS et bar ouvert toute la journée",
+      "Petit-déjeuner de 6 h à 10 h",
+      "Une salle de séminaire de 70 m² (40 personnes)",
+      "2 boutiques",
+      "Paiement : FCFA, euro, dollar, cartes Visa et Mastercard"
+    ],
+    "cards": [
+      {
+        "title": "Restaurant L’ENVERS",
+        "img": "svc-restaurant",
+        "text": "Cuisine européenne et africaine, sur la terrasse au bord de la piscine. Service en continu tous les jours."
+      },
+      {
+        "title": "Boutiques",
+        "img": "svc-boutique",
+        "text": "LAPESCHARDIÈRE (bijoux faits main) et ZAMANI (créateurs, produits africains)."
+      }
+    ],
+    "location": [
+      {
+        "time": "10 min à pied",
+        "to": "la plage de la Pointe des Almadies"
+      },
+      {
+        "time": "5 min",
+        "to": "le golf des Almadies"
+      },
+      {
+        "time": "15 min",
+        "to": "le centre-ville de Dakar"
+      },
+      {
+        "time": "environ 1 h",
+        "to": "l’aéroport Blaise-Diagne, par l’autoroute"
+      }
+    ]
+  },
+  "rooms": [
+    {
+      "slug": "suites",
+      "name": "Suites",
+      "intro": "Trois suites spacieuses et calmes, à la décoration raffinée et personnalisée. L’une d’elles dispose d’un petit salon et d’une terrasse privée donnant sur la piscine. Lit supplémentaire possible sur demande.",
+      "guests": "2 personnes max.",
+      "beds": "Lit king-size",
+      "equipment": [
+        "Minibar",
+        "Bouilloire",
+        "Écran plat LCD et câble satellite",
+        "Coffre individuel",
+        "Climatisation",
+        "Wi-Fi haut débit gratuit",
+        "Bureau",
+        "Moustiquaire",
+        "Sèche-cheveux et fer à repasser sur demande",
+        "Corbeille de fruits à l’arrivée"
+      ],
+      "prices": [
+        {
+          "label": "Côté terrasse / piscine",
+          "fcfa": 78000
+        },
+        {
+          "label": "Côté cour",
+          "fcfa": 89000
+        }
+      ],
+      "images": [
+        "suite-01",
+        "suite-02",
+        "suite-03",
+        "suite-04",
+        "suite-05"
+      ]
+    },
+    {
+      "slug": "double",
+      "name": "Chambres Double",
+      "intro": "Toutes les commodités nécessaires. Certaines chambres ont un balcon, d’autres communiquent avec une chambre twin, idéal pour les familles avec enfants. Lit supplémentaire possible sur demande.",
+      "guests": "2 personnes max.",
+      "beds": "Lit double",
+      "equipment": [
+        "Écran plat LCD et câble satellite",
+        "Coffre individuel",
+        "Climatisation",
+        "Wi-Fi haut débit gratuit",
+        "Bureau",
+        "Moustiquaire"
+      ],
+      "prices": [
+        {
+          "label": "Côté route",
+          "fcfa": 49000
+        },
+        {
+          "label": "Côté piscine",
+          "fcfa": 53000
+        },
+        {
+          "label": "Chambre spacieuse avec minibar",
+          "fcfa": 63000
+        }
+      ],
+      "images": [
+        "double-01",
+        "double-02",
+        "double-03",
+        "double-04",
+        "double-05"
+      ]
+    },
+    {
+      "slug": "twin",
+      "name": "Chambres Twin",
+      "intro": "Pensées pour les voyages d’affaires et les séjours entre amis. Certaines ont un balcon. Sur demande, la chambre peut être transformée en double, et un lit supplémentaire ajouté.",
+      "guests": "2 personnes max.",
+      "beds": "Deux lits individuels",
+      "equipment": [
+        "Écran plat LCD et câble satellite",
+        "Coffre individuel",
+        "Climatisation",
+        "Wi-Fi haut débit gratuit",
+        "Bureau",
+        "Moustiquaire"
+      ],
+      "prices": [
+        {
+          "label": "Côté route",
+          "fcfa": 49000
+        },
+        {
+          "label": "Côté piscine",
+          "fcfa": 53000
+        },
+        {
+          "label": "Annexe, côté cour ou route",
+          "fcfa": 57000
+        },
+        {
+          "label": "Chambre spacieuse avec minibar",
+          "fcfa": 63000
+        }
+      ],
+      "images": [
+        "twin-01",
+        "twin-02",
+        "twin-03",
+        "twin-04",
+        "twin-05"
+      ]
+    }
+  ],
+  "tarifs": {
+    "mode": "public",
+    "heroImage": "g-decor",
+    "intro": "Tarifs TTC par chambre et par nuit, hors petit-déjeuner et taxe de séjour.",
+    "taxeSejour": 1000,
+    "societe": {
+      "title": "Tarifs sociétés 2027",
+      "rooms": [
+        {
+          "name": "Chambre côté route",
+          "building": "A",
+          "count": 7,
+          "fcfa": 44100
+        },
+        {
+          "name": "Chambre côté piscine",
+          "building": "A",
+          "count": 7,
+          "fcfa": 47700
+        },
+        {
+          "name": "Chambre",
+          "building": "B",
+          "count": 15,
+          "fcfa": 51300
+        },
+        {
+          "name": "Chambre sup, mini-bar, côté route",
+          "building": "A",
+          "count": 1,
+          "fcfa": 56700
+        },
+        {
+          "name": "Chambre sup, mini-bar",
+          "building": "B",
+          "count": 3,
+          "fcfa": 56700
+        },
+        {
+          "name": "Suite junior, mini-bar",
+          "building": "A",
+          "count": 1,
+          "fcfa": 70200
+        },
+        {
+          "name": "Suite, mini-bar",
+          "building": "B",
+          "count": 2,
+          "fcfa": 80100
+        }
+      ]
+    },
+    "restauration": [
+      {
+        "label": "Petit-déjeuner",
+        "fcfa": 8000,
+        "detail": "Par personne, servi de 6 h à 10 h"
+      },
+      {
+        "label": "Menu plat et dessert",
+        "fcfa": 12500,
+        "detail": "Par personne, au déjeuner ou au dîner"
+      }
+    ],
+    "restaurationNote": "Restaurant ouvert tous les jours en service continu, avec une carte en plus du menu. Le bar reste ouvert toute la journée.",
+    "seminaire": [
+      {
+        "label": "Salle de réunion, journée de location",
+        "fcfa": 130000,
+        "detail": "70 m², 38 à 40 personnes, vidéoprojecteur inclus"
+      },
+      {
+        "label": "Pause-café",
+        "fcfa": 5500,
+        "detail": "Par personne"
+      }
+    ],
+    "budgetExample": {
+      "title": "Exemple : une journée d’étude pour 20 personnes",
+      "lines": [
+        {
+          "label": "Salle de réunion, 1 journée",
+          "fcfa": 130000
+        },
+        {
+          "label": "2 pauses-café × 20 personnes",
+          "fcfa": 220000
+        },
+        {
+          "label": "Déjeuner menu × 20 personnes",
+          "fcfa": 250000
+        }
+      ],
+      "note": "Calcul à partir des tarifs 2027, hors hébergement."
+    },
+    "infos": [
+      {
+        "subject": "Taxe de séjour",
+        "detail": "1 000 FCFA par nuitée et par personne"
+      },
+      {
+        "subject": "Piscine",
+        "detail": "Accès libre pour les clients, non surveillée"
+      },
+      {
+        "subject": "Dans chaque chambre",
+        "detail": "Wi-Fi, climatisation, écran plat, coffre-fort, bouilloire"
+      },
+      {
+        "subject": "Navette aéroport",
+        "detail": "Disponible en supplément"
+      }
+    ]
+  },
+  "seminaire": {
+    "heroImage": "sem-01",
+    "intro": "Un espace de travail lumineux, calme et climatisé pour vos formations, réunions de direction, lancements de produits et journées d’étude.",
+    "capacity": "70 m², de 38 à 40 personnes, climatisée, avec Wi-Fi haut débit",
+    "equipment": [
+      "Vidéoprojecteur",
+      "Micro",
+      "Paperboard",
+      "Wi-Fi haut débit",
+      "Téléphone"
+    ],
+    "services": [
+      "Pauses-café et repas de groupe",
+      "Menu plat et dessert",
+      "Forfait boissons avec ou sans alcool",
+      "Bouteilles d’eau individuelles",
+      "Carnet et stylo personnalisés à votre logo",
+      "Hébergement : suites, doubles et twins"
+    ],
+    "images": [
+      "sem-02",
+      "sem-03",
+      "sem-04"
+    ]
+  },
+  "faq": [
+    {
+      "q": "Où se trouve le Lodge des Almadies ?",
+      "a": "Route de l’OCI, aux Almadies, à Dakar : 10 minutes à pied de la plage de la Pointe des Almadies, 5 minutes du golf, 15 minutes du centre-ville et environ 1 heure de l’aéroport Blaise-Diagne par l’autoroute."
+    },
+    {
+      "q": "Combien de chambres compte l’hôtel ?",
+      "a": "L’hôtel compte 36 chambres : suites, chambres double et chambres twin, réparties sur deux bâtiments."
+    },
+    {
+      "q": "Y a-t-il une piscine et un restaurant ?",
+      "a": "Oui. La piscine est en accès libre pour les clients (non surveillée), sur la terrasse du restaurant L’ENVERS (cuisine européenne et africaine). Le restaurant est ouvert tous les jours en service continu et le bar toute la journée."
+    },
+    {
+      "q": "Le Wi-Fi est-il gratuit ?",
+      "a": "Oui, le Wi-Fi haut débit est gratuit. La réception est ouverte 24h/24 et le parking est surveillé."
+    },
+    {
+      "q": "Peut-on organiser un séminaire ?",
+      "a": "Oui. Une salle climatisée de 70 m², équipée, jusqu’à 40 personnes. Restauration et hébergement sur place."
+    },
+    {
+      "q": "Quels moyens de paiement sont acceptés ?",
+      "a": "FCFA, euro, dollar américain et cartes bancaires Visa et Mastercard uniquement."
+    },
+    {
+      "q": "Y a-t-il une taxe de séjour ?",
+      "a": "Oui, 1 000 FCFA par nuitée et par personne."
+    },
+    {
+      "q": "Propose-t-on une navette depuis l’aéroport ?",
+      "a": "Oui, une navette taxi aéroport est disponible en supplément."
+    }
+  ],
+  "gallery": [
+    {
+      "src": "g-apero",
+      "alt": "Apéro sur le balcon"
+    },
+    {
+      "src": "g-relax",
+      "alt": "Espace détente"
+    },
+    {
+      "src": "g-decor",
+      "alt": "Un décor raffiné"
+    },
+    {
+      "src": "g-reception",
+      "alt": "La réception"
+    },
+    {
+      "src": "g-seminaires",
+      "alt": "Salle de séminaire"
+    },
+    {
+      "src": "p-049_DSC_2308",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-041_DSC_2291-2",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-3-",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-099_DSC_2424",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-034_DSC_2263",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-dsc_7888",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-dsc_8082",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-033_DSC_2259",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-9-chambres1",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-2-chambres4",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-1-chambres",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-101_DSC_2420",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-077_DSC_2360",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-028_DSC_2233",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-068_DSC_2354",
+      "alt": "Le Lodge des Almadies"
+    },
+    {
+      "src": "p-5-salle-de-seminaire4",
+      "alt": "Salle de séminaire"
+    },
+    {
+      "src": "b-01",
+      "alt": "Les boutiques du Lodge"
+    },
+    {
+      "src": "b-02",
+      "alt": "Les boutiques du Lodge"
+    },
+    {
+      "src": "b-03",
+      "alt": "Les boutiques du Lodge"
+    },
+    {
+      "src": "b-04",
+      "alt": "Les boutiques du Lodge"
+    },
+    {
+      "src": "b-05",
+      "alt": "Les boutiques du Lodge"
+    }
+  ],
+  "pageHeroes": {
+    "contact": "g-reception",
+    "faq": "hotel",
+    "galerie": "g-decor"
+  }
+}

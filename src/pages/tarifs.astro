@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+import BookButton from '../components/BookButton.astro';
+import { getContent, imgSrc, fmtFcfa, fmtEur } from '../lib/content';
+const c = await getContent();
+const t = c.tarifs;
+const societe = t.mode === 'societe';
+const rows = societe
+  ? t.societe.rooms.map((r) => ({ label: `${r.name} (bâtiment ${r.building})`, fcfa: r.fcfa }))
+  : c.rooms.flatMap((r) => r.prices.map((p) => ({ label: `${r.name} · ${p.label}`, fcfa: p.fcfa })));
+const total = t.budgetExample.lines.reduce((n, l) => n + l.fcfa, 0);
+---
+<Base title="Tarifs | Lodge des Almadies, Dakar" description="Tarifs des chambres, du restaurant et de la salle de séminaire du Lodge des Almadies, en FCFA et en euros.">
+  <section class="page-hero"><img src={imgSrc(t.heroImage)} alt="" /><h1>Tarifs</h1></section>
+  <section><div class="wrap">
+    <h2>{societe ? t.societe.title : 'Les chambres, par nuit'}</h2>
+    <p>{t.intro} 1 € = {c.rate} FCFA.</p>
+    {rows.map((r) => <div class="price"><span>{r.label}</span><strong>{fmtFcfa(r.fcfa)} <small>{fmtEur(r.fcfa, c.rate)}</small></strong></div>)}
+    <p><small>Taxe de séjour : {fmtFcfa(t.taxeSejour)} par nuitée et par personne.</small></p>
+    <p><BookButton /></p>
+
+    <h2>Restauration et bar</h2>
+    {t.restauration.map((r) => <div class="price"><span>{r.label} · {r.detail}</span><strong>{fmtFcfa(r.fcfa)} <small>{fmtEur(r.fcfa, c.rate)}</small></strong></div>)}
+    <p>{t.restaurationNote}</p>
+
+    <h2>Séminaires et réunions</h2>
+    {t.seminaire.map((r) => <div class="price"><span>{r.label} · {r.detail}</span><strong>{fmtFcfa(r.fcfa)} <small>{fmtEur(r.fcfa, c.rate)}</small></strong></div>)}
+    <h3>{t.budgetExample.title}</h3>
+    {t.budgetExample.lines.map((l) => <div class="price"><span>{l.label}</span><strong>{fmtFcfa(l.fcfa)}</strong></div>)}
+    <div class="price"><span><strong>Total</strong></span><strong>{fmtFcfa(total)}</strong></div>
+    <p><small>{t.budgetExample.note}</small></p>
+    <p><a class="btn" href="/contact/?objet=seminaire">Demander un devis séminaire</a></p>
+
+    <h2>Bon à savoir</h2>
+    {t.infos.map((i) => <div class="price"><span>{i.subject}</span><strong>{i.detail}</strong></div>)}
+  </div></section>
+</Base>

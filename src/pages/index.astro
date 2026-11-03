@@ -1,36 +1,29 @@
 ---
 import Base from '../layouts/Base.astro';
-const tiles = [
-  ['Restaurant', 'restaurant', '/hotel/'], ['Room service', 'room-service', '/hotel/'],
-  ['Séminaires', 'seminaires', '/seminaires/'], ['Suites', 'suites', '/chambres/suites/'],
-  ['L’hôtel', 'hotel', '/hotel/'], ['Boutiques', 'boutique', '/hotel/'],
-];
-const services = [
-  ['Séminaires', 'svc-seminaires', 'Une salle de séminaire pour 40 personnes, lumineuse, calme et climatisée.'],
-  ['Les boutiques', 'svc-boutique', 'LAPESCHARDIÈRE (bijoux faits main) et ZAMANI (créateurs et produits africains).'],
-  ['Restaurant', 'svc-restaurant', 'L’ENVERS, restaurant indépendant : cuisine européenne et africaine, produits de qualité.'],
-  ['Piscine', 'svc-piscine', 'Une piscine sur la terrasse du restaurant pour vous détendre.'],
-];
+import BookButton from '../components/BookButton.astro';
+import { getContent, imgSrc } from '../lib/content';
+const { home } = await getContent();
+const slides = home.carousel.length ? home.carousel : [home.heroImage];
 ---
 <Base title="Lodge des Almadies | Hôtel Dakar | Restaurant | Séminaires | Piscine">
   <section class="hero">
-    <img src="/img/hotel.jpg" alt="" fetchpriority="high" />
+    <img src={imgSrc(slides[0])} alt="" fetchpriority="high" id="hero-img" data-slides={JSON.stringify(slides.map(imgSrc))} />
     <div class="in">
-      <h1>Une oasis de sérénité dans un univers raffiné</h1>
-      <p>Hôtel 3 étoiles aux Almadies, à 15 minutes du centre de Dakar.</p>
-      <a class="btn" href="/contact/">Réserver</a>
+      <h1>{home.title}</h1>
+      <p>{home.subtitle}</p>
+      <BookButton />
     </div>
   </section>
   <section>
     <div class="wrap center">
-      <h2>Bienvenue au Lodge des Almadies</h2>
-      <p class="lead">Au cœur du quartier des Almadies, à proximité de restaurants, banques, commerces et plages, le Lodge vous offre une atmosphère calme, raffinée et familiale, et l’accueil chaleureux de son équipe.</p>
+      <h2>{home.welcomeTitle}</h2>
+      <p class="lead">{home.welcomeText}</p>
     </div>
   </section>
   <section class="alt">
     <div class="wrap grid g3">
-      {tiles.map(([t, img, href]) => (
-        <a class="card" href={href}><img src={`/img/${img}.jpg`} alt={t} loading="lazy" /><div class="b"><h3>{t}</h3></div></a>
+      {home.tiles.map((t) => (
+        <a class="card" href={t.href}><img src={imgSrc(t.img)} alt={t.title} loading="lazy" /><div class="b"><h3>{t.title}</h3></div></a>
       ))}
     </div>
   </section>
@@ -38,10 +31,19 @@ const services = [
     <div class="wrap">
       <h2 class="center">Nos services</h2>
       <div class="grid g2">
-        {services.map(([t, img, d]) => (
-          <article class="card"><img src={`/img/${img}.jpg`} alt={t} loading="lazy" /><div class="b"><h3>{t}</h3><p>{d}</p></div></article>
+        {home.services.map((s) => (
+          <article class="card"><img src={imgSrc(s.img)} alt={s.title} loading="lazy" /><div class="b"><h3>{s.title}</h3><p>{s.text}</p></div></article>
         ))}
       </div>
     </div>
   </section>
+  <script is:inline>
+    (function () {
+      var el = document.getElementById('hero-img');
+      if (!el) return;
+      var s = JSON.parse(el.getAttribute('data-slides') || '[]'), i = 0;
+      if (s.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      setInterval(function () { i = (i + 1) % s.length; el.src = s[i]; }, 5000);
+    })();
+  </script>
 </Base>

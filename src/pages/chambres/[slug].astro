@@ -1,8 +1,12 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { rooms } from '../../data/site';
-export function getStaticPaths() { return rooms.map((r) => ({ params: { slug: r.slug }, props: { r } })); }
-const { r } = Astro.props;
+import BookButton from '../../components/BookButton.astro';
+import { getContent, imgSrc, fmtFcfa, fmtEur } from '../../lib/content';
+const { slug } = Astro.params;
+const c = await getContent();
+const r = c.rooms.find((x) => x.slug === slug);
+if (!r) return new Response(null, { status: 404 });
+const prices = r.prices.map((p) => ({ label: p.label, fcfa: fmtFcfa(p.fcfa), eur: fmtEur(p.fcfa, c.rate), raw: p.fcfa }));
 const schema = [{
   '@context': 'https://schema.org',
   '@type': 'HotelRoom',
@@ -10,32 +14,27 @@ const schema = [{
   description: r.intro,
   bed: { '@type': 'BedDetails', typeOfBed: r.beds },
   occupancy: { '@type': 'QuantitativeValue', maxValue: 2 },
-  image: r.images.map((i) => `https://lodgedesalmadies.com/img/${i}.jpg`),
+  image: r.images.map((i) => new URL(imgSrc(i), 'https://lodgedesalmadies.com').href),
   amenityFeature: r.equipment.map((name) => ({ '@type': 'LocationFeatureSpecification', name, value: true })),
   containedInPlace: { '@id': 'https://lodgedesalmadies.com/#hotel' },
-  makesOffer: r.prices.map((p) => ({
-    '@type': 'Offer',
-    name: p.label,
-    priceCurrency: 'XOF',
-    price: p.fcfa.replace(/\D/g, ''),
-  })),
+  makesOffer: prices.map((p) => ({ '@type': 'Offer', name: p.label, priceCurrency: 'XOF', price: String(p.raw) })),
 }];
 ---
 <Base title={`${r.name} | Lodge des Almadies, Dakar`} description={r.intro.slice(0, 155)} schema={schema}>
-  <section class="page-hero"><img src={`/img/${r.images[0]}.jpg`} alt="" /><h1>{r.name}</h1></section>
+  <section class="page-hero"><img src={imgSrc(r.images[0] ?? 'hotel')} alt="" /><h1>{r.name}</h1></section>
   <section>
     <div class="wrap">
       <p class="lead">{r.intro}</p>
       <p class="center"><strong>{r.guests}</strong> · {r.beds} · 1 nuit minimum</p>
       <div class="grid g3 thumbs" style="margin:32px 0">
-        {r.images.map((i) => <img src={`/img/${i}.jpg`} alt={r.name} loading="lazy" />)}
+        {r.images.map((i) => <img src={imgSrc(i)} alt={r.name} loading="lazy" />)}
       </div>
       <div class="grid g2">
         <div><h2>Équipements</h2><ul class="ticks one">{r.equipment.map((e) => <li>{e}</li>)}</ul></div>
         <div><h2>Tarifs par nuit</h2>
-          {r.prices.map((p) => <div class="price"><span>{p.label}</span><strong>{p.fcfa} <small>{p.eur}</small></strong></div>)}
-          <p><small>Navette taxi aéroport disponible en supplément.</small></p>
-          <a class="btn" href="/contact/">Réserver</a>
+          {prices.map((p) => <div class="price"><span>{p.label}</span><strong>{p.fcfa} <small>{p.eur}</small></strong></div>)}
+          <p><small>Taxe de séjour : 1 000 FCFA par nuitée et par personne. Navette taxi aéroport disponible en supplément.</small></p>
+          <BookButton />
         </div>
       </div>
     </div>

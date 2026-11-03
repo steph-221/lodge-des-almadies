@@ -1,15 +1,18 @@
 ---
 import '../styles/global.css';
-import { site, nav } from '../data/site';
-interface Props { title: string; description?: string; schema?: object[]; }
-const { title, description = `${site.name} : hôtel 3 étoiles aux Almadies, Dakar. Chambres, restaurant, piscine et salles de séminaire.`, schema = [] } = Astro.props;
+import BookButton from '../components/BookButton.astro';
+import { getContent, imgSrc } from '../lib/content';
+interface Props { title: string; description?: string; schema?: object[]; noindex?: boolean; }
+const c = await getContent();
+const { site, nav } = c;
+const { title, description = `${site.name} : hôtel 3 étoiles aux Almadies, Dakar. Chambres, restaurant, piscine et salle de séminaire.`, schema = [], noindex = false } = Astro.props;
 const path = Astro.url.pathname;
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Hotel',
   '@id': 'https://lodgedesalmadies.com/#hotel',
   name: site.name,
-  description: 'Hôtel 3 étoiles de 36 chambres aux Almadies, Dakar, avec restaurant, piscine, room service, salles de séminaire et boutiques.',
+  description: 'Hôtel 3 étoiles de 36 chambres aux Almadies, Dakar, avec restaurant, piscine, salle de séminaire et boutiques.',
   telephone: site.phone,
   email: site.email,
   url: 'https://lodgedesalmadies.com',
@@ -19,12 +22,12 @@ const jsonLd = {
   numberOfRooms: 36,
   inLanguage: 'fr',
   currenciesAccepted: 'XOF, EUR, USD',
-  paymentAccepted: 'Espèces, cartes bancaires',
+  paymentAccepted: 'Espèces, Visa, Mastercard',
   sameAs: [site.tripadvisor, site.maps],
   hasMap: site.maps,
   geo: { '@type': 'GeoCoordinates', latitude: 14.7399266, longitude: -17.5150638 },
-  address: { '@type': 'PostalAddress', streetAddress: 'Route des Almadies', addressLocality: 'Dakar', addressCountry: 'SN' },
-  amenityFeature: ['Piscine', 'Restaurant', 'Room service', 'Wi-Fi gratuit', 'Réception 24h/24', 'Parking surveillé', 'Groupe électrogène', 'Salles de séminaire', 'Petit-déjeuner buffet'].map((name) => ({ '@type': 'LocationFeatureSpecification', name, value: true })),
+  address: { '@type': 'PostalAddress', streetAddress: 'Route de l’OCI', addressLocality: 'Dakar', addressCountry: 'SN' },
+  amenityFeature: ['Piscine', 'Restaurant', 'Bar', 'Wi-Fi gratuit', 'Réception 24h/24', 'Parking', 'Groupe électrogène', 'Salle de séminaire'].map((name) => ({ '@type': 'LocationFeatureSpecification', name, value: true })),
 };
 const graph = [jsonLd, ...schema];
 ---
@@ -35,6 +38,7 @@ const graph = [jsonLd, ...schema];
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content={description} />
+  {noindex && <meta name="robots" content="noindex,nofollow" />}
   <link rel="canonical" href={new URL(path, Astro.site)} />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
@@ -52,7 +56,7 @@ const graph = [jsonLd, ...schema];
       <nav id="menu" aria-label="Navigation principale">
         <ul>
           {nav.map((n) => <li><a href={n.href} aria-current={path === n.href ? 'page' : undefined}>{n.label}</a></li>)}
-          <li><a class="btn" href="/contact/">Réserver</a></li>
+          <li><BookButton /></li>
         </ul>
       </nav>
     </div>
