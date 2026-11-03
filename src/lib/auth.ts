@@ -52,5 +52,9 @@ export function tooManyAttempts(key: string): boolean {
 export function sameOrigin(request: Request): boolean {
   const origin = request.headers.get('origin');
   if (!origin) return true;
-  return new URL(origin).host === new URL(request.url).host;
+  // Derrière le proxy de Vercel, l'URL interne peut différer de l'adresse publique : on compare aussi les en-têtes d'hôte.
+  const hosts = [request.headers.get('x-forwarded-host'), request.headers.get('host'), new URL(request.url).host]
+    .filter(Boolean)
+    .flatMap((h) => String(h).split(',').map((x) => x.trim()));
+  try { return hosts.includes(new URL(origin).host); } catch { return false; }
 }
