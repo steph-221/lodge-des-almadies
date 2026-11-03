@@ -1,0 +1,23 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getContent, imgSrc, fmtFcfa, fmtEur } from '../../lib/content';
+const c = await getContent();
+const t = c.tarifs;
+const total = t.budgetExample.lines.reduce((n, l) => n + l.fcfa, 0);
+---
+<Base title="Tarifs séminaire 2027 | Lodge des Almadies, Dakar" description="Tarifs de la salle de séminaire du Lodge des Almadies : location à la journée, pause-café, exemple de budget.">
+  <section class="page-hero"><img src={imgSrc(t.seminaireHeroImage)} alt="" /><h1>Tarifs séminaire 2027</h1></section>
+  <section><div class="wrap">
+    <p class="center"><a href="/tarifs/">Tarifs publics</a> · <strong>Séminaire</strong></p>
+    <p class="lead">{t.seminaireIntro}</p>
+    <h2>La salle de réunion</h2>
+    {t.seminaireInfo.map((i) => <div class="price"><span>{i.label}</span><strong>{i.value}</strong></div>)}
+    {t.seminaire.map((r) => <div class="price"><span>{r.label} <small>· {r.detail}</small></span><strong>{fmtFcfa(r.fcfa)} <small>{fmtEur(r.fcfa, c.rate)}</small></strong></div>)}
+
+    <h2>{t.budgetExample.title}</h2>
+    {t.budgetExample.lines.map((l) => <div class="price"><span>{l.label}</span><strong>{fmtFcfa(l.fcfa)}</strong></div>)}
+    <div class="price"><span><strong>Total</strong></span><strong>{fmtFcfa(total)}</strong></div>
+    <p><small>{t.budgetExample.note}</small></p>
+    <p style="margin-top:24px"><a class="btn" href="/contact/?objet=seminaire">Demander un devis</a></p>
+  </div></section>
+</Base>

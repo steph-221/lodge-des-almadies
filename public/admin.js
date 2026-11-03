@@ -212,30 +212,37 @@
           photoList('Photos (la 1re sert de bandeau)', r.images));
       }));
     }],
-    tarifs: ['Tarifs', function () {
+    tarifs: ['Tarifs publics', function () {
       var t = c.tarifs;
-      var mode = h('select', {}, h('option', { value: 'public' }, 'Tarifs publics (ceux des pages chambres)'), h('option', { value: 'societe' }, 'Tarifs sociétés 2027 (offre PDF)'));
-      mode.value = t.mode; mode.addEventListener('change', function () { t.mode = mode.value; touch(); });
       return h('div', {},
-        h('div', { class: 'card' }, h('h2', {}, 'Page Tarifs'),
-          h('label', {}, 'Tarifs des chambres affichés', mode),
-          imageField('Photo du bandeau', t, 'heroImage'), field('Introduction', t, 'intro'), price('Taxe de séjour (par nuit et par personne)', t, 'taxeSejour')),
-        h('div', { class: 'card' }, objList('Tarifs sociétés 2027 (par nuit)', t.societe.rooms, { name: '', building: 'A', count: 1, fcfa: 0 }, function (r) {
-          return h('div', { class: 'row' }, field('Chambre', r, 'name'), field('Bâtiment', r, 'building'), field('Nombre', r, 'count', { type: 'number' }), price('Tarif TTC', r, 'fcfa'));
+        h('div', { class: 'card' }, h('h2', {}, 'Page Tarifs publics'),
+          imageField('Photo du bandeau', t, 'heroImage'), field('Introduction', t, 'intro', { area: true }), price('Taxe de séjour (par nuit et par personne)', t, 'taxeSejour')),
+        h('div', { class: 'card' }, objList('Hébergement (tarif TTC par chambre et par nuit)', t.rooms, { name: '', building: 'A', view: '', count: 1, fcfa: 0 }, function (r) {
+          return h('div', { class: 'row' }, field('Type de chambre', r, 'name'), field('Bâtiment', r, 'building'), field('Vue', r, 'view'), field('Nombre', r, 'count', { type: 'number' }), price('Tarif TTC', r, 'fcfa'));
         })),
+        h('div', { class: 'card' }, stringList('Services et équipements en chambre', t.equipements)),
         h('div', { class: 'card' }, objList('Restauration', t.restauration, { label: '', fcfa: 0, detail: '' }, function (r) {
           return h('div', { class: 'row' }, field('Libellé', r, 'label'), price('Prix', r, 'fcfa'), field('Détail', r, 'detail'));
-        }), field('Note', t, 'restaurationNote', { area: true })),
-        h('div', { class: 'card' }, objList('Séminaires (1re ligne : salle par jour, 2e : pause-café)', t.seminaire, { label: '', fcfa: 0, detail: '' }, function (r) {
+        }), field('Note restaurant et bar', t, 'restaurationNote', { area: true })),
+        h('div', { class: 'card' }, objList('Informations complémentaires', t.infos, { subject: '', detail: '' }, function (i) {
+          return h('div', { class: 'row' }, field('Sujet', i, 'subject'), field('Détail', i, 'detail'));
+        }), h('p', { class: 'hint' }, 'Le taux de change se règle dans Réglages.')));
+    }],
+    tarifsSem: ['Tarifs séminaire', function () {
+      var t = c.tarifs;
+      return h('div', {},
+        h('div', { class: 'card' }, h('h2', {}, 'Page Tarifs séminaire'),
+          imageField('Photo du bandeau', t, 'seminaireHeroImage'), field('Introduction', t, 'seminaireIntro', { area: true }),
+          objList('Caractéristiques de la salle', t.seminaireInfo, { label: '', value: '' }, function (i) {
+            return h('div', { class: 'row' }, field('Libellé', i, 'label'), field('Valeur', i, 'value'));
+          })),
+        h('div', { class: 'card' }, objList('Tarifs (1re ligne : salle par jour, 2e : pause-café, utilisées aussi sur la page Séminaires)', t.seminaire, { label: '', fcfa: 0, detail: '' }, function (r) {
           return h('div', { class: 'row' }, field('Libellé', r, 'label'), price('Prix', r, 'fcfa'), field('Détail', r, 'detail'));
         })),
         h('div', { class: 'card' }, h('h2', {}, 'Exemple de budget'), field('Titre', t.budgetExample, 'title'),
           objList('Lignes (le total est calculé)', t.budgetExample.lines, { label: '', fcfa: 0 }, function (l) {
             return h('div', { class: 'row' }, field('Libellé', l, 'label'), price('Montant', l, 'fcfa'));
-          }), field('Note', t.budgetExample, 'note')),
-        h('div', { class: 'card' }, objList('Bon à savoir', t.infos, { subject: '', detail: '' }, function (i) {
-          return h('div', { class: 'row' }, field('Sujet', i, 'subject'), field('Détail', i, 'detail'));
-        })));
+          }), field('Note', t.budgetExample, 'note')));
     }],
     services: ['Services', function () {
       var x = c.services;

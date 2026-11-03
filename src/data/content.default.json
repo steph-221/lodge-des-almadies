@@ -53,7 +53,17 @@
     },
     {
       "href": "/tarifs/",
-      "label": "Tarifs"
+      "label": "Tarifs",
+      "children": [
+        {
+          "href": "/tarifs/",
+          "label": "Tarifs publics"
+        },
+        {
+          "href": "/tarifs/seminaire/",
+          "label": "Tarifs séminaire"
+        }
+      ]
     },
     {
       "href": "/seminaires/",
@@ -272,57 +282,63 @@
     }
   ],
   "tarifs": {
-    "mode": "public",
     "heroImage": "g-decor",
-    "intro": "Tarifs TTC par chambre et par nuit, hors petit-déjeuner et taxe de séjour.",
+    "intro": "Tarifs publics 2027, par chambre et par nuitée, toutes taxes comprises (hors taxe de séjour). Contre-valeur en euros donnée à titre indicatif.",
+    "rooms": [
+      {
+        "name": "Chambre standard",
+        "building": "A",
+        "view": "Côté route",
+        "count": 7,
+        "fcfa": 49000
+      },
+      {
+        "name": "Chambre standard",
+        "building": "A",
+        "view": "Côté piscine",
+        "count": 7,
+        "fcfa": 53000
+      },
+      {
+        "name": "Chambre standard",
+        "building": "B",
+        "view": "",
+        "count": 15,
+        "fcfa": 57000
+      },
+      {
+        "name": "Chambre supérieure avec mini-bar",
+        "building": "B",
+        "view": "Côté route",
+        "count": 3,
+        "fcfa": 63000
+      },
+      {
+        "name": "Suite junior avec mini-bar",
+        "building": "A",
+        "view": "Côté piscine",
+        "count": 1,
+        "fcfa": 78000
+      },
+      {
+        "name": "Suite avec mini-bar",
+        "building": "B",
+        "view": "Côté cour",
+        "count": 2,
+        "fcfa": 89000
+      }
+    ],
+    "equipements": [
+      "Wi-Fi haut débit gratuit",
+      "Climatisation",
+      "Téléphone",
+      "Écran plat LCD",
+      "Coffre-fort",
+      "Moustiquaire",
+      "Bouilloire, thé et café",
+      "Salle de bain privative"
+    ],
     "taxeSejour": 1000,
-    "societe": {
-      "title": "Tarifs sociétés 2027",
-      "rooms": [
-        {
-          "name": "Chambre côté route",
-          "building": "A",
-          "count": 7,
-          "fcfa": 44100
-        },
-        {
-          "name": "Chambre côté piscine",
-          "building": "A",
-          "count": 7,
-          "fcfa": 47700
-        },
-        {
-          "name": "Chambre",
-          "building": "B",
-          "count": 15,
-          "fcfa": 51300
-        },
-        {
-          "name": "Chambre sup, mini-bar, côté route",
-          "building": "A",
-          "count": 1,
-          "fcfa": 56700
-        },
-        {
-          "name": "Chambre sup, mini-bar",
-          "building": "B",
-          "count": 3,
-          "fcfa": 56700
-        },
-        {
-          "name": "Suite junior, mini-bar",
-          "building": "A",
-          "count": 1,
-          "fcfa": 70200
-        },
-        {
-          "name": "Suite, mini-bar",
-          "building": "B",
-          "count": 2,
-          "fcfa": 80100
-        }
-      ]
-    },
     "restauration": [
       {
         "label": "Petit-déjeuner",
@@ -335,12 +351,38 @@
         "detail": "Par personne, au déjeuner ou au dîner"
       }
     ],
-    "restaurationNote": "Restaurant ouvert tous les jours en service continu, avec une carte en plus du menu. Le bar reste ouvert toute la journée.",
+    "restaurationNote": "Restaurant à la carte ouvert tous les jours, midi et soir. Bar ouvert en continu toute la journée. Petit-déjeuner de 6 h à 10 h ; restauration en continu (non-stop).",
+    "infos": [
+      {
+        "subject": "Taxe de séjour",
+        "detail": "1 000 FCFA par nuitée et par personne"
+      },
+      {
+        "subject": "Piscine",
+        "detail": "Accès libre (non surveillée)"
+      },
+      {
+        "subject": "Navette aéroport",
+        "detail": "Disponible en supplément"
+      }
+    ],
+    "seminaireHeroImage": "sem-01",
+    "seminaireIntro": "Une salle de réunion climatisée, équipée d’un vidéoprojecteur, Wi-Fi haut débit inclus.",
+    "seminaireInfo": [
+      {
+        "label": "Superficie",
+        "value": "70 m²"
+      },
+      {
+        "label": "Capacité",
+        "value": "38 à 40 personnes"
+      }
+    ],
     "seminaire": [
       {
-        "label": "Salle de réunion, journée de location",
+        "label": "Location de la salle",
         "fcfa": 130000,
-        "detail": "70 m², 38 à 40 personnes, vidéoprojecteur inclus"
+        "detail": "Par jour, vidéoprojecteur inclus"
       },
       {
         "label": "Pause-café",
@@ -365,25 +407,7 @@
         }
       ],
       "note": "Calcul à partir des tarifs 2027, hors hébergement."
-    },
-    "infos": [
-      {
-        "subject": "Taxe de séjour",
-        "detail": "1 000 FCFA par nuitée et par personne"
-      },
-      {
-        "subject": "Piscine",
-        "detail": "Accès libre pour les clients, non surveillée"
-      },
-      {
-        "subject": "Dans chaque chambre",
-        "detail": "Wi-Fi, climatisation, écran plat, coffre-fort, bouilloire"
-      },
-      {
-        "subject": "Navette aéroport",
-        "detail": "Disponible en supplément"
-      }
-    ]
+    }
   },
   "seminaire": {
     "heroImage": "sem-01",

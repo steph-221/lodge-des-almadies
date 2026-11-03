@@ -1,0 +1,33 @@
+---
+import Base from '../../layouts/Base.astro';
+import BookButton from '../../components/BookButton.astro';
+import { getContent, imgSrc, fmtFcfa, fmtEur } from '../../lib/content';
+const c = await getContent();
+const t = c.tarifs;
+---
+<Base title="Tarifs publics 2027 | Lodge des Almadies, Dakar" description="Tarifs publics 2027 du Lodge des Almadies : chambres, suites, restauration, en FCFA et en euros.">
+  <section class="page-hero"><img src={imgSrc(t.heroImage)} alt="" /><h1>Tarifs publics 2027</h1></section>
+  <section><div class="wrap">
+    <p class="center"><strong>Hébergement</strong> · <a href="/tarifs/seminaire/">Tarifs séminaire</a></p>
+    <h2>Hébergement</h2>
+    <p>{t.intro} 1 € = {c.rate} FCFA.</p>
+    <div class="tarif-table">
+      {t.rooms.map((r) => (
+        <div class="price"><span>{r.name} · bâtiment {r.building}{r.view ? ` · ${r.view}` : ''} <small>({r.count} {r.count > 1 ? 'chambres' : 'chambre'})</small></span><strong>{fmtFcfa(r.fcfa)} <small>{fmtEur(r.fcfa, c.rate)}</small></strong></div>
+      ))}
+    </div>
+    <p><small>Taxe de séjour : {fmtFcfa(t.taxeSejour)} par nuitée et par personne.</small></p>
+    <p><BookButton /></p>
+
+    <h2>Services et équipements en chambre</h2>
+    <ul class="ticks">{t.equipements.map((e) => <li>{e}</li>)}</ul>
+
+    <h2>Restauration et bar</h2>
+    {t.restauration.map((r) => <div class="price"><span>{r.label} <small>· {r.detail}</small></span><strong>{fmtFcfa(r.fcfa)} <small>{fmtEur(r.fcfa, c.rate)}</small></strong></div>)}
+    <p>{t.restaurationNote}</p>
+
+    <h2>Informations complémentaires</h2>
+    {t.infos.map((i) => <div class="price"><span>{i.subject}</span><strong>{i.detail}</strong></div>)}
+    <p style="margin-top:24px"><a class="btn" href="/tarifs/seminaire/">Voir les tarifs séminaire</a></p>
+  </div></section>
+</Base>
