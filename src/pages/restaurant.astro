@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import { getContent, imgSrc, fmtFcfa } from '../lib/content';
+const c = await getContent();
+const r = c.restaurant;
+const lines = r.internalLines.filter((l) => l.label || l.phone);
+---
+<Base title="Restaurant L’ENVERS | Lodge des Almadies, Dakar" description="L’ENVERS, restaurant au bord de la piscine du Lodge des Almadies : cuisine européenne et africaine, service en continu.">
+  <section class="page-hero"><img src={imgSrc(r.heroImage)} alt="" /><h1>Restaurant L’ENVERS</h1></section>
+  <section><div class="wrap">
+    <p class="lead">{r.intro}</p>
+    <div class="grid g2">
+      <div>
+        <h2>Horaires</h2>
+        <p>{r.hours}</p>
+        <h2>Réservation et lignes directes</h2>
+        {r.phone && <p><a href={`tel:${r.phone.replace(/[^+\d]/g, '')}`}>{r.phone}</a></p>}
+        {lines.map((l) => <div class="price"><span>{l.label}</span><strong><a href={`tel:${l.phone.replace(/[^+\d]/g, '')}`}>{l.phone}</a></strong></div>)}
+        {!r.phone && lines.length === 0 && <p><a href={`tel:${c.site.phoneHref}`}>{c.site.phone}</a></p>}
+        <p><small>{r.menuNote}</small></p>
+      </div>
+      <div class="grid g2 thumbs">{r.images.map((i) => <img src={imgSrc(i)} alt="Restaurant L’ENVERS" loading="lazy" />)}</div>
+    </div>
+    {(r.menu.length > 0 || r.menuImages.length > 0) && <h2>Les menus</h2>}
+    {r.menu.map((s) => (
+      <div class="menu-sec"><h3>{s.title}</h3>
+        {s.items.map((it) => <div class="price"><span>{it.name}{it.desc && <small>{it.desc}</small>}</span>{it.fcfa > 0 && <strong>{fmtFcfa(it.fcfa)}</strong>}</div>)}
+      </div>
+    ))}
+    {r.menuImages.length > 0 && <div class="gal" style="margin-top:20px">{r.menuImages.map((i) => <img src={imgSrc(i)} alt="Menu du restaurant" loading="lazy" />)}</div>}
+  </div></section>
+</Base>

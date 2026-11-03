@@ -105,7 +105,7 @@
 
   // Liste de photos : ajout, suppression, ordre (glisser-déposer ou flèches), texte alternatif pour la galerie.
   // items : tableau de chaînes, ou d'objets { src, alt } si withAlt.
-  function photoList(label, arr, withAlt) {
+  function photoList(label, arr, withAlt, fromGallery) {
     var wrap = h('div', {});
     var grid = h('div', { class: 'photos' });
     var from = null;
@@ -134,6 +134,15 @@
     wrap.appendChild(h('button', { class: 'sm', type: 'button', onclick: function () {
       pickFiles(true, function (src) { arr.push(withAlt ? { src: src, alt: 'Le Lodge des Almadies' } : src); draw(); });
     } }, '+ Ajouter des photos'));
+    if (fromGallery) {
+      var panel = h('div', { class: 'photos', hidden: true });
+      c.gallery.forEach(function (g) {
+        panel.appendChild(h('img', { src: imgSrc(g.src), alt: g.alt, title: 'Ajouter', style: 'cursor:pointer;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px', onclick: function () { arr.push(g.src); touch(); draw(); } }));
+      });
+      wrap.appendChild(document.createTextNode(' '));
+      wrap.appendChild(h('button', { class: 'sm', type: 'button', onclick: function () { panel.hidden = !panel.hidden; } }, '+ Choisir dans la galerie'));
+      wrap.appendChild(panel);
+    }
     return wrap;
   }
 
@@ -174,13 +183,10 @@
       return h('div', {},
         h('div', { class: 'card' }, h('h2', {}, 'Bandeau d’accueil'),
           field('Titre', x, 'title'), field('Sous-titre', x, 'subtitle'),
-          photoList('Carrousel (défile sur la page d’accueil ; la 1re photo s’affiche en premier)', x.carousel)),
+          photoList('Carrousel (défile sur la page d’accueil ; la 1re photo s’affiche en premier)', x.carousel, false, true)),
         h('div', { class: 'card' }, h('h2', {}, 'Bienvenue'), field('Titre', x, 'welcomeTitle'), field('Texte', x, 'welcomeText', { area: true })),
-        h('div', { class: 'card' }, h('h2', {}, 'Tuiles'), objList('Tuiles', x.tiles, { title: '', img: 'hotel', href: '/' }, function (t) {
-          return h('div', {}, field('Titre', t, 'title'), field('Lien', t, 'href'), imageField('Photo', t, 'img'));
-        })),
-        h('div', { class: 'card' }, h('h2', {}, 'Nos services'), objList('Services', x.services, { title: '', img: 'hotel', text: '' }, function (t) {
-          return h('div', {}, field('Titre', t, 'title'), field('Texte', t, 'text', { area: true }), imageField('Photo', t, 'img'));
+        h('div', { class: 'card' }, h('h2', {}, 'Nos services'), objList('Services mis en avant (3 recommandés)', x.services, { title: '', img: 'hotel', text: '', href: '/' }, function (t) {
+          return h('div', {}, field('Titre', t, 'title'), field('Texte', t, 'text', { area: true }), field('Lien', t, 'href'), imageField('Photo', t, 'img'));
         })));
     }],
     hotel: ['L’hôtel', function () {
@@ -231,6 +237,39 @@
           return h('div', { class: 'row' }, field('Sujet', i, 'subject'), field('Détail', i, 'detail'));
         })));
     }],
+    services: ['Services', function () {
+      var x = c.services;
+      return h('div', { class: 'card' }, imageField('Photo du bandeau', x, 'heroImage'), field('Introduction', x, 'intro', { area: true }),
+        objList('Services', x.items, { title: '', img: 'hotel', text: '', href: '/' }, function (t) {
+          return h('div', {}, field('Titre', t, 'title'), field('Texte', t, 'text', { area: true }), field('Lien', t, 'href'), imageField('Photo', t, 'img'));
+        }));
+    }],
+    restaurant: ['Restaurant', function () {
+      var r = c.restaurant;
+      return h('div', {},
+        h('div', { class: 'card' }, h('h2', {}, 'L’ENVERS'), imageField('Photo du bandeau', r, 'heroImage'), field('Présentation', r, 'intro', { area: true }),
+          field('Horaires', r, 'hours', { area: true }), field('Téléphone du restaurant', r, 'phone'), field('Note sous les horaires (menu du jour, formules…)', r, 'menuNote', { area: true }),
+          objList('Lignes internes (ex. cuisine, bar, réservation)', r.internalLines, { label: '', phone: '' }, function (l) {
+            return h('div', { class: 'row' }, field('Libellé', l, 'label'), field('Numéro', l, 'phone'));
+          }),
+          photoList('Photos du restaurant', r.images)),
+        h('div', { class: 'card' }, h('h2', {}, 'Menus'),
+          h('p', { class: 'hint' }, 'Deux façons de présenter le menu : le saisir ci-dessous (rubriques et plats), et/ou ajouter des photos ou scans du menu.'),
+          objList('Rubriques du menu', r.menu, { title: '', items: [] }, function (sec) {
+            return h('div', {}, field('Titre de la rubrique', sec, 'title'),
+              objList('Plats', sec.items, { name: '', desc: '', fcfa: 0 }, function (it) {
+                return h('div', { class: 'row' }, field('Plat', it, 'name'), field('Description', it, 'desc'), price('Prix', it, 'fcfa'));
+              }));
+          }),
+          photoList('Photos / scans du menu', r.menuImages)));
+    }],
+    boutiques: ['Boutiques', function () {
+      var b = c.boutiques;
+      return h('div', { class: 'card' }, imageField('Photo du bandeau', b, 'heroImage'), field('Introduction', b, 'intro', { area: true }),
+        objList('Boutiques', b.items, { name: '', text: '', phone: '', images: [] }, function (it) {
+          return h('div', {}, field('Nom', it, 'name'), field('Description', it, 'text', { area: true }), field('Téléphone', it, 'phone'), photoList('Photos', it.images));
+        }));
+    }],
     seminaire: ['Séminaire', function () {
       var s = c.seminaire;
       return h('div', { class: 'card' }, imageField('Photo du bandeau', s, 'heroImage'), field('Introduction', s, 'intro', { area: true }),
@@ -258,8 +297,12 @@
           h('p', { class: 'hint' }, 'Tant que la case est décochée, les boutons « Réserver » mènent au formulaire de contact. Renseigner ici le lien du moteur de réservation fourni par Octorate (https://…).'),
           check('Activer le bouton Réserver vers Octorate', c.booking, 'enabled'), field('Lien de réservation Octorate', c.booking, 'url', { type: 'url' })),
         h('div', { class: 'card' }, h('h2', {}, 'Devise'), field('1 € = … FCFA', c, 'rate', { type: 'number', hint: 'Sert à calculer les montants en euros affichés sur le site.' })),
-        h('div', { class: 'card' }, objList('Menu de navigation', c.nav, { href: '/', label: '' }, function (n) {
-          return h('div', { class: 'row' }, field('Libellé', n, 'label'), field('Lien', n, 'href'));
+        h('div', { class: 'card' }, objList('Menu de navigation (le bouton Réserver est ajouté automatiquement)', c.nav, { href: '/', label: '', children: [] }, function (n) {
+          n.children = n.children || [];
+          return h('div', {}, h('div', { class: 'row' }, field('Libellé', n, 'label'), field('Lien', n, 'href')),
+            objList('Sous-menu déroulant (facultatif)', n.children, { href: '/', label: '' }, function (m) {
+              return h('div', { class: 'row' }, field('Libellé', m, 'label'), field('Lien', m, 'href'));
+            }));
         })));
     }]
   };

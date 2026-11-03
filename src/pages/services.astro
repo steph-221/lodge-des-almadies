@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import { getContent, imgSrc } from '../lib/content';
+const { services } = await getContent();
+---
+<Base title="Services | Lodge des Almadies, Dakar" description="Restaurant L’ENVERS, salle de séminaire, boutiques et piscine au Lodge des Almadies, Dakar.">
+  <section class="page-hero"><img src={imgSrc(services.heroImage)} alt="" /><h1>Services</h1></section>
+  <section><div class="wrap">
+    <p class="lead">{services.intro}</p>
+    <div class="grid g2">
+      {services.items.map((s) => (
+        <a class="card" href={s.href}><img src={imgSrc(s.img)} alt={s.title} loading="lazy" /><div class="b"><h3>{s.title}</h3><p>{s.text}</p></div></a>
+      ))}
+    </div>
+  </div></section>
+</Base>

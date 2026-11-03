@@ -16,6 +16,9 @@ Paiement : FCFA, euro, dollar, cartes Visa et Mastercard
 - [L'hôtel](https://lodgedesalmadies.com/hotel/) : équipements, restaurant L'ENVERS, boutiques LAPESCHARDIÈRE et ZAMANI
 - [Séminaires](https://lodgedesalmadies.com/seminaires/) : une salle de 70 m² pour 40 personnes, équipée (130 000 FCFA la journée)
 - [Tarifs](https://lodgedesalmadies.com/tarifs/) : chambres, restauration, séminaires
+- [Services](https://lodgedesalmadies.com/services/)
+- [Restaurant L'ENVERS](https://lodgedesalmadies.com/restaurant/)
+- [Boutiques](https://lodgedesalmadies.com/boutiques/)
 - [Galerie](https://lodgedesalmadies.com/galerie/)
 
 ## Pratique

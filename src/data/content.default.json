@@ -21,19 +21,35 @@
     },
     {
       "href": "/hotel/",
-      "label": "L'hôtel"
+      "label": "Hôtel",
+      "children": [
+        {
+          "href": "/chambres/suites/",
+          "label": "Suites"
+        },
+        {
+          "href": "/chambres/double/",
+          "label": "Chambres doubles"
+        },
+        {
+          "href": "/chambres/twin/",
+          "label": "Chambres twin"
+        }
+      ]
     },
     {
-      "href": "/chambres/suites/",
-      "label": "Suites"
-    },
-    {
-      "href": "/chambres/double/",
-      "label": "Double"
-    },
-    {
-      "href": "/chambres/twin/",
-      "label": "Twin"
+      "href": "/services/",
+      "label": "Services",
+      "children": [
+        {
+          "href": "/restaurant/",
+          "label": "Restaurant L’ENVERS"
+        },
+        {
+          "href": "/boutiques/",
+          "label": "Boutiques"
+        }
+      ]
     },
     {
       "href": "/tarifs/",
@@ -42,6 +58,10 @@
     {
       "href": "/seminaires/",
       "label": "Séminaires"
+    },
+    {
+      "href": "/boutiques/",
+      "label": "Boutique"
     },
     {
       "href": "/galerie/",
@@ -68,53 +88,24 @@
       "g-relax",
       "g-apero"
     ],
-    "tiles": [
-      {
-        "title": "Restaurant",
-        "img": "restaurant",
-        "href": "/hotel/"
-      },
-      {
-        "title": "Séminaires",
-        "img": "seminaires",
-        "href": "/seminaires/"
-      },
-      {
-        "title": "Suites",
-        "img": "suites",
-        "href": "/chambres/suites/"
-      },
-      {
-        "title": "L’hôtel",
-        "img": "hotel",
-        "href": "/hotel/"
-      },
-      {
-        "title": "Boutiques",
-        "img": "boutique",
-        "href": "/hotel/"
-      }
-    ],
     "services": [
       {
         "title": "Séminaires",
         "img": "svc-seminaires",
-        "text": "Une salle de séminaire de 70 m² pour 40 personnes, lumineuse, calme et climatisée."
+        "text": "Une salle de séminaire de 70 m² pour 40 personnes, climatisée, avec vidéoprojecteur. Forfait journée : 130 000 FCFA.",
+        "href": "/seminaires/"
+      },
+      {
+        "title": "Restaurant L’ENVERS",
+        "img": "svc-restaurant",
+        "text": "Cuisine européenne et africaine, service en continu tous les jours, bar ouvert toute la journée.",
+        "href": "/restaurant/"
       },
       {
         "title": "Les boutiques",
         "img": "svc-boutique",
-        "text": "LAPESCHARDIÈRE (bijoux faits main) et ZAMANI (créateurs et produits africains)."
-      },
-      {
-        "title": "Restaurant",
-        "img": "svc-restaurant",
-        "text": "L’ENVERS, restaurant indépendant : cuisine européenne et africaine, service en continu tous les jours, bar ouvert toute la journée."
-      },
-      {
-        "title": "Piscine",
-        "img": "svc-piscine",
-        "text": "Une piscine en accès libre pour les clients, sur la terrasse du restaurant (non surveillée)."
+        "text": "LAPESCHARDIÈRE (bijoux faits main) et ZAMANI (créateurs et produits africains).",
+        "href": "/boutiques/"
       }
     ]
   },
@@ -563,5 +554,75 @@
     "contact": "g-reception",
     "faq": "hotel",
     "galerie": "g-decor"
+  },
+  "services": {
+    "heroImage": "svc-piscine",
+    "intro": "Tout pour travailler et se reposer au même endroit.",
+    "items": [
+      {
+        "title": "Restaurant L’ENVERS",
+        "img": "svc-restaurant",
+        "text": "Restaurant indépendant, cuisine européenne et africaine, service en continu 7j/7, bar ouvert toute la journée.",
+        "href": "/restaurant/"
+      },
+      {
+        "title": "Séminaires",
+        "img": "svc-seminaires",
+        "text": "Une salle de 70 m² pour 40 personnes, climatisée, Wi-Fi haut débit, vidéoprojecteur inclus.",
+        "href": "/seminaires/"
+      },
+      {
+        "title": "Boutiques",
+        "img": "svc-boutique",
+        "text": "Deux boutiques dans l’enceinte de l’hôtel : bijoux faits main, créateurs et produits africains.",
+        "href": "/boutiques/"
+      },
+      {
+        "title": "Piscine",
+        "img": "svc-piscine",
+        "text": "Piscine en accès libre pour les clients, sur la terrasse du restaurant (non surveillée).",
+        "href": "/hotel/"
+      }
+    ]
+  },
+  "restaurant": {
+    "heroImage": "restaurant",
+    "intro": "L’ENVERS est un restaurant indépendant au bord de la piscine : cuisine européenne et africaine, produits de qualité.",
+    "hours": "Ouvert tous les jours en service continu. Le bar reste ouvert toute la journée. Petit-déjeuner de 6 h à 10 h.",
+    "phone": "",
+    "internalLines": [],
+    "menuNote": "Menu plat et dessert à 12 500 FCFA, avec une carte en plus. Petit-déjeuner à 8 000 FCFA.",
+    "menuImages": [],
+    "menu": [],
+    "images": [
+      "svc-restaurant",
+      "restaurant"
+    ]
+  },
+  "boutiques": {
+    "heroImage": "boutique",
+    "intro": "Deux boutiques dans l’enceinte du Lodge, à découvrir pendant votre séjour.",
+    "items": [
+      {
+        "name": "LAPESCHARDIÈRE",
+        "text": "Bijoux faits main.",
+        "phone": "",
+        "images": [
+          "svc-boutique",
+          "b-01",
+          "b-02"
+        ]
+      },
+      {
+        "name": "ZAMANI",
+        "text": "Créateurs et produits africains.",
+        "phone": "",
+        "images": [
+          "b-03",
+          "b-04",
+          "b-05"
+        ]
+      }
+    ]
   }
 }

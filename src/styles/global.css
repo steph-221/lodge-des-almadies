@@ -40,3 +40,11 @@ input,textarea,select{font:inherit;padding:12px;border:1px solid var(--line);bor
 footer{background:#2b2622;color:#d8cfc4;padding:48px 0 24px}footer a{color:#fff}
 footer .grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}footer h3{color:#fff;font-size:1.1rem}
 footer ul{list-style:none;padding:0;margin:0}.copy{border-top:1px solid #4a423a;margin-top:32px;padding-top:16px;font-size:.85rem}
+nav li.sub{position:relative}
+nav li.sub>a::after{content:"▾";margin-left:4px;font-size:.75em}
+nav li.sub>ul{display:none;position:absolute;top:100%;left:-12px;min-width:210px;flex-direction:column;align-items:stretch;gap:0;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 0;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+nav li.sub>ul a{display:block;padding:8px 16px;white-space:nowrap}
+nav li.sub:hover>ul,nav li.sub:focus-within>ul{display:flex}
+@media(max-width:900px){nav li.sub>ul{display:flex;position:static;border:0;box-shadow:none;background:none;padding:4px 0 0 14px;min-width:0}nav li.sub>ul a{padding:4px 0}nav li.sub>a::after{content:""}}
+.shop{display:grid;gap:12px}.shop .gal{margin-top:8px}
+.menu-sec h3{margin:20px 0 4px}.menu-sec .price span small{display:block;color:var(--muted,#6b6259)}
