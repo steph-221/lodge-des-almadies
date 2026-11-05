@@ -31,7 +31,7 @@ const schema = [{
       </div>
       <div class="grid g2">
         <div><h2>Équipements</h2><ul class="ticks one">{r.equipment.map((e) => <li>{e}</li>)}</ul></div>
-        <div><h2>Tarifs par nuit</h2>
+        <div class="pin"><h2>Tarifs par nuit</h2>
           {prices.map((p) => <div class="price"><span>{p.label}</span><strong>{p.fcfa} <small>{p.eur}</small></strong></div>)}
           <p><small>Taxe de séjour : 1 000 FCFA par nuitée et par personne. Navette taxi aéroport disponible en supplément.</small></p>
           <BookButton />

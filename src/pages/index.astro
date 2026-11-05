@@ -3,11 +3,14 @@ import Base from '../layouts/Base.astro';
 import BookButton from '../components/BookButton.astro';
 import { getContent, imgSrc } from '../lib/content';
 const { home } = await getContent();
+const webp = (u: string) => (/^\/img\/.+\.jpg$/.test(u) ? u.replace(/\.jpg$/, '.webp') : null);
 const slides = home.carousel.length ? home.carousel : [home.heroImage];
 ---
 <Base title="Lodge des Almadies | Hôtel Dakar | Restaurant | Séminaires | Piscine">
   <section class="hero">
-    <img src={imgSrc(slides[0])} alt="" fetchpriority="high" id="hero-img" data-slides={JSON.stringify(slides.map(imgSrc))} />
+    <div class="hero-media">
+      {slides.map((sl, i) => <picture>{webp(imgSrc(sl)) && <source srcset={webp(imgSrc(sl))!} type="image/webp" />}<img src={imgSrc(sl)} alt="" class={i === 0 ? 'on' : undefined} fetchpriority={i === 0 ? 'high' : undefined} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" /></picture>)}
+    </div>
     <div class="in">
       <h1>{home.title}</h1>
       <p>{home.subtitle}</p>
@@ -20,7 +23,7 @@ const slides = home.carousel.length ? home.carousel : [home.heroImage];
       <p class="lead">{home.welcomeText}</p>
     </div>
   </section>
-  <section class="alt">
+  <section class="dark-sec" data-theme-section>
     <div class="wrap">
       <h2 class="center">Nos services</h2>
       <div class="grid g3">
@@ -30,13 +33,4 @@ const slides = home.carousel.length ? home.carousel : [home.heroImage];
       </div>
     </div>
   </section>
-  <script is:inline>
-    (function () {
-      var el = document.getElementById('hero-img');
-      if (!el) return;
-      var s = JSON.parse(el.getAttribute('data-slides') || '[]'), i = 0;
-      if (s.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      setInterval(function () { i = (i + 1) % s.length; el.src = s[i]; }, 5000);
-    })();
-  </script>
 </Base>
