@@ -1,0 +1,40 @@
+---
+import '../styles/admin.css';
+import { navFor } from '../lib/hotel/nav';
+import { ROLE_LABEL, levelFor } from '../lib/hotel/permissions';
+
+interface Props { title: string; active: string }
+const { title, active } = Astro.props;
+const user = Astro.locals.user!;
+const items = navFor(user.role);
+const showSite = levelFor(user.role, 'site') !== null;
+Astro.response.headers.set('cache-control', 'no-store');
+---
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>{title} | Lodge des Almadies</title>
+</head>
+<body>
+  <header>
+    <h1>Lodge des Almadies</h1>
+    <nav class="zones" aria-label="Zones">
+      {showSite && <a href="/admin/">Site</a>}
+      <a href="/admin/hotel/" aria-current="page">Services hôtel</a>
+    </nav>
+    <span class="who">{user.name} · {ROLE_LABEL[user.role]} · <button class="sm" id="logout" type="button">Déconnexion</button></span>
+  </header>
+  <main>
+    <nav class="tabs" aria-label="Sections">
+      {items.map((i) => <a href={i.href} aria-current={i.key === active ? 'page' : undefined}>{i.label}</a>)}
+    </nav>
+    <slot />
+  </main>
+  <script>
+    import '../client/hotel/shell';
+  </script>
+</body>
+</html>

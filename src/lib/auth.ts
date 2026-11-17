@@ -1,6 +1,6 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
-
-const env = (k: string): string | undefined => (import.meta.env as any)[k] ?? process.env[k];
+import { env } from './env';
+import { isRole, type Role } from './hotel/permissions';
 
 export const COOKIE = 'lodge_admin';
 const TTL_S = 60 * 60 * 8;
@@ -8,37 +8,58 @@ const TTL_S = 60 * 60 * 8;
 const sha = (s: string) => createHash('sha256').update(s).digest();
 const sign = (payload: string) => createHmac('sha256', env('SESSION_SECRET') ?? '').update(payload).digest('hex');
 
-export const adminConfigured = (): boolean => Boolean(env('ADMIN_PASSWORD') && (env('SESSION_SECRET') ?? '').length >= 16);
+// L'accès de secours exige un mot de passe d'au moins 16 caractères.
+export const adminConfigured = (): boolean => (env('ADMIN_PASSWORD') ?? '').length >= 16 && (env('SESSION_SECRET') ?? '').length >= 16;
 
+// Accès de secours de la direction : mot de passe unique ADMIN_PASSWORD (indépendant de la base de données).
 export function checkPassword(input: string): boolean {
   const expected = env('ADMIN_PASSWORD');
   if (!expected) return false;
   return timingSafeEqual(sha(input), sha(expected));
 }
 
-export function makeToken(): string {
-  const exp = Math.floor(Date.now() / 1000) + TTL_S;
-  return `${exp}.${sign(String(exp))}`;
+export type SessionClaims = { staffId: number; role: Role; sv: number; exp: number };
+
+// Jeton v2 : v2.exp.staffId.role.sv.mac. staffId 0 = accès de secours. Le rôle du jeton n'est qu'un indice :
+// pour l'espace hôtel, le middleware relit le compte en base à chaque requête (révocation immédiate).
+export function makeToken(c: { staffId: number; role: Role; sv: number }, now = Date.now()): string {
+  const exp = Math.floor(now / 1000) + TTL_S;
+  const payload = `v2.${exp}.${c.staffId}.${c.role}.${c.sv}`;
+  return `${payload}.${sign(payload)}`;
 }
 
-export function isAdmin(cookieValue: string | undefined): boolean {
-  if (!adminConfigured() || !cookieValue) return false;
-  const [exp, mac] = cookieValue.split('.');
-  if (!exp || !mac || Number(exp) < Date.now() / 1000) return false;
-  const good = Buffer.from(sign(exp));
+export function readToken(cookieValue: string | undefined, now = Date.now()): SessionClaims | null {
+  if (!cookieValue || (env('SESSION_SECRET') ?? '').length < 16) return null;
+  const parts = cookieValue.split('.');
+  if (parts.length !== 6 || parts[0] !== 'v2') return null;
+  const [, exp, staffId, role, sv, mac] = parts;
+  if (!/^\d+$/.test(exp) || !/^\d+$/.test(staffId) || !/^\d+$/.test(sv) || !isRole(role)) return null;
+  if (Number(exp) < now / 1000) return null;
+  const good = Buffer.from(sign(`v2.${exp}.${staffId}.${role}.${sv}`));
   const got = Buffer.from(mac);
-  return good.length === got.length && timingSafeEqual(good, got);
+  if (good.length !== got.length || !timingSafeEqual(good, got)) return null;
+  return { staffId: Number(staffId), role, sv: Number(sv), exp: Number(exp) };
+}
+
+// La session peut être émise dès que SESSION_SECRET est défini ; ADMIN_PASSWORD ne sert qu'à l'accès de secours.
+export const sessionConfigured = (): boolean => (env('SESSION_SECRET') ?? '').length >= 16;
+
+// Vrai pour un jeton valide de la direction (garde supplémentaire des routes de la zone Site ;
+// le middleware relit en plus le compte en base).
+export function isAdmin(cookieValue: string | undefined): boolean {
+  return readToken(cookieValue)?.role === 'direction';
 }
 
 export const cookieOptions = (secure: boolean) => ({
   httpOnly: true,
   secure,
-  sameSite: 'strict' as const,
+  // Lax : un lien ouvert depuis un e-mail (brief du matin) arrive connecté ; les écritures restent protégées par sameOrigin().
+  sameSite: 'lax' as const,
   path: '/',
   maxAge: TTL_S,
 });
 
-// Limitation basique des tentatives (par instance serveur).
+// Limitation basique des tentatives (par instance serveur) ; la limitation durable par compte est en base (hotel/throttle.ts).
 const attempts = new Map<string, { n: number; at: number }>();
 export function tooManyAttempts(key: string): boolean {
   const now = Date.now();
@@ -48,7 +69,7 @@ export function tooManyAttempts(key: string): boolean {
   return a.n > 8;
 }
 
-// Refuse les requêtes d'écriture venant d'un autre site (protection CSRF en plus de SameSite=Strict).
+// Refuse les requêtes d'écriture venant d'un autre site (protection CSRF en plus de SameSite).
 export function sameOrigin(request: Request): boolean {
   const origin = request.headers.get('origin');
   if (!origin) return true;

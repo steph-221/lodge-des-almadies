@@ -1,0 +1,22 @@
+---
+import AdminShell from '../../../layouts/AdminShell.astro';
+import { upcoming } from '../../../lib/hotel/nav';
+import { ROLE_LABEL } from '../../../lib/hotel/permissions';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+const soon = upcoming(user.role);
+---
+<AdminShell title="Services hôtel" active="today">
+  <div class="card">
+    <h2 style="margin-top:0">Bonjour {user.name}</h2>
+    <p>Espace Services hôtel — connecté en tant que {ROLE_LABEL[user.role]}.</p>
+    <p class="hint">Les écrans arrivent par étapes. Le brief du matin, les chambres, le linge et les demandes clients seront ajoutés ici au fil des livraisons.</p>
+  </div>
+  {soon.length > 0 && (
+    <div class="card">
+      <h3 style="margin-top:0">Prochainement pour votre rôle</h3>
+      <ul>{soon.map((i) => <li>{i.label}</li>)}</ul>
+    </div>
+  )}
+</AdminShell>
