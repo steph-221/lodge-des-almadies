@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /c/
 
 # Crawlers IA : autorisés (citation dans ChatGPT, Claude, Perplexity, Gemini…)
 User-agent: GPTBot

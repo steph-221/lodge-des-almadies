@@ -1,9 +1,14 @@
 ---
-import { COOKIE, adminConfigured, isAdmin } from '../../lib/auth';
+import '../../styles/admin.css';
+import { adminConfigured, sessionConfigured } from '../../lib/auth';
+import { dbConfigured } from '../../lib/db';
 
 export const prerender = false;
-const configured = adminConfigured();
-const authed = isAdmin(Astro.cookies.get(COOKIE)?.value);
+const user = Astro.locals.user;
+// Hors direction : l'espace hôtel est leur seul accès.
+if (user && user.role !== 'direction') return Astro.redirect('/admin/hotel/');
+const configured = sessionConfigured() && (adminConfigured() || dbConfigured());
+const authed = user?.role === 'direction';
 Astro.response.headers.set('cache-control', 'no-store');
 ---
 <!doctype html>
@@ -13,49 +18,19 @@ Astro.response.headers.set('cache-control', 'no-store');
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="robots" content="noindex,nofollow" />
   <title>Administration | Lodge des Almadies</title>
-  <style is:global>
-    :root{--bg:#f7f3ed;--card:#fff;--ink:#1f2a2e;--mut:#667;--line:#e2d9cc;--acc:#a8532b;--ok:#2d7a4b;--bad:#b3261e}
-    @media (prefers-color-scheme:dark){:root{--bg:#171c1e;--card:#20272a;--ink:#f0ebe3;--mut:#a3abad;--line:#35403f}}
-    *{box-sizing:border-box}body{margin:0;font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink)}
-    header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:5;flex-wrap:wrap}
-    h1{font-size:1.1rem;margin:0}h2{margin:28px 0 8px;font-size:1.15rem}h3{margin:18px 0 6px;font-size:1rem}
-    main{max-width:960px;margin:0 auto;padding:16px}
-    nav.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
-    nav.tabs button{background:var(--card);border:1px solid var(--line);padding:8px 14px;border-radius:999px;cursor:pointer;color:var(--ink);font:inherit}
-    nav.tabs button[aria-current=true]{background:var(--acc);color:#fff;border-color:var(--acc)}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
-    label{display:grid;gap:4px;font-size:.88rem;font-weight:600;margin:10px 0}
-    input,textarea,select{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
-    input[type=checkbox]{width:auto}
-    textarea{min-height:80px;resize:vertical}
-    .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
-    button.btn,button.sm{font:inherit;border:0;border-radius:8px;cursor:pointer;background:var(--acc);color:#fff;padding:9px 16px}
-    button.sm{padding:4px 10px;font-size:.85rem;background:var(--card);color:var(--ink);border:1px solid var(--line)}
-    button.danger{color:var(--bad)}
-    button:disabled{opacity:.5;cursor:wait}
-    .photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0}
-    .photo{border:1px solid var(--line);border-radius:10px;padding:6px;background:var(--bg);display:grid;gap:4px}
-    .photo img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;background:#0002}
-    .photo .acts{display:flex;gap:4px;flex-wrap:wrap}
-    .photo.drag{outline:2px dashed var(--acc)}
-    .item{border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0;background:var(--bg)}
-    .bar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between}
-    #msg{font-size:.9rem}.ok{color:var(--ok)}.err{color:var(--bad)}
-    .hint{color:var(--mut);font-size:.85rem;margin:2px 0}
-    .eur{color:var(--mut);font-size:.85rem}
-    .login{max-width:360px;margin:15vh auto;padding:0 16px}
-  </style>
 </head>
 <body>
 {!configured && (
   <main><div class="card"><h1>Administration non configurée</h1>
-  <p>Définir les variables d’environnement <code>ADMIN_PASSWORD</code> et <code>SESSION_SECRET</code> (16 caractères minimum), puis redémarrer le site.</p></div></main>
+  <p>Définir les variables d’environnement <code>SESSION_SECRET</code> (16 caractères minimum) et <code>ADMIN_PASSWORD</code> (accès de secours de la direction) ou <code>DATABASE_URL</code> (comptes du personnel), puis redémarrer le site.</p></div></main>
 )}
 {configured && !authed && (
   <div class="login card">
     <h1>Administration</h1>
     <form id="login">
-      <label>Mot de passe<input type="password" id="pw" autocomplete="current-password" required /></label>
+      <label>Identifiant<input type="text" id="lg" autocomplete="username" autocapitalize="none" spellcheck="false" /></label>
+      <label>Code ou mot de passe<input type="password" id="pw" autocomplete="current-password" required /></label>
+      <p class="hint">Accès de secours de la direction : laisser l’identifiant vide.</p>
       <button class="btn" type="submit">Se connecter</button>
       <p id="msg" class="err" role="alert"></p>
     </form>
@@ -63,9 +38,9 @@ Astro.response.headers.set('cache-control', 'no-store');
   <script is:inline>
     document.getElementById('login').addEventListener('submit', async function (e) {
       e.preventDefault();
-      var r = await fetch('/api/admin/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password: document.getElementById('pw').value }) });
-      if (r.ok) return location.reload();
+      var r = await fetch('/api/admin/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ login: document.getElementById('lg').value, password: document.getElementById('pw').value }) });
       var j = await r.json().catch(function () { return {}; });
+      if (r.ok) return (location.href = j.next || '/admin/');
       document.getElementById('msg').textContent = j.error || 'Connexion impossible.';
     });
   </script>
@@ -74,6 +49,10 @@ Astro.response.headers.set('cache-control', 'no-store');
   <>
     <header>
       <h1>Administration · Lodge des Almadies</h1>
+      <nav class="zones" aria-label="Zones">
+        <a href="/admin/" aria-current="page">Site</a>
+        <a href="/admin/hotel/">Services hôtel</a>
+      </nav>
       <span><a href="/" target="_blank" rel="noopener">Voir le site</a> · <button class="sm" id="logout">Déconnexion</button></span>
     </header>
     <main>

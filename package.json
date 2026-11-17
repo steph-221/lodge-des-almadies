@@ -6,12 +6,26 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:migrate": "node db/migrate.mjs",
+    "db:status": "node db/migrate.mjs --status",
+    "db:seed:dev": "node db/seed-dev.mjs",
+    "build:vercel": "node db/migrate.mjs && astro build"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.2.1",
     "@astrojs/vercel": "^9.0.5",
+    "@neondatabase/serverless": "^1.2.1",
     "@vercel/blob": "^2.8.2",
     "astro": "^5.0.0"
+  },
+  "devDependencies": {
+    "pg": "^8.23.1",
+    "vitest": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=22.18"
   }
 }

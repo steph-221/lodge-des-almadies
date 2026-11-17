@@ -1,0 +1,75 @@
+---
+import AdminShell from '../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../lib/db';
+import { ROLES, ROLE_LABEL, canManageStaff, type Role } from '../../../../lib/hotel/permissions';
+import { listStaff, type Staff } from '../../../../lib/hotel/staff';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+let staff: Staff[] = [];
+let error = '';
+if (!dbConfigured()) error = 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+else {
+  try { staff = (await listStaff()).filter((s) => canManageStaff(user.role, s.role)); }
+  catch (e) { console.error('[equipe]', (e as Error).message); error = 'Lecture des comptes impossible pour le moment.'; }
+}
+const creatable = ROLES.filter((r) => canManageStaff(user.role, r));
+const fmt = (d: string | null) => (d ? new Date(d).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Africa/Dakar' }) : 'jamais');
+---
+<AdminShell title="Équipe" active="team">
+  <h2 style="margin-top:0">Équipe</h2>
+  {error && <div class="card err" role="alert">{error}</div>}
+
+  <div id="secret-box" aria-live="polite"></div>
+  <p id="team-msg" role="alert"></p>
+
+  {!error && (
+    <>
+      <div class="card">
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>Nom</th><th>Identifiant</th><th>Rôle</th><th>Dernière connexion</th><th>État</th><th></th></tr></thead>
+            <tbody>
+              {staff.length === 0 && <tr><td colspan="6" class="hint">Aucun compte pour le moment.</td></tr>}
+              {staff.map((s) => (
+                <tr>
+                  <td>{s.displayName}</td>
+                  <td>{s.login}</td>
+                  <td>{ROLE_LABEL[s.role as Role]}</td>
+                  <td>{fmt(s.lastLoginAt)}</td>
+                  <td><span class={s.active ? 'pill' : 'pill off'}>{s.active ? 'Actif' : 'Désactivé'}</span></td>
+                  <td class="acts">
+                    <button class="sm" type="button" data-action="reset" data-id={s.id} data-name={s.displayName}>Nouveau code</button>
+                    {s.active
+                      ? s.id !== user.id && <button class="sm danger" type="button" data-action="deactivate" data-id={s.id} data-name={s.displayName}>Désactiver</button>
+                      : <button class="sm" type="button" data-action="activate" data-id={s.id} data-name={s.displayName}>Réactiver</button>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">Nouveau compte</h3>
+        <form id="staff-form">
+          <div class="row">
+            <label>Nom affiché<input name="displayName" required maxlength="80" autocomplete="off" /></label>
+            <label>Identifiant<input name="login" required pattern="[a-z0-9._-]{3,40}" maxlength="40" autocomplete="off" /><span class="hint">Minuscules, chiffres, point, tiret.</span></label>
+            <label>Rôle
+              <select name="role" required>
+                {creatable.map((r) => <option value={r}>{ROLE_LABEL[r]}</option>)}
+              </select>
+            </label>
+          </div>
+          <p class="hint">Un code est généré automatiquement (PIN à 6 chiffres pour la femme de chambre, la technique et le restaurant ; mot de passe pour les autres rôles) et affiché une seule fois.</p>
+          <button class="btn" type="submit">Créer le compte</button>
+        </form>
+      </div>
+    </>
+  )}
+  <script>
+    import '../../../../client/hotel/staff';
+  </script>
+</AdminShell>
