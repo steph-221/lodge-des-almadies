@@ -56,3 +56,22 @@ label.check{display:flex;align-items:center;gap:8px;font-weight:500}
 .item.task button.btn{padding:12px 20px;font-size:1rem}
 .item.task select{width:auto;max-width:100%}
 @media (max-width:600px){main{padding:12px}.tbl{font-size:.9rem}}
+
+/* Page « Aujourd'hui » et impression A4 */
+.print-only{display:none}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:0 0 12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font-size:1.6rem;line-height:1.1}
+.stat span{color:var(--mut);font-size:.9rem}
+.lines{margin:6px 0 0;padding:0;list-style:none}
+.lines li{padding:4px 0;border-top:1px solid var(--line)}
+.lines li:first-child{border-top:0}
+.pinned{border-left:4px solid #b07d1e;padding-left:10px}
+@media print{
+  @page{size:A4;margin:12mm}
+  header,.tabs,.no-print,button,form{display:none!important}
+  .print-only{display:block}
+  body{background:#fff;color:#000}
+  main{padding:0;max-width:none}
+  .card,.stat{box-shadow:none;border:1px solid #999;break-inside:avoid;background:#fff}
+}
