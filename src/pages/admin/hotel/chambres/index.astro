@@ -1,0 +1,95 @@
+---
+import AdminShell from '../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../lib/db';
+import { canEdit } from '../../../../lib/hotel/permissions';
+import { listStaff } from '../../../../lib/hotel/staff';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+const manage = canEdit(user.role, 'rooms');
+let error = '';
+let fdc: { id: number; name: string }[] = [];
+if (!dbConfigured()) error = 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+else if (manage) {
+  try { fdc = (await listStaff()).filter((s) => s.role === 'femme_chambre' && s.active).map((s) => ({ id: s.id, name: s.displayName })); }
+  catch (e) { console.error('[chambres]', (e as Error).message); error = 'Lecture des données impossible pour le moment.'; }
+}
+---
+<AdminShell title="Chambres" active="rooms">
+  <h2 style="margin-top:0">Chambres</h2>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {!error && (
+    <div id="rooms-app" data-manage={manage ? '1' : '0'} data-fdc={JSON.stringify(fdc)}>
+      <div class="card">
+        <div class="head-row">
+          <h3 style="margin:0">{manage ? 'Ménage du jour' : 'Ma journée'}</h3>
+          <label class="inline">Jour<input type="date" id="task-date" /></label>
+          {manage && <button class="btn" type="button" id="tasks-generate">Préparer les tâches</button>}
+        </div>
+        <p id="tasks-msg" role="status" class="hint"></p>
+        <div id="tasks" aria-live="polite"></div>
+      </div>
+
+      {manage && (
+        <>
+          <div class="card">
+            <div class="head-row"><h3 style="margin:0">Liste des chambres</h3><span class="hint" id="rooms-count"></span></div>
+            <p id="room-msg" role="status" class="hint"></p>
+            <div class="table-wrap">
+              <table class="tbl">
+                <thead><tr><th>N°</th><th>Bât.</th><th>Étage</th><th>Type</th><th>Minibar</th><th>État</th><th></th></tr></thead>
+                <tbody id="rooms-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0" id="room-form-title">Ajouter une chambre</h3>
+            <form id="room-form">
+              <div class="row">
+                <label>Numéro<input name="number" required maxlength="20" autocomplete="off" /></label>
+                <label>Bâtiment<input name="building" maxlength="40" autocomplete="off" placeholder="A, B…" /></label>
+                <label>Étage<input name="floor" maxlength="40" autocomplete="off" /></label>
+                <label>Type<select name="roomTypeId"></select></label>
+              </div>
+              <label class="check"><input type="checkbox" name="minibar" /> Minibar dans la chambre</label>
+              <label>Remarques<textarea name="notes" maxlength="500" rows="2"></textarea></label>
+              <div class="acts"><button class="btn" type="submit">Enregistrer</button><button class="sm" type="button" id="room-cancel">Annuler</button></div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0">Types de chambre</h3>
+            <p class="hint">Un type fixe le nombre de personnes accepté : une réservation au-dessus du maximum est refusée.</p>
+            <p id="type-msg" role="status" class="hint"></p>
+            <div class="table-wrap">
+              <table class="tbl">
+                <thead><tr><th>Libellé</th><th>Code</th><th>Personnes</th><th>Lits</th><th></th></tr></thead>
+                <tbody id="types-body"></tbody>
+              </table>
+            </div>
+            <h4 id="type-form-title" style="margin:14px 0 0">Ajouter un type de chambre</h4>
+            <form id="type-form">
+              <div class="row">
+                <label>Libellé<input name="label" required maxlength="80" autocomplete="off" placeholder="Chambre double" /></label>
+                <label>Code<input name="code" required maxlength="30" pattern="[A-Za-z0-9_\-]{1,30}" autocomplete="off" placeholder="double" /></label>
+                <label>Personnes (base)<input name="baseCapacity" type="number" min="1" max="8" value="2" /></label>
+                <label>Personnes (maximum)<input name="maxCapacity" type="number" min="1" max="8" value="2" /></label>
+                <label>Lits<input name="beds" maxlength="80" placeholder="1 lit double" /></label>
+              </div>
+              <div class="acts"><button class="btn" type="submit">Enregistrer</button><button class="sm" type="button" id="type-cancel">Annuler</button></div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0">Importer des chambres</h3>
+            <div id="import-box"></div>
+          </div>
+        </>
+      )}
+    </div>
+  )}
+  <script>
+    import '../../../../client/hotel/chambres';
+  </script>
+</AdminShell>

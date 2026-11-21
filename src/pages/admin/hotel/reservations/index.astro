@@ -1,0 +1,68 @@
+---
+import AdminShell from '../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../lib/db';
+import { canEdit } from '../../../../lib/hotel/permissions';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+const manage = canEdit(user.role, 'stays');
+const error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+---
+<AdminShell title="Réservations" active="stays">
+  <h2 style="margin-top:0">Réservations</h2>
+  <p class="hint">Séjours de l’hôtel pour préparer le ménage. Octorate reste la référence pour les réservations et la facturation.</p>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {!error && (
+    <div id="stays-app" data-manage={manage ? '1' : '0'}>
+      <div class="card">
+        <div class="head-row">
+          <h3 style="margin:0">Séjours</h3>
+          <label class="inline">Du<input type="date" id="stay-from" /></label>
+          <label class="inline">au<input type="date" id="stay-to" /></label>
+        </div>
+        <p id="stay-msg" role="status" class="hint"></p>
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>Chambre</th><th>Client</th><th>Pers.</th><th>Arrivée</th><th>Départ</th><th>Détails</th>{manage && <th></th>}</tr></thead>
+            <tbody id="stays-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      {manage && (
+        <>
+          <div class="card">
+            <h3 style="margin-top:0" id="stay-form-title">Nouveau séjour</h3>
+            <form id="stay-form">
+              <div class="row">
+                <label>Chambre<select name="roomId" required></select></label>
+                <label>Nom du client<input name="guestName" required maxlength="120" autocomplete="off" /></label>
+                <label>Personnes<input name="guests" type="number" min="1" max="8" value="1" required /></label>
+              </div>
+              <div class="row">
+                <label>Arrivée<input name="arrival" type="date" required /></label>
+                <label>Départ<input name="departure" type="date" required /></label>
+                <label>Heure d’arrivée<input name="arrivalTime" type="time" /></label>
+              </div>
+              <div class="acts">
+                <label class="check"><input type="checkbox" name="extraBed" /> Lit d’appoint</label>
+                <label class="check"><input type="checkbox" name="babyCot" /> Lit bébé</label>
+              </div>
+              <label>Remarques<textarea name="notes" maxlength="500" rows="2"></textarea></label>
+              <div class="acts"><button class="btn" type="submit">Enregistrer</button><button class="sm" type="button" id="stay-cancel">Annuler</button></div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0">Importer des séjours</h3>
+            <p class="hint">Les chambres citées doivent déjà exister. Un séjour déjà importé (même référence) est mis à jour, pas dupliqué.</p>
+            <div id="import-box"></div>
+          </div>
+        </>
+      )}
+    </div>
+  )}
+  <script>
+    import '../../../../client/hotel/reservations';
+  </script>
+</AdminShell>
