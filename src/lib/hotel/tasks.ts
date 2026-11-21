@@ -1,6 +1,7 @@
 import { sql } from '../db';
 import { planDay, type PlanStay } from './planning';
 import { setRoomStatus } from './rooms';
+import { postTaskStock } from './stock';
 
 export const TASK_STATUSES = ['todo', 'doing', 'done', 'checked'] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
@@ -82,6 +83,10 @@ export async function setTaskStatus(id: number, status: TaskStatus, staffId: num
   )) as { roomId: number }[];
   if (!rows[0]) return null;
   await setRoomStatus(rows[0].roomId, ROOM_STATUS_FOR[status], staffId, true);
+  // Le stock se décompte à la première fois que la tâche est terminée (une seule fois). Un échec ne bloque pas le travail d'étage.
+  if (status === 'done' || status === 'checked') {
+    try { await postTaskStock(id, staffId); } catch (e) { console.error('[stock]', (e as Error).message); }
+  }
   return getTask(id);
 }
 

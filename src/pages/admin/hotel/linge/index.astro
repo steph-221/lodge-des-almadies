@@ -1,0 +1,111 @@
+---
+import AdminShell from '../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../lib/db';
+import { canEdit } from '../../../../lib/hotel/permissions';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+const manage = canEdit(user.role, 'linen');
+const error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+---
+<AdminShell title="Linge & stocks" active="linen">
+  <h2 style="margin-top:0">Linge & stocks</h2>
+  <p class="hint">Le stock est la somme des mouvements : chaque tâche de ménage terminée sort le linge de la réserve (une seule fois), la blanchisserie le remet en réserve.</p>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {!error && (
+    <div id="linen-app" data-manage={manage ? '1' : '0'}>
+      <p id="linen-msg" role="status" class="hint"></p>
+
+      <div class="card">
+        <div class="head-row">
+          <h3 style="margin:0">À sortir de la réserve</h3>
+          <label class="inline">Jour<input type="date" id="needs-date" /></label>
+        </div>
+        <p class="hint" id="needs-sub"></p>
+        <div class="table-wrap"><table class="tbl">
+          <thead><tr><th>Article</th><th>À sortir</th><th>En réserve</th><th></th></tr></thead>
+          <tbody id="needs-body"></tbody>
+        </table></div>
+      </div>
+
+      <div class="card">
+        <div class="head-row"><h3 style="margin:0">Articles et stocks</h3><span class="hint" id="items-count"></span></div>
+        <div class="table-wrap"><table class="tbl">
+          <thead><tr><th>Article</th><th>Nature</th><th>Réserve</th><th>Sale</th><th>Blanchisserie</th><th>Rebut</th><th>Seuil</th>{manage && <th></th>}</tr></thead>
+          <tbody id="items-body"></tbody>
+        </table></div>
+      </div>
+
+      {manage && (
+        <div class="card">
+          <h3 style="margin-top:0" id="item-form-title">Nouvel article</h3>
+          <form id="item-form">
+            <div class="row">
+              <label>Nom<input name="name" required maxlength="80" autocomplete="off" /></label>
+              <label>Nature
+                <select name="kind"><option value="linen">Linge</option><option value="supply">Consommable</option><option value="minibar">Minibar</option></select>
+              </label>
+              <label>Unité<input name="unit" maxlength="20" placeholder="pièce" /></label>
+            </div>
+            <div class="row">
+              <label>Seuil d’alerte<input name="minStock" type="number" min="0" value="0" /></label>
+              <label>Prix de vente (FCFA)<input name="price" type="number" min="0" value="0" /></label>
+              <label class="check" style="align-self:end"><input type="checkbox" name="active" checked /> Article actif</label>
+            </div>
+            <div class="acts"><button class="btn" type="submit">Enregistrer</button><button class="sm" type="button" id="item-cancel">Annuler</button></div>
+          </form>
+        </div>
+      )}
+
+      <div class="card">
+        <h3 style="margin-top:0">Gabarits de préparation</h3>
+        <p class="hint">Ce qu’il faut mettre dans une chambre, par type, par nature (départ ou recouche) et par nombre de personnes. La ligne la plus précise remplace la ligne générale ; une quantité 0 retire l’article.</p>
+        <div class="table-wrap"><table class="tbl">
+          <thead><tr><th>Type</th><th>Nature</th><th>Personnes</th><th>Condition</th><th>Article</th><th>Qté</th>{manage && <th></th>}</tr></thead>
+          <tbody id="tpl-body"></tbody>
+        </table></div>
+        {manage && (
+          <form id="tpl-form" style="margin-top:12px">
+            <div class="row">
+              <label>Type de chambre<select name="roomTypeId" id="tpl-type"></select></label>
+              <label>Nature<select name="kind"><option value="depart">Départ</option><option value="recouche">Recouche</option></select></label>
+              <label>Personnes
+                <select name="occupancy"><option value="">Toutes</option>{[1,2,3,4,5,6,7,8].map((n) => <option value={String(n)}>{n}</option>)}</select>
+              </label>
+            </div>
+            <div class="row">
+              <label>Condition
+                <select name="cond"><option value="">Aucune</option><option value="extra_bed">Lit d’appoint demandé</option><option value="baby_cot">Lit bébé demandé</option></select>
+              </label>
+              <label>Article<select name="itemId" id="tpl-item" required></select></label>
+              <label>Quantité<input name="qty" type="number" min="0" max="999" value="1" required /></label>
+            </div>
+            <div class="acts"><button class="btn" type="submit">Ajouter ou remplacer la ligne</button></div>
+          </form>
+        )}
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">Blanchisserie</h3>
+        {manage && (
+          <>
+            <p class="hint">Envoyez du linge sale : indiquez la quantité par article. Au retour, saisissez ce qui est revenu propre et ce qui est abîmé ; le reste est compté manquant.</p>
+            <div id="laundry-send"></div>
+          </>
+        )}
+        <div id="laundry-list"></div>
+      </div>
+
+      {manage && (
+        <div class="card">
+          <h3 style="margin-top:0">Importer le catalogue</h3>
+          <p class="hint">Un article déjà présent (même nom) est mis à jour. La colonne « Stock » devient l’inventaire de la réserve.</p>
+          <div id="import-box"></div>
+        </div>
+      )}
+    </div>
+  )}
+  <script>
+    import '../../../../client/hotel/linge';
+  </script>
+</AdminShell>

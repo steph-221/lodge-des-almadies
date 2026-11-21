@@ -1,0 +1,43 @@
+---
+import AdminShell from '../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../lib/db';
+import { canEdit } from '../../../../lib/hotel/permissions';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+const reading = canEdit(user.role, 'minibar');
+const error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+---
+<AdminShell title="Minibar" active="minibar">
+  <h2 style="margin-top:0">Minibar</h2>
+  <p class="hint">Comptez ce qui reste dans chaque minibar : l’application déduit la consommation, sort le stock de la réserve et crée l’extra à reporter sur la facture.</p>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {!error && (
+    <div id="minibar-app" data-reading={reading ? '1' : '0'}>
+      <p id="mb-msg" role="status" class="hint"></p>
+      <div class="card">
+        <div class="head-row"><h3 style="margin:0">Chambres à relever</h3><span class="hint" id="mb-count"></span></div>
+        <div id="mb-rooms"></div>
+      </div>
+      <div class="card" id="dot-card" hidden>
+        <h3 style="margin-top:0">Dotation par type de chambre</h3>
+        <p class="hint">Ce qui doit se trouver dans un minibar plein. Les articles viennent du catalogue (nature « Minibar »).</p>
+        <div class="table-wrap"><table class="tbl">
+          <thead><tr><th>Type de chambre</th><th>Article</th><th>Quantité</th><th>Prix</th><th></th></tr></thead>
+          <tbody id="dot-body"></tbody>
+        </table></div>
+        <form id="dot-form" style="margin-top:12px">
+          <div class="row">
+            <label>Type de chambre<select name="roomTypeId" id="dot-type" required></select></label>
+            <label>Article<select name="itemId" id="dot-item" required></select></label>
+            <label>Quantité<input name="qty" type="number" min="1" max="99" value="2" required /></label>
+          </div>
+          <div class="acts"><button class="btn" type="submit">Ajouter ou remplacer</button></div>
+        </form>
+      </div>
+    </div>
+  )}
+  <script>
+    import '../../../../client/hotel/minibar';
+  </script>
+</AdminShell>
