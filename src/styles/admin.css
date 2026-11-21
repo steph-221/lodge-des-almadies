@@ -42,4 +42,17 @@ button:disabled{opacity:.5;cursor:wait}
 .secret{border:2px solid var(--acc);border-radius:12px;padding:14px;margin:12px 0;background:var(--card)}
 .secret code{font-size:1.4rem;letter-spacing:.08em;user-select:all}
 .table-wrap{overflow-x:auto}
+.head-row{display:flex;gap:12px;align-items:end;flex-wrap:wrap;justify-content:space-between}
+.head-row label.inline{margin:0}
+label.inline{display:flex;align-items:center;gap:8px;font-weight:600}
+label.inline input{width:auto}
+label.check{display:flex;align-items:center;gap:8px;font-weight:500}
+.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tbl tr.off td{opacity:.55}
+.item.task{display:grid;gap:4px}
+.item.task .task-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.item.task.done{border-color:var(--acc)}
+.item.task.checked{opacity:.65}
+.item.task button.btn{padding:12px 20px;font-size:1rem}
+.item.task select{width:auto;max-width:100%}
 @media (max-width:600px){main{padding:12px}.tbl{font-size:.9rem}}

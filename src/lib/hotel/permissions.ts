@@ -51,9 +51,15 @@ export function canManageStaff(actor: Role, target: Role): boolean {
 }
 
 // Pages de l'espace hôtel (premier segment après /admin/hotel/) → module.
-export const PAGE_MODULE: Record<string, Module> = { equipe: 'team' };
+export const PAGE_MODULE: Record<string, Module> = { equipe: 'team', chambres: 'rooms', reservations: 'stays' };
 // API (premier segment après /api/hotel/) → module. 'me' est ouvert à tout le personnel.
-export const API_MODULE: Record<string, Module> = { staff: 'team' };
+// « P » (périmètre limité) autorise l'écriture au niveau de la route : chaque route doit alors contrôler elle-même ce que le rôle peut faire.
+export const API_MODULE: Record<string, Module> = {
+  staff: 'team', rooms: 'rooms', 'room-types': 'rooms', tasks: 'rooms', stays: 'stays', import: 'stays',
+};
+
+// Écriture complète sur un module (et non simple périmètre limité).
+export const canEdit = (role: Role, module: Module): boolean => levelFor(role, module) === 'E';
 
 export const PROTECTED_PREFIXES = ['/api/hotel', '/api/admin', '/api/cron'] as const;
 // Tout /admin/* est protégé, sauf la page de connexion (/admin et /admin/) : une future page ajoutée est fermée par défaut.

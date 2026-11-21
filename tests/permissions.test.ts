@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ROLES, levelFor, routePolicy, canManageStaff, type Role } from '../src/lib/hotel/permissions';
+import { ROLES, levelFor, routePolicy, canEdit, canManageStaff, type Role } from '../src/lib/hotel/permissions';
 
 describe('matrice rôles × modules', () => {
   it('réserve la zone Site à la direction', () => {
@@ -71,6 +71,40 @@ describe('routePolicy', () => {
     expect(allowed('/api/hotel/me/../staff', 'GET', 'femme_chambre')).toBe(false);
     expect(allowed('/api/hotel//staff', 'GET', 'femme_chambre')).toBe(false);
     expect(allowed('/API/HOTEL/STAFF', 'GET', 'femme_chambre')).toBe(false);
+  });
+});
+
+describe('routes chambres et séjours (lot 1a)', () => {
+  const allowed = (path: string, method: string, role: Role) => routePolicy(path, method, role) === 'allow';
+
+  it('ne montre jamais les séjours (noms de clients) à la femme de chambre ni à la technique', () => {
+    for (const r of ['femme_chambre', 'technique'] as Role[]) {
+      expect(allowed('/api/hotel/stays', 'GET', r)).toBe(false);
+      expect(allowed('/admin/hotel/reservations/', 'GET', r)).toBe(false);
+    }
+  });
+  it('laisse la femme de chambre lire et avancer ses tâches, mais pas importer ni écrire les séjours', () => {
+    expect(allowed('/api/hotel/tasks', 'GET', 'femme_chambre')).toBe(true);
+    expect(allowed('/api/hotel/tasks/4', 'PATCH', 'femme_chambre')).toBe(true);
+    expect(allowed('/api/hotel/import', 'POST', 'femme_chambre')).toBe(false);
+    expect(allowed('/api/hotel/stays', 'POST', 'femme_chambre')).toBe(false);
+  });
+  it('accorde la lecture seule des séjours à la gouvernante et au restaurant', () => {
+    for (const r of ['gouvernante', 'restaurant'] as Role[]) {
+      expect(allowed('/api/hotel/stays', 'GET', r)).toBe(true);
+      expect(allowed('/api/hotel/stays', 'POST', r)).toBe(false);
+      expect(allowed('/api/hotel/import', 'POST', r)).toBe(false);
+    }
+  });
+  it('autorise la réception à saisir séjours et chambres', () => {
+    expect(allowed('/api/hotel/stays', 'POST', 'reception')).toBe(true);
+    expect(allowed('/api/hotel/rooms', 'POST', 'reception')).toBe(true);
+    expect(allowed('/api/hotel/room-types/3', 'PATCH', 'reception')).toBe(true);
+  });
+  it('canEdit distingue l’écriture complète du périmètre limité', () => {
+    expect(canEdit('femme_chambre', 'rooms')).toBe(false);
+    expect(canEdit('gouvernante', 'rooms')).toBe(true);
+    expect(canEdit('gouvernante', 'stays')).toBe(false);
   });
 });
 

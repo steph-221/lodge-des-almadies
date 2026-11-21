@@ -5,8 +5,8 @@ export type HotelNavItem = { key: Module; label: string; href: string; ready: bo
 // Sous-onglets de l'espace Services hôtel. « ready » passe à vrai quand le lot correspondant est livré.
 export const HOTEL_NAV: HotelNavItem[] = [
   { key: 'today', label: 'Aujourd’hui', href: '/admin/hotel/', ready: true },
-  { key: 'stays', label: 'Réservations', href: '/admin/hotel/reservations/', ready: false },
-  { key: 'rooms', label: 'Chambres', href: '/admin/hotel/chambres/', ready: false },
+  { key: 'stays', label: 'Réservations', href: '/admin/hotel/reservations/', ready: true },
+  { key: 'rooms', label: 'Chambres', href: '/admin/hotel/chambres/', ready: true },
   { key: 'linen', label: 'Linge & stocks', href: '/admin/hotel/linge/', ready: false },
   { key: 'requests', label: 'Demandes', href: '/admin/hotel/demandes/', ready: false },
   { key: 'events', label: 'Groupes & séminaires', href: '/admin/hotel/groupes/', ready: false },
