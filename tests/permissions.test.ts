@@ -157,3 +157,24 @@ describe('routes linge, minibar et extras (lot 1b)', () => {
     expect(allowed('/admin/hotel/minibar/', 'GET', 'restaurant')).toBe(false);
   });
 });
+
+describe('routes visites de chambre (lot 1c)', () => {
+  const allowed = (path: string, method: string, role: Role) => routePolicy(path, method, role) === 'allow';
+
+  it('ouvre l’écran des visites à la direction, à la gouvernante et à la technique seulement', () => {
+    for (const r of ['direction', 'gouvernante', 'technique'] as Role[]) expect(allowed('/admin/hotel/visites/', 'GET', r)).toBe(true);
+    for (const r of ['reception', 'femme_chambre', 'restaurant'] as Role[]) {
+      expect(allowed('/admin/hotel/visites/', 'GET', r)).toBe(false);
+      expect(allowed('/api/hotel/inspections', 'GET', r)).toBe(false);
+    }
+  });
+  it('réserve la saisie des visites et les photos à la direction (canEdit)', () => {
+    expect(canEdit('direction', 'inspections')).toBe(true);
+    expect(canEdit('gouvernante', 'inspections')).toBe(false);
+    expect(canEdit('technique', 'inspections')).toBe(false);
+  });
+  it('ne laisse pas la réception ni la femme de chambre lire les photos', () => {
+    for (const r of ['reception', 'femme_chambre', 'restaurant'] as Role[]) expect(allowed('/api/hotel/files/4', 'GET', r)).toBe(false);
+    expect(allowed('/api/hotel/files/4', 'GET', 'direction')).toBe(true);
+  });
+});

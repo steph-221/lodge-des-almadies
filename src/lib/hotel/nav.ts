@@ -7,6 +7,7 @@ export const HOTEL_NAV: HotelNavItem[] = [
   { key: 'today', label: 'Aujourd’hui', href: '/admin/hotel/', ready: true },
   { key: 'stays', label: 'Réservations', href: '/admin/hotel/reservations/', ready: true },
   { key: 'rooms', label: 'Chambres', href: '/admin/hotel/chambres/', ready: true },
+  { key: 'inspections', label: 'Visites', href: '/admin/hotel/visites/', ready: true },
   { key: 'linen', label: 'Linge & stocks', href: '/admin/hotel/linge/', ready: true },
   { key: 'minibar', label: 'Minibar', href: '/admin/hotel/minibar/', ready: true },
   { key: 'requests', label: 'Demandes', href: '/admin/hotel/demandes/', ready: false },
