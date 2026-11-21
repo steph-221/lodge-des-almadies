@@ -4,7 +4,7 @@ import { h } from '../dom';
 import { parseTable, type Table } from '../../lib/hotel/csv';
 import { guessMapping, type FieldDef } from '../../lib/hotel/import';
 
-type Opts = { kind: 'rooms' | 'stays'; fields: FieldDef[]; template: string; templateName: string; onDone: () => void };
+type Opts = { kind: 'rooms' | 'stays' | 'items'; fields: FieldDef[]; template: string; templateName: string; onDone: () => void };
 
 // Les exports Excel français sont souvent en Windows-1252 : on essaie UTF-8 d'abord, puis on se rabat dessus.
 async function readText(file: File): Promise<string> {
@@ -55,7 +55,7 @@ export function mountImport(box: HTMLElement, o: Opts): void {
     const missing = o.fields.filter((f) => f.required && mapping[f.key] < 0).map((f) => f.label);
     if (missing.length) { say(`Colonne à choisir : ${missing.join(', ')}.`, 'err'); return; }
     say(dryRun ? 'Contrôle en cours…' : 'Import en cours…');
-    const r = await api<Record<string, unknown>>('POST', '/api/hotel/import', { kind: o.kind, rows: table.rows, mapping, dryRun });
+    const r = await api<Record<string, unknown>>('POST', o.kind === 'items' ? '/api/hotel/items/import' : '/api/hotel/import', { kind: o.kind, rows: table.rows, mapping, dryRun });
     if (!r.ok) { say(r.data.error || 'Import impossible.', 'err'); return; }
     say('');
     result.textContent = '';

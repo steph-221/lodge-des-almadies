@@ -1,0 +1,51 @@
+---
+import AdminShell from '../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../lib/db';
+import { canEdit } from '../../../../lib/hotel/permissions';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+const manage = canEdit(user.role, 'extras');
+const error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+---
+<AdminShell title="Extras" active="extras">
+  <h2 style="margin-top:0">Extras</h2>
+  <p class="hint">Consommations notées par chambre, à reporter sur la facture dans le PMS. Aucun encaissement ici : l’application ne fait que garder la trace.</p>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {!error && (
+    <div id="extras-app" data-manage={manage ? '1' : '0'}>
+      <p id="ex-msg" role="status" class="hint"></p>
+      <div class="card">
+        <div class="head-row">
+          <h3 style="margin:0">{manage ? 'À reporter sur les factures' : 'Room service saisi'}</h3>
+          {manage && <label class="check"><input type="checkbox" id="ex-all" /> Afficher aussi l’historique (60 jours)</label>}
+        </div>
+        <div id="ex-list" aria-live="polite"></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Ajouter un extra</h3>
+        <form id="ex-form">
+          <div class="row">
+            <label>Chambre<select name="roomId" id="ex-room" required></select></label>
+            <label>Origine
+              <select name="source">
+                <option value="room_service">Room service</option>
+                {manage && <option value="laundry">Blanchisserie</option>}
+                {manage && <option value="other">Divers</option>}
+              </select>
+            </label>
+            <label>Libellé<input name="label" required maxlength="120" autocomplete="off" /></label>
+          </div>
+          <div class="row">
+            <label>Quantité<input name="qty" type="number" min="1" max="999" value="1" required /></label>
+            <label>Prix unitaire (FCFA)<input name="unitPrice" type="number" min="0" required /></label>
+          </div>
+          <div class="acts"><button class="btn" type="submit">Ajouter</button></div>
+        </form>
+      </div>
+    </div>
+  )}
+  <script>
+    import '../../../../client/hotel/extras';
+  </script>
+</AdminShell>

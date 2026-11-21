@@ -123,3 +123,37 @@ describe('canManageStaff', () => {
     expect(canManageStaff('technique', 'technique')).toBe(false);
   });
 });
+
+describe('routes linge, minibar et extras (lot 1b)', () => {
+  const allowed = (path: string, method: string, role: Role) => routePolicy(path, method, role) === 'allow';
+
+  it('réserve l’écriture du linge et des stocks à la direction et à la gouvernante', () => {
+    for (const p of ['/api/hotel/items', '/api/hotel/stock', '/api/hotel/templates', '/api/hotel/laundry']) {
+      expect(allowed(p, 'POST', 'direction')).toBe(true);
+      expect(allowed(p, 'POST', 'gouvernante')).toBe(true);
+      expect(allowed(p, 'POST', 'reception')).toBe(false);
+      expect(allowed(p, 'POST', 'femme_chambre')).toBe(false);
+    }
+    expect(allowed('/api/hotel/items/import', 'POST', 'gouvernante')).toBe(true);
+    expect(allowed('/api/hotel/items', 'GET', 'reception')).toBe(true);
+    expect(allowed('/api/hotel/items', 'GET', 'femme_chambre')).toBe(false);
+  });
+  it('laisse la femme de chambre relever le minibar mais pas régler la dotation', () => {
+    expect(allowed('/api/hotel/minibar', 'POST', 'femme_chambre')).toBe(true);
+    expect(allowed('/api/hotel/minibar', 'POST', 'reception')).toBe(false);
+    expect(canEdit('femme_chambre', 'linen')).toBe(false);
+    expect(canEdit('gouvernante', 'linen')).toBe(true);
+  });
+  it('limite le restaurant au room service dans les extras', () => {
+    expect(allowed('/api/hotel/charges', 'POST', 'restaurant')).toBe(true);
+    expect(canEdit('restaurant', 'extras')).toBe(false);
+    expect(allowed('/api/hotel/charges', 'GET', 'gouvernante')).toBe(false);
+    expect(allowed('/admin/hotel/extras/', 'GET', 'femme_chambre')).toBe(false);
+  });
+  it('ouvre les pages Linge, Minibar et Extras aux bons rôles', () => {
+    expect(allowed('/admin/hotel/linge/', 'GET', 'reception')).toBe(true);
+    expect(allowed('/admin/hotel/linge/', 'GET', 'technique')).toBe(false);
+    expect(allowed('/admin/hotel/minibar/', 'GET', 'femme_chambre')).toBe(true);
+    expect(allowed('/admin/hotel/minibar/', 'GET', 'restaurant')).toBe(false);
+  });
+});
