@@ -1,0 +1,96 @@
+---
+import AdminShell from '../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../lib/db';
+import { canEdit } from '../../../../lib/hotel/permissions';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+const director = canEdit(user.role, 'inspections');
+const error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+const title = director ? 'Visites de chambre' : 'Défauts à corriger';
+---
+<AdminShell title={title} active="inspections">
+  <h2 style="margin-top:0">{title}</h2>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {!error && (
+    <div id="visits-app" data-director={director ? '1' : '0'}>
+      <p id="v-msg" role="status" class="hint"></p>
+
+      {director && (
+        <>
+          <div class="card">
+            <div class="head-row">
+              <h3 style="margin:0">À visiter ce matin</h3>
+              <label class="inline">Jour<input type="date" id="q-date" /></label>
+            </div>
+            <p class="hint" id="q-sub"></p>
+            <div id="q-list"></div>
+          </div>
+
+          <div class="card" id="visit-card" hidden>
+            <h3 style="margin-top:0" id="visit-title">Nouvelle visite</h3>
+            <form id="visit-form">
+              <label>Chambre<select name="roomId" id="visit-room" required></select></label>
+              <div id="visit-points"></div>
+              <div class="row">
+                <label>Note d’ensemble
+                  <select name="overall"><option value="">—</option>{[5,4,3,2,1].map((n) => <option value={String(n)}>{n} / 5</option>)}</select>
+                </label>
+              </div>
+              <label>Commentaire<textarea name="comment" maxlength="1000" rows="2"></textarea></label>
+              <label>Photos (4 au plus)<input type="file" id="visit-photos" accept="image/*" multiple /></label>
+              <p class="hint" id="visit-photos-hint"></p>
+              <div class="acts"><button class="btn" type="submit">Enregistrer la visite</button><button class="sm" type="button" id="visit-cancel">Annuler</button></div>
+            </form>
+          </div>
+        </>
+      )}
+
+      <div class="card">
+        <div class="head-row">
+          <h3 style="margin:0">Défauts à corriger</h3>
+          {director && (
+            <label class="inline">Service
+              <select id="d-service"><option value="">Tous</option><option value="housekeeping">Ménage</option><option value="maintenance">Technique</option></select>
+            </label>
+          )}
+          {director && <label class="check"><input type="checkbox" id="d-all" /> Afficher aussi les corrigés</label>}
+        </div>
+        <div id="d-list" aria-live="polite"></div>
+      </div>
+
+      {director && (
+        <>
+          <div class="card">
+            <h3 style="margin-top:0">Historique des visites</h3>
+            <label class="inline">Chambre<select id="h-room"><option value="">Toutes</option></select></label>
+            <div id="h-list"></div>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0">Grille de contrôle</h3>
+            <p class="hint">Les points contrôlés lors d’une visite. Un point désactivé n’apparaît plus dans les nouvelles visites mais reste dans l’historique.</p>
+            <label class="inline">Visites par matin<input type="number" id="per-morning" min="0" max="36" style="width:6rem" /></label>
+            <div class="table-wrap"><table class="tbl">
+              <thead><tr><th>Zone</th><th>Point</th><th>Service</th><th></th></tr></thead>
+              <tbody id="pt-body"></tbody>
+            </table></div>
+            <form id="pt-form" style="margin-top:12px">
+              <div class="row">
+                <label>Zone<input name="zone" maxlength="40" placeholder="Salle de bain" /></label>
+                <label>Point à contrôler<input name="label" required maxlength="80" /></label>
+                <label>Service
+                  <select name="service"><option value="housekeeping">Ménage</option><option value="maintenance">Technique</option></select>
+                </label>
+              </div>
+              <div class="acts"><button class="btn" type="submit">Ajouter le point</button><button class="sm" type="button" id="pt-suggest">Ajouter les points habituels</button></div>
+            </form>
+          </div>
+        </>
+      )}
+    </div>
+  )}
+  <script>
+    import '../../../../client/hotel/visites';
+  </script>
+</AdminShell>
