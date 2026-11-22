@@ -1,0 +1,94 @@
+---
+import AdminShell from '../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../lib/db';
+import { canEdit } from '../../../../lib/hotel/permissions';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+const manage = canEdit(user.role, 'events');
+const error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+---
+<AdminShell title="Groupes & séminaires" active="events">
+  <h2 style="margin-top:0">Groupes et séminaires</h2>
+  <p class="hint">De la demande à la fin de l’événement. {manage ? 'Une option, un devis envoyé ou une confirmation retient la salle : deux dossiers ne peuvent pas se chevaucher.' : 'Vous consultez les dossiers : horaires, disposition, pauses et repas.'}</p>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {!error && (
+    <div id="ev-app" data-manage={manage ? '1' : '0'}>
+      <p id="ev-msg" role="status" class="hint"></p>
+
+      <div class="card">
+        <div class="head-row">
+          <h3 style="margin:0">Dossiers</h3>
+          <label class="inline">Statut
+            <select id="ev-filter">
+              <option value="active">En cours (hors terminés et annulés)</option>
+              <option value="">Tous</option>
+              <option value="request">Demandes</option>
+              <option value="option">Options</option>
+              <option value="quoted">Devis envoyés</option>
+              <option value="confirmed">Confirmés</option>
+              <option value="done">Terminés</option>
+              <option value="cancelled">Annulés</option>
+            </select>
+          </label>
+        </div>
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>Dossier</th><th>Intitulé</th>{manage && <th>Client</th>}<th>Dates</th><th>Pers.</th><th>Statut</th>{manage && <th>Total</th>}</tr></thead>
+            <tbody id="ev-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="head-row">
+          <h3 style="margin:0">Calendrier des salles</h3>
+          <label class="inline">Du<input type="date" id="cal-from" /></label>
+          <label class="inline">au<input type="date" id="cal-to" /></label>
+        </div>
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>Date</th><th>Horaire</th><th>Salle</th><th>Dossier</th><th>Statut</th></tr></thead>
+            <tbody id="cal-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      {manage && (
+        <>
+          <div class="card">
+            <h3 style="margin-top:0">Nouveau dossier</h3>
+            <form id="ev-form">
+              <div class="row">
+                <label>Intitulé<input name="title" required maxlength="120" autocomplete="off" placeholder="Séminaire annuel" /></label>
+                <label>Client ou société<input name="clientName" required maxlength="120" autocomplete="off" /></label>
+                <label>Participants<input name="attendees" type="number" min="1" max="1000" value="10" required /></label>
+              </div>
+              <div class="row">
+                <label>Contact<input name="contactName" maxlength="120" autocomplete="off" /></label>
+                <label>Téléphone<input name="contactPhone" maxlength="40" autocomplete="off" /></label>
+                <label>E-mail<input name="contactEmail" type="email" maxlength="120" autocomplete="off" /></label>
+              </div>
+              <label>Remarques<textarea name="notes" maxlength="1000" rows="2"></textarea></label>
+              <div class="acts"><button class="btn" type="submit">Créer le dossier</button></div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-top:0">Salles</h3>
+            <p class="hint">Les salles réservables (salle de séminaire, terrasse privatisée…). Une salle retirée reste dans l’historique.</p>
+            <div id="sp-list"></div>
+            <form id="sp-form" class="row">
+              <label>Nouvelle salle<input name="name" required maxlength="80" autocomplete="off" /></label>
+              <label>Capacité<input name="capacity" type="number" min="1" max="1000" /></label>
+              <div class="acts"><button class="btn" type="submit">Ajouter</button></div>
+            </form>
+          </div>
+        </>
+      )}
+    </div>
+  )}
+  <script>
+    import '../../../../client/hotel/groupes';
+  </script>
+</AdminShell>

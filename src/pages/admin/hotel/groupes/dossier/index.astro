@@ -1,0 +1,23 @@
+---
+import AdminShell from '../../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../../lib/db';
+import { canEdit } from '../../../../../lib/hotel/permissions';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+const manage = canEdit(user.role, 'events');
+const error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+---
+<AdminShell title="Dossier groupe" active="events">
+  <p class="no-print"><a href="/admin/hotel/groupes/">← Tous les dossiers</a></p>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {!error && (
+    <div id="ed-app" data-manage={manage ? '1' : '0'}>
+      <p id="ed-msg" role="status" class="hint"></p>
+      <div id="ed-body"></div>
+    </div>
+  )}
+  <script>
+    import '../../../../../client/hotel/dossier';
+  </script>
+</AdminShell>
