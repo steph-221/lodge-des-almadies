@@ -5,5 +5,5 @@ import vercel from '@astrojs/vercel';
 export default defineConfig({
   site: 'https://lodgedesalmadies.com',
   output: 'server',
-  adapter: vercel(),
+  adapter: vercel({ maxDuration: 60 }),
 });

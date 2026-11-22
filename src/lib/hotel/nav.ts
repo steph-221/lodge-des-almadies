@@ -13,6 +13,7 @@ export const HOTEL_NAV: HotelNavItem[] = [
   { key: 'requests', label: 'Demandes', href: '/admin/hotel/demandes/', ready: true },
   { key: 'maintenance', label: 'Pannes', href: '/admin/hotel/pannes/', ready: true },
   { key: 'events', label: 'Groupes & séminaires', href: '/admin/hotel/groupes/', ready: true },
+  { key: 'sheets', label: 'Fiches papier', href: '/admin/hotel/fiches/', ready: true },
   { key: 'extras', label: 'Extras', href: '/admin/hotel/extras/', ready: true },
   { key: 'team', label: 'Équipe & réglages', href: '/admin/hotel/equipe/', ready: true },
 ];

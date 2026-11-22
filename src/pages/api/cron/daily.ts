@@ -5,6 +5,7 @@ import { env } from '../../../lib/env';
 import { json } from '../../../lib/http';
 import { mailConfigured, sendMail } from '../../../lib/mail';
 import { backupToDrive } from '../../../lib/hotel/backup';
+import { purgeOldSheetPhotos } from '../../../lib/hotel/sheets';
 import { computeBrief, getRecipients, toEmailData } from '../../../lib/hotel/brief';
 import { todayDakar } from '../../../lib/hotel/tasks';
 import { briefEmail } from '../../../lib/hotel/today';
@@ -43,7 +44,8 @@ const run: APIRoute = async () => {
     const backup: Outcome = !driveConfigured()
       ? { status: 'inactif', detail: 'Google Drive non configuré' }
       : await once('backup', date, async () => ({ ...(await backupToDrive(date)) }));
-    return json(200, { date, email, backup });
+    const sheets: Outcome = await once('sheet-photos', date, async () => ({ ...(await purgeOldSheetPhotos(30)) }));
+    return json(200, { date, email, backup, sheets });
   } catch (e) {
     console.error('[cron] daily :', (e as Error).message);
     return json(503, { error: 'unavailable' });

@@ -1,0 +1,59 @@
+---
+import AdminShell from '../../../../../layouts/AdminShell.astro';
+import { getContent } from '../../../../../lib/content';
+import { dbConfigured } from '../../../../../lib/db';
+import { canEdit } from '../../../../../lib/hotel/permissions';
+import { getSheet } from '../../../../../lib/hotel/sheets';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+if (!canEdit(user.role, 'sheets')) return Astro.redirect('/admin/hotel/fiches/');
+const id = Number(Astro.url.searchParams.get('id'));
+let sheet = null;
+let error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+if (!error) {
+  try { sheet = Number.isSafeInteger(id) && id > 0 ? await getSheet(id) : null; } catch { error = 'Base indisponible, réessayez dans un instant.'; }
+  if (!error && !sheet) error = 'Fiche inconnue.';
+}
+const site = (await getContent()).site;
+const fr = (d: string) => d.split('-').reverse().join('/');
+---
+<AdminShell title={sheet ? `Fiche ${sheet.code}` : 'Fiche de ménage'} active="sheets">
+  <div class="no-print head-row">
+    <a href="/admin/hotel/fiches/">← Retour aux fiches</a>
+    {sheet && <button class="btn" type="button" id="doc-print">Imprimer (A4)</button>}
+  </div>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {sheet && (
+    <article class="card doc">
+      <div class="doc-head">
+        <div>
+          <strong>{site.name}</strong><br />
+          Fiche de ménage du {fr(sheet.date)}<br />
+          Pour : {sheet.staffName ?? 'chambres non attribuées'}
+        </div>
+        <div class="doc-ref"><span class="sheet-code">{sheet.code}</span></div>
+      </div>
+      <p class="hint">Cochez ou barrez la case « Faite » une fois la chambre prête. Minibar : écrivez en gros chiffres le nombre d’articles qui <strong>restent</strong>. Un cadre laissé vide veut dire « non compté ». Écrivez en majuscules, au stylo noir ou bleu foncé, sans dépasser des cases. Photographiez la feuille entière, bien à plat, avec le code visible.</p>
+      <table class="sheet-tbl">
+        <thead><tr><th>Chambre</th><th>Type</th><th>Pers.</th><th>Faite</th><th>Minibar : reste</th><th class="sheet-note">Remarque</th></tr></thead>
+        <tbody>
+          {sheet.rows.map((r) => (
+            <tr>
+              <td class="sheet-room">{r.roomNumber}</td>
+              <td>{r.kind === 'depart' ? 'Départ' : 'Recouche'}</td>
+              <td>{r.guests ?? ''}</td>
+              <td><span class="sheet-box"></span></td>
+              <td>{r.minibar.length ? r.minibar.map((m) => <span class="sheet-mb">{m.name} <span class="sheet-box sm"></span></span>) : <span class="hint">—</span>}</td>
+              <td></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p class="hint" style="margin-top:12px">Fiche {sheet.code} · {sheet.rows.length} chambre(s)</p>
+    </article>
+  )}
+  <script>
+    document.getElementById('doc-print')?.addEventListener('click', () => window.print());
+  </script>
+</AdminShell>
