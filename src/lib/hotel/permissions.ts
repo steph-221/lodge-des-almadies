@@ -18,7 +18,7 @@ export type Level = 'E' | 'L' | 'P';
 
 export const MODULES = [
   'site', 'today', 'logbook', 'stays', 'rooms', 'inspections', 'linen', 'minibar',
-  'requests', 'maintenance', 'events', 'extras', 'sheets', 'team', 'settings',
+  'requests', 'maintenance', 'events', 'extras', 'sheets', 'keys', 'team', 'settings',
 ] as const;
 export type Module = (typeof MODULES)[number];
 
@@ -37,6 +37,7 @@ const ROWS: Record<Module, (Level | null)[]> = {
   events:      ['E', 'E', 'L', null, 'L', 'L'],
   extras:      ['E', 'E', null, null, null, 'P'],
   sheets:      ['E', null, 'E', 'P', null, null],
+  keys:        ['E', 'E', 'E', 'P', null, null],
   team:        ['E', null, 'P', null, null, null],
   settings:    ['E', 'P', null, null, null, null],
 };
@@ -51,7 +52,7 @@ export function canManageStaff(actor: Role, target: Role): boolean {
 }
 
 // Pages de l'espace hôtel (premier segment après /admin/hotel/) → module.
-export const PAGE_MODULE: Record<string, Module> = { equipe: 'team', chambres: 'rooms', reservations: 'stays', linge: 'linen', minibar: 'minibar', extras: 'extras', visites: 'inspections', demandes: 'requests', pannes: 'maintenance', groupes: 'events', fiches: 'sheets' };
+export const PAGE_MODULE: Record<string, Module> = { equipe: 'team', chambres: 'rooms', reservations: 'stays', linge: 'linen', minibar: 'minibar', extras: 'extras', visites: 'inspections', demandes: 'requests', pannes: 'maintenance', groupes: 'events', fiches: 'sheets', cartes: 'keys' };
 // API (premier segment après /api/hotel/) → module. 'me' est ouvert à tout le personnel.
 // « P » (périmètre limité) autorise l'écriture au niveau de la route : chaque route doit alors contrôler elle-même ce que le rôle peut faire.
 export const API_MODULE: Record<string, Module> = {
@@ -60,7 +61,7 @@ export const API_MODULE: Record<string, Module> = {
   inspections: 'inspections', files: 'inspections',
   today: 'today', logbook: 'logbook', brief: 'settings',
   requests: 'requests', 'request-catalog': 'requests', guide: 'requests', issues: 'maintenance',
-  'room-tokens': 'settings', alerts: 'settings', events: 'events', spaces: 'events', sheets: 'sheets',
+  'room-tokens': 'settings', alerts: 'settings', events: 'events', spaces: 'events', sheets: 'sheets', cards: 'keys', lost: 'keys',
 };
 
 // Écriture complète sur un module (et non simple périmètre limité).

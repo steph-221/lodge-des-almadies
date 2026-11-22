@@ -1,0 +1,85 @@
+---
+import AdminShell from '../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../lib/db';
+import { canEdit } from '../../../../lib/hotel/permissions';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+const editor = canEdit(user.role, 'keys');
+const error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+---
+<AdminShell title="Cartes & objets trouvés" active="keys">
+  <h2 style="margin-top:0">Cartes & objets trouvés</h2>
+  <p class="hint">
+    {editor
+      ? 'Registre des cartes RFID (sans encodage : l’application ne programme pas les serrures) et des objets trouvés. Une carte déclarée perdue sort de la liste active, prévient l’équipe par le cahier de liaison, et ne redevient jamais active : faites reprogrammer la serrure.'
+      : 'Vous avez trouvé un objet dans une chambre ou ailleurs ? Signalez-le ici, la réception s’en occupe.'}
+  </p>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {!error && (
+    <div id="keys-app" data-editor={editor ? '1' : '0'}>
+      <p id="k-msg" role="status" class="hint"></p>
+      {editor && (
+        <div class="card">
+          <h3 style="margin-top:0">Cartes</h3>
+          <form id="k-card-form" class="no-print">
+            <div class="row">
+              <label>Numéro de la carte<input id="kc-code" maxlength="40" required autocomplete="off" /></label>
+              <label>Type
+                <select id="kc-kind">
+                  <option value="client">Carte client</option>
+                  <option value="passe">Passe</option>
+                  <option value="personnel">Carte du personnel</option>
+                </select>
+              </label>
+              <label>Chambre<select id="kc-room"></select></label>
+              <label>Titulaire<input id="kc-holder" maxlength="80" placeholder="Nom (carte du personnel, passe)" /></label>
+            </div>
+            <div class="acts"><button class="btn" type="submit">Ajouter la carte</button></div>
+          </form>
+          <div class="head-row" style="margin-top:12px">
+            <label>Afficher
+              <select id="kc-filter">
+                <option value="active">Cartes actives</option>
+                <option value="lost">Cartes perdues</option>
+                <option value="retired">Cartes retirées</option>
+                <option value="all">Toutes</option>
+              </select>
+            </label>
+          </div>
+          <div class="table-wrap" id="kc-list" style="margin-top:8px"></div>
+        </div>
+      )}
+      <div class="card">
+        <h3 style="margin-top:0">Objets trouvés</h3>
+        <form id="k-item-form" class="no-print">
+          <div class="row">
+            <label>Objet<input id="ki-desc" maxlength="200" required placeholder="Ex. : lunettes noires, chargeur…" /></label>
+            <label>Chambre<select id="ki-room"></select></label>
+            <label>Lieu (si hors chambre)<input id="ki-place" maxlength="120" placeholder="Ex. : piscine, restaurant" /></label>
+            {editor && <label>Rangé à<input id="ki-storage" maxlength="80" placeholder="Ex. : armoire de la réception" /></label>}
+          </div>
+          <div class="acts"><button class="btn" type="submit">Signaler l’objet</button></div>
+        </form>
+        {editor && (
+          <>
+            <div class="head-row" style="margin-top:12px">
+              <label>Afficher
+                <select id="ki-filter">
+                  <option value="stored">Objets gardés</option>
+                  <option value="returned">Rendus</option>
+                  <option value="discarded">Éliminés</option>
+                  <option value="all">Tous</option>
+                </select>
+              </label>
+            </div>
+            <div class="table-wrap" id="ki-list" style="margin-top:8px"></div>
+          </>
+        )}
+      </div>
+    </div>
+  )}
+  <script>
+    import '../../../../client/hotel/cartes';
+  </script>
+</AdminShell>
