@@ -12,7 +12,7 @@ export const HOTEL_NAV: HotelNavItem[] = [
   { key: 'minibar', label: 'Minibar', href: '/admin/hotel/minibar/', ready: true },
   { key: 'requests', label: 'Demandes', href: '/admin/hotel/demandes/', ready: true },
   { key: 'maintenance', label: 'Pannes', href: '/admin/hotel/pannes/', ready: true },
-  { key: 'events', label: 'Groupes & séminaires', href: '/admin/hotel/groupes/', ready: false },
+  { key: 'events', label: 'Groupes & séminaires', href: '/admin/hotel/groupes/', ready: true },
   { key: 'extras', label: 'Extras', href: '/admin/hotel/extras/', ready: true },
   { key: 'team', label: 'Équipe & réglages', href: '/admin/hotel/equipe/', ready: true },
 ];

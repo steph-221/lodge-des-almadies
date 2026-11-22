@@ -1,0 +1,79 @@
+---
+import AdminShell from '../../../../../layouts/AdminShell.astro';
+import { fmtFcfa, getContent } from '../../../../../lib/content';
+import { dbConfigured } from '../../../../../lib/db';
+import { STATUS_LABEL } from '../../../../../lib/hotel/events-core';
+import { getEventFull } from '../../../../../lib/hotel/events';
+import { canEdit } from '../../../../../lib/hotel/permissions';
+import { todayDakar } from '../../../../../lib/hotel/tasks';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+if (!canEdit(user.role, 'events')) return Astro.redirect('/admin/hotel/groupes/');
+const id = Number(Astro.url.searchParams.get('id'));
+let full = null;
+let error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+if (!error) {
+  try { full = Number.isSafeInteger(id) && id > 0 ? await getEventFull(id, true) : null; } catch { error = 'Base indisponible, réessayez dans un instant.'; }
+  if (!error && !full) error = 'Dossier inconnu.';
+}
+const site = (await getContent()).site;
+const fr = (d: string) => d.split('-').reverse().join('/');
+const e = full?.event;
+---
+<AdminShell title={e ? `Devis ${e.reference}` : 'Devis'} active="events">
+  <div class="no-print head-row">
+    <a href={e ? `/admin/hotel/groupes/dossier/?id=${e.id}` : '/admin/hotel/groupes/'}>← Retour au dossier</a>
+    {full && <button class="btn" type="button" id="doc-print">Imprimer (A4)</button>}
+  </div>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {full && e && (
+    <article class="card doc">
+      <div class="doc-head">
+        <div>
+          <strong>{site.name}</strong><br />
+          {site.address}<br />
+          {site.phone} · {site.email}
+        </div>
+        <div class="doc-ref"><h2 style="margin:0">Devis {e.reference}</h2>Établi le {fr(todayDakar())}</div>
+      </div>
+      <p><strong>{e.clientName}</strong>{e.contactName && <> — à l’attention de {e.contactName}</>}<br />
+        {[e.contactPhone, e.contactEmail].filter(Boolean).join(' · ')}</p>
+      <p><strong>Objet :</strong> {e.title} — {e.attendees} participant(s)</p>
+      {full.slots.length > 0 && (
+        <>
+          <h3>Dates et salle</h3>
+          <ul class="lines">
+            {full.slots.map((s) => <li>{fr(s.date)} · {s.start} – {s.end} · {s.spaceName}{s.label ? ` · ${s.label}` : ''}</li>)}
+          </ul>
+        </>
+      )}
+      <h3>Prestations</h3>
+      <table class="tbl">
+        <thead><tr><th>Désignation</th><th class="num">Prix unitaire</th><th class="num">Qté</th><th class="num">Total</th></tr></thead>
+        <tbody>
+          {full.lines.map((l) => (
+            <tr><td>{l.label}{l.detail && <div class="hint">{l.detail}</div>}</td><td class="num">{fmtFcfa(l.unitFcfa)}</td><td class="num">{l.qty}</td><td class="num">{fmtFcfa(l.total)}</td></tr>
+          ))}
+          {full.lines.length === 0 && <tr><td colspan="4" class="hint">Aucune ligne : ajoutez-les dans le dossier.</td></tr>}
+        </tbody>
+        <tfoot><tr><th colspan="3" class="num">Total</th><th class="num">{fmtFcfa(full.total ?? 0)}</th></tr></tfoot>
+      </table>
+      {full.blocks.length > 0 && (
+        <>
+          <h3>Hébergement réservé pour le groupe</h3>
+          <ul class="lines">
+            {full.blocks.map((b) => <li>{b.rooms} chambre(s) · {b.roomTypeLabel} · du {fr(b.arrival)} au {fr(b.departure)}{b.note ? ` · ${b.note}` : ''}</li>)}
+          </ul>
+          <p class="hint">L’hébergement est facturé séparément, selon les tarifs en vigueur.</p>
+        </>
+      )}
+      {e.optionUntil && e.status === 'option' && <p>Option sur la salle valable jusqu’au {fr(e.optionUntil)}.</p>}
+      {e.quoteNote && <p style="white-space:pre-wrap">{e.quoteNote}</p>}
+      <p class="hint no-print">Statut du dossier : {STATUS_LABEL[e.status]}. Les montants sont en FCFA.</p>
+    </article>
+  )}
+  <script>
+    document.getElementById('doc-print')?.addEventListener('click', () => window.print());
+  </script>
+</AdminShell>

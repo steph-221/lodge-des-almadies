@@ -1,0 +1,66 @@
+---
+import AdminShell from '../../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../../lib/db';
+import { STATUS_LABEL } from '../../../../../lib/hotel/events-core';
+import { getEventFull } from '../../../../../lib/hotel/events';
+import { canEdit } from '../../../../../lib/hotel/permissions';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+const manage = canEdit(user.role, 'events');
+const id = Number(Astro.url.searchParams.get('id'));
+let full = null;
+let error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+if (!error) {
+  try { full = Number.isSafeInteger(id) && id > 0 ? await getEventFull(id, manage) : null; } catch { error = 'Base indisponible, réessayez dans un instant.'; }
+  if (!error && !full) error = 'Dossier inconnu.';
+}
+const fr = (d: string) => d.split('-').reverse().join('/');
+const e = full?.event;
+const diets = full ? full.attendees.filter((a) => a.diet) : [];
+// Regroupe les régimes (« sans porc » ×3) : le restaurant n'a pas besoin des noms.
+const dietCount = new Map<string, number>();
+for (const a of diets) dietCount.set(a.diet, (dietCount.get(a.diet) ?? 0) + 1);
+---
+<AdminShell title={e ? `Fonction ${e.reference}` : 'Feuille de fonction'} active="events">
+  <div class="no-print head-row">
+    <a href="/admin/hotel/groupes/">← Tous les dossiers</a>
+    {full && <button class="btn" type="button" id="doc-print">Imprimer (A4)</button>}
+  </div>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {full && e && (
+    <article class="card doc">
+      <div class="doc-head">
+        <div><h2 style="margin:0">Feuille de fonction</h2>{e.reference} · {e.title}</div>
+        <div class="doc-ref">{STATUS_LABEL[e.status]}<br />{e.attendees} participant(s)</div>
+      </div>
+      {manage && <p><strong>{e.clientName}</strong>{e.contactName && <> · {e.contactName}</>}{e.contactPhone && <> · {e.contactPhone}</>}</p>}
+      <h3>Horaires et salle</h3>
+      {full.slots.length === 0 ? <p class="hint">Aucun créneau planifié.</p> : (
+        <ul class="lines">
+          {full.slots.map((s) => <li><strong>{fr(s.date)}</strong> · {s.start} – {s.end} · {s.spaceName}{s.label ? ` · ${s.label}` : ''}</li>)}
+        </ul>
+      )}
+      <h3>Disposition de la salle</h3><p style="white-space:pre-wrap">{e.layout || '—'}</p>
+      <h3>Matériel</h3><p style="white-space:pre-wrap">{e.equipment || '—'}</p>
+      <h3>Pauses</h3><p style="white-space:pre-wrap">{e.breaksNote || '—'}</p>
+      <h3>Repas</h3><p style="white-space:pre-wrap">{e.mealsNote || '—'}</p>
+      {dietCount.size > 0 && (
+        <>
+          <h3>Régimes alimentaires et allergies</h3>
+          <ul class="lines">{[...dietCount].map(([d, n]) => <li>{n} × {d}</li>)}</ul>
+        </>
+      )}
+      {full.blocks.length > 0 && (
+        <>
+          <h3>Chambres du groupe</h3>
+          <ul class="lines">{full.blocks.map((b) => <li>{b.rooms} chambre(s) · {b.roomTypeLabel} · du {fr(b.arrival)} au {fr(b.departure)}</li>)}</ul>
+        </>
+      )}
+      {manage && e.notes && <><h3>Remarques</h3><p style="white-space:pre-wrap">{e.notes}</p></>}
+    </article>
+  )}
+  <script>
+    document.getElementById('doc-print')?.addEventListener('click', () => window.print());
+  </script>
+</AdminShell>
