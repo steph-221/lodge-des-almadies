@@ -80,8 +80,8 @@ const error = dbConfigured() ? '' : 'La base de données n’est pas configurée
 
       {director && (
         <div class="card no-print">
-          <h3 style="margin-top:0">Alertes par e-mail</h3>
-          <p class="hint">Une adresse par ligne pour chaque service : elle reçoit un e-mail à chaque nouvelle demande ou panne (numéro de chambre et libellé, jamais de nom de client). Inactif tant que l’envoi d’e-mails n’est pas configuré.</p>
+          <h3 style="margin-top:0">Alertes par e-mail et WhatsApp</h3>
+          <p class="hint">Pour chaque service : une adresse par ligne reçoit un e-mail à chaque nouvelle demande ou panne (numéro de chambre et libellé, jamais de nom de client). Les numéros WhatsApp, au format international (+221…), reçoivent le même message. Chaque canal reste inactif tant que son envoi n’est pas configuré.</p>
           <p id="al-state" class="hint"></p>
           <form id="al-form">
             <div class="row">
@@ -90,7 +90,14 @@ const error = dbConfigured() ? '' : 'La base de données n’est pas configurée
               <label>Technique (reçoit aussi les pannes)<textarea name="technique"></textarea></label>
               <label>Restaurant<textarea name="restaurant"></textarea></label>
             </div>
-            <div class="acts"><button class="btn" type="submit">Enregistrer les adresses</button></div>
+            <h4 style="margin:12px 0 0">Numéros WhatsApp</h4>
+            <div class="row">
+              <label>Réception<textarea name="wa_reception" placeholder="+221 …"></textarea></label>
+              <label>Ménage<textarea name="wa_housekeeping" placeholder="+221 …"></textarea></label>
+              <label>Technique (reçoit aussi les pannes)<textarea name="wa_technique" placeholder="+221 …"></textarea></label>
+              <label>Restaurant<textarea name="wa_restaurant" placeholder="+221 …"></textarea></label>
+            </div>
+            <div class="acts"><button class="btn" type="submit">Enregistrer les adresses et numéros</button></div>
           </form>
         </div>
       )}

@@ -11,6 +11,7 @@ Noms des champs uniquement : les valeurs vont dans `.env` (jamais suivi par git)
 | Vercel Blob | Photos et contenu du site public | https://vercel.com | `BLOB_READ_WRITE_TOKEN` | à vérifier |
 | Cloudflare Turnstile | Anti-robot du formulaire de contact | https://dash.cloudflare.com | `PUBLIC_TURNSTILE_SITEKEY`, `TURNSTILE_SECRET` | à vérifier |
 | Resend | Envoi des e-mails (contact, brief, alertes) | https://resend.com | `RESEND_API_KEY`, `CONTACT_FROM` | à créer |
+| WhatsApp Business (Meta) | Alertes WhatsApp par service (lot 3b) | https://business.facebook.com/settings | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID`, `WHATSAPP_TEMPLATE`, `WHATSAPP_TEMPLATE_LANG` | à créer |
 | Google Drive (compte Google de l'hôtel) | Photos de visites, fichiers importés, sauvegardes (lot 1c) | https://drive.google.com | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, `GOOGLE_DRIVE_ROOT_FOLDER_ID` | à créer |
 | Anthropic API | Lecture des fiches papier (lot 5) | https://console.anthropic.com | `ANTHROPIC_API_KEY` | à créer |
 | Octorate | Moteur de réservation (lien réglé dans l'admin) | — | aucun champ secret dans le code | à vérifier |
