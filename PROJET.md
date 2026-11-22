@@ -8,7 +8,7 @@ prod: https://lodge-des-almadies.vercel.app
 staging:
 projet: lodge
 local: C:\Sites et APP\hotel lodges des almadies\site
-claude_projet: VERCEL HOTEL LODGE DES ALMADIES (cible : Lodge des Almadies)
+claude_projet: "VERCEL HOTEL LODGE DES ALMADIES (cible : Lodge des Almadies)"
 env_local: hotel lodge almadies
 env_cloud:
 ssh:
