@@ -62,3 +62,9 @@ export async function driveDownload(id: string): Promise<Uint8Array> {
   const r = await api(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(id)}?alt=media`);
   return new Uint8Array(await r.arrayBuffer());
 }
+
+// Supprime un fichier (déjà absent = réussi). Sert à purger les photos de fiche après 30 jours.
+export async function driveDelete(id: string): Promise<void> {
+  const r = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(id)}`, { method: 'DELETE', headers: { authorization: `Bearer ${await accessToken()}` } });
+  if (!r.ok && r.status !== 404) throw new Error(`Google Drive : ${r.status}.`);
+}

@@ -4,7 +4,7 @@ import { sql } from '../db';
 import { driveConfigured, driveDownload, driveUpload } from '../drive';
 
 export const MAX_FILE_BYTES = 2_000_000;
-export type FileKind = 'inspection';
+export type FileKind = 'inspection' | 'sheet';
 export type Mime = 'image/jpeg' | 'image/png' | 'image/webp';
 
 export type StorageMode = 'drive' | 'local' | null;
@@ -55,6 +55,11 @@ export async function saveFile(o: { kind: FileKind; entityId: number; bytes: Uin
     [mode, remoteId, o.kind, o.entityId, mime, o.bytes.length, o.staffId && o.staffId > 0 ? o.staffId : null],
   )) as { id: number }[];
   return { id: r[0].id };
+}
+
+export async function fileKind(id: number): Promise<FileKind | null> {
+  const r = (await sql().query(`select kind from files where id = $1`, [id])) as { kind: FileKind }[];
+  return r[0]?.kind ?? null;
 }
 
 export async function readFile(id: number): Promise<{ mime: Mime; bytes: Uint8Array } | null> {

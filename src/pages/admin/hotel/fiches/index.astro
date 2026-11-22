@@ -1,0 +1,41 @@
+---
+import AdminShell from '../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../lib/db';
+import { canEdit } from '../../../../lib/hotel/permissions';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+const editor = canEdit(user.role, 'sheets');
+const error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+---
+<AdminShell title="Fiches papier" active="sheets">
+  <h2 style="margin-top:0">Fiches de ménage papier</h2>
+  <p class="hint">
+    {editor
+      ? 'Imprimez la fiche d’une femme de chambre, faites-la remplir à la main, photographiez-la : l’application lit la photo et propose les cases. Vous contrôlez, corrigez et validez : c’est la validation qui met à jour les chambres et le minibar, jamais la lecture seule.'
+      : 'Voici vos fiches du jour. Une fois la fiche remplie, photographiez-la et envoyez la photo : la gouvernante la contrôlera.'}
+  </p>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {!error && (
+    <div id="sheets-app" data-editor={editor ? '1' : '0'}>
+      <p id="sh-msg" role="status" class="hint"></p>
+      <div class="card">
+        <div class="head-row">
+          <label>Jour <input type="date" id="sh-date" /></label>
+          <span class="hint" id="sh-status"></span>
+        </div>
+        <form id="sh-new" class="no-print" hidden style="margin-top:10px">
+          <div class="row">
+            <label>Fiche pour<select id="sh-staff"></select></label>
+          </div>
+          <div class="acts"><button class="btn" type="submit">Créer la fiche</button></div>
+        </form>
+        <div id="sh-list" style="margin-top:10px"></div>
+      </div>
+      <div class="card" id="sh-detail" hidden></div>
+    </div>
+  )}
+  <script>
+    import '../../../../client/hotel/fiches';
+  </script>
+</AdminShell>
