@@ -205,3 +205,35 @@ describe('lot 2 : brief, liaison, cron', () => {
     for (const r of ['direction', 'reception', 'gouvernante', 'femme_chambre', 'technique', 'restaurant'] as Role[]) expect(allowed('/api/cron/daily', 'GET', r)).toBe(false);
   });
 });
+
+describe('lot 3 : demandes, pannes, QR', () => {
+  const allowed = (path: string, method: string, role: Role) => routePolicy(path, method, role) === 'allow';
+  const all: Role[] = ['direction', 'reception', 'gouvernante', 'femme_chambre', 'technique', 'restaurant'];
+  it('ouvre les demandes et les pannes à tout le personnel (chaque route filtre ensuite par service)', () => {
+    for (const r of all) {
+      expect(allowed('/api/hotel/requests', 'GET', r)).toBe(true);
+      expect(allowed('/api/hotel/requests/3', 'PATCH', r)).toBe(true);
+      expect(allowed('/api/hotel/issues', 'POST', r)).toBe(true);
+      expect(allowed('/admin/hotel/demandes/', 'GET', r)).toBe(true);
+      expect(allowed('/admin/hotel/pannes/', 'GET', r)).toBe(true);
+    }
+  });
+  it('réserve catalogue et guide à ceux qui ont l’écriture complète sur les demandes', () => {
+    for (const r of ['direction', 'reception'] as Role[]) expect(canEdit(r, 'requests')).toBe(true);
+    for (const r of ['gouvernante', 'femme_chambre', 'technique', 'restaurant'] as Role[]) expect(canEdit(r, 'requests')).toBe(false);
+  });
+  it('réserve QR codes et alertes e-mail à la direction', () => {
+    expect(canEdit('direction', 'settings')).toBe(true);
+    for (const r of ['reception', 'gouvernante', 'femme_chambre', 'technique', 'restaurant'] as Role[]) expect(canEdit(r, 'settings')).toBe(false);
+    expect(allowed('/api/hotel/room-tokens', 'POST', 'direction')).toBe(true);
+    for (const r of ['gouvernante', 'femme_chambre', 'technique', 'restaurant'] as Role[]) expect(allowed('/api/hotel/room-tokens', 'POST', r)).toBe(false);
+  });
+  it('laisse faire avancer les pannes à la technique, la gouvernante, la réception, la direction seulement', () => {
+    for (const r of ['direction', 'reception', 'gouvernante', 'technique'] as Role[]) expect(canEdit(r, 'maintenance')).toBe(true);
+    for (const r of ['femme_chambre', 'restaurant'] as Role[]) expect(canEdit(r, 'maintenance')).toBe(false);
+  });
+  it('garde la page cliente et son API hors de la zone protégée', () => {
+    expect(allowed('/c/abcdefghijklmnopqrstuv', 'GET', 'direction')).toBe(true);
+    expect(routePolicy('/api/guest/request', 'POST', null)).toBe('allow');
+  });
+});

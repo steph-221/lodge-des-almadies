@@ -51,7 +51,7 @@ export function canManageStaff(actor: Role, target: Role): boolean {
 }
 
 // Pages de l'espace hôtel (premier segment après /admin/hotel/) → module.
-export const PAGE_MODULE: Record<string, Module> = { equipe: 'team', chambres: 'rooms', reservations: 'stays', linge: 'linen', minibar: 'minibar', extras: 'extras', visites: 'inspections' };
+export const PAGE_MODULE: Record<string, Module> = { equipe: 'team', chambres: 'rooms', reservations: 'stays', linge: 'linen', minibar: 'minibar', extras: 'extras', visites: 'inspections', demandes: 'requests', pannes: 'maintenance' };
 // API (premier segment après /api/hotel/) → module. 'me' est ouvert à tout le personnel.
 // « P » (périmètre limité) autorise l'écriture au niveau de la route : chaque route doit alors contrôler elle-même ce que le rôle peut faire.
 export const API_MODULE: Record<string, Module> = {
@@ -59,6 +59,8 @@ export const API_MODULE: Record<string, Module> = {
   items: 'linen', stock: 'linen', templates: 'linen', laundry: 'linen', minibar: 'minibar', charges: 'extras',
   inspections: 'inspections', files: 'inspections',
   today: 'today', logbook: 'logbook', brief: 'settings',
+  requests: 'requests', 'request-catalog': 'requests', guide: 'requests', issues: 'maintenance',
+  'room-tokens': 'settings', alerts: 'settings',
 };
 
 // Écriture complète sur un module (et non simple périmètre limité).

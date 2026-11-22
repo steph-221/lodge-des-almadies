@@ -1,0 +1,45 @@
+---
+import AdminShell from '../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../lib/db';
+import { canEdit } from '../../../../lib/hotel/permissions';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+const manage = canEdit(user.role, 'maintenance');
+const error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+---
+<AdminShell title="Pannes" active="maintenance">
+  <h2 style="margin-top:0">Pannes et maintenance</h2>
+  <p class="hint">Tout le personnel peut signaler une panne. {manage ? 'Vous pouvez bloquer une chambre, suivre les réparations et les clore.' : 'La technique et la direction suivent les réparations.'}</p>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {!error && (
+    <div id="is-app" data-manage={manage ? '1' : '0'}>
+      <p id="is-msg" role="status" class="hint"></p>
+      <div id="is-list" aria-live="polite"></div>
+      <div class="card">
+        <h3 style="margin-top:0">Signaler une panne</h3>
+        <form id="is-form">
+          <div class="row">
+            <label>Chambre<select name="roomId" id="is-room"></select></label>
+            <label>Ou lieu (hors chambre)<input name="place" maxlength="80" placeholder="Piscine, restaurant, couloir B…" autocomplete="off" /></label>
+            <label>Priorité
+              <select name="priority">
+                <option value="low">Basse</option>
+                <option value="normal" selected>Normale</option>
+                <option value="high">Haute</option>
+                <option value="urgent">Urgente</option>
+              </select>
+            </label>
+          </div>
+          <label>Panne<input name="title" required maxlength="120" autocomplete="off" placeholder="Climatiseur ne refroidit plus" /></label>
+          <label>Détail<textarea name="detail" maxlength="1000"></textarea></label>
+          {manage && <label class="check"><input type="checkbox" name="blocksRoom" /> Bloquer la chambre (hors service jusqu’à la réparation)</label>}
+          <div class="acts"><button class="btn" type="submit">Signaler</button></div>
+        </form>
+      </div>
+    </div>
+  )}
+  <script>
+    import '../../../../client/hotel/pannes';
+  </script>
+</AdminShell>
