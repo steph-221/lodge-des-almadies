@@ -1,22 +1,52 @@
 ---
 import AdminShell from '../../../layouts/AdminShell.astro';
-import { upcoming } from '../../../lib/hotel/nav';
-import { ROLE_LABEL } from '../../../lib/hotel/permissions';
+import { dbConfigured } from '../../../lib/db';
+import { canEdit } from '../../../lib/hotel/permissions';
 
 export const prerender = false;
 const user = Astro.locals.user!;
-const soon = upcoming(user.role);
+const director = canEdit(user.role, 'settings');
+const canManageLog = canEdit(user.role, 'logbook');
+const error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
 ---
-<AdminShell title="Services hôtel" active="today">
-  <div class="card">
-    <h2 style="margin-top:0">Bonjour {user.name}</h2>
-    <p>Espace Services hôtel — connecté en tant que {ROLE_LABEL[user.role]}.</p>
-    <p class="hint">Les écrans arrivent par étapes. Le brief du matin, les chambres, le linge et les demandes clients seront ajoutés ici au fil des livraisons.</p>
+<AdminShell title="Aujourd’hui" active="today">
+  <div class="head-row no-print">
+    <h2 style="margin:0">Aujourd’hui</h2>
+    <div class="acts">
+      <label class="inline">Jour<input type="date" id="t-date" /></label>
+      <button class="sm" type="button" id="t-print">Imprimer (A4)</button>
+    </div>
   </div>
-  {soon.length > 0 && (
-    <div class="card">
-      <h3 style="margin-top:0">Prochainement pour votre rôle</h3>
-      <ul>{soon.map((i) => <li>{i.label}</li>)}</ul>
+  <h2 class="print-only" id="t-print-title"></h2>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {!error && (
+    <div id="today-app" data-manage={canManageLog ? '1' : '0'} data-director={director ? '1' : '0'}>
+      <p id="t-msg" role="status" class="hint"></p>
+      <div id="t-body" aria-live="polite"></div>
+
+      <div class="card" id="log-card">
+        <h3 style="margin-top:0">Cahier de liaison <span class="hint" id="log-unread"></span></h3>
+        <form id="log-form" class="no-print">
+          <label>Message pour les autres équipes<textarea name="body" id="log-body" maxlength="1000" rows="2" required></textarea></label>
+          <div class="acts"><button class="btn" type="submit">Publier</button></div>
+        </form>
+        <div id="log-list" aria-live="polite"></div>
+      </div>
+
+      {director && (
+        <div class="card no-print" id="brief-card">
+          <h3 style="margin-top:0">E-mail du matin</h3>
+          <p class="hint">Envoyé chaque matin à 5 h (heure de Dakar), sans aucun nom de client. Une adresse par ligne.</p>
+          <form id="brief-form">
+            <label>Destinataires<textarea name="recipients" id="brief-recipients" rows="3"></textarea></label>
+            <p class="hint" id="brief-state"></p>
+            <div class="acts"><button class="btn" type="submit">Enregistrer</button></div>
+          </form>
+        </div>
+      )}
     </div>
   )}
+  <script>
+    import '../../../client/hotel/aujourdhui';
+  </script>
 </AdminShell>

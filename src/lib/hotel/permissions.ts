@@ -58,6 +58,7 @@ export const API_MODULE: Record<string, Module> = {
   staff: 'team', rooms: 'rooms', 'room-types': 'rooms', tasks: 'rooms', stays: 'stays', import: 'stays',
   items: 'linen', stock: 'linen', templates: 'linen', laundry: 'linen', minibar: 'minibar', charges: 'extras',
   inspections: 'inspections', files: 'inspections',
+  today: 'today', logbook: 'logbook', brief: 'settings',
 };
 
 // Écriture complète sur un module (et non simple périmètre limité).

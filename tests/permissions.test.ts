@@ -178,3 +178,30 @@ describe('routes visites de chambre (lot 1c)', () => {
     expect(allowed('/api/hotel/files/4', 'GET', 'direction')).toBe(true);
   });
 });
+
+describe('lot 2 : brief, liaison, cron', () => {
+  const allowed = (path: string, method: string, role: Role) => routePolicy(path, method, role) === 'allow';
+  it('laisse tout le personnel lire « Aujourd’hui » et le cahier de liaison, et y écrire', () => {
+    for (const r of ['direction', 'reception', 'gouvernante', 'femme_chambre', 'technique', 'restaurant'] as Role[]) {
+      expect(allowed('/api/hotel/today', 'GET', r)).toBe(true);
+      expect(allowed('/api/hotel/logbook', 'GET', r)).toBe(true);
+      expect(allowed('/api/hotel/logbook', 'POST', r)).toBe(true);
+    }
+  });
+  it('refuse toute écriture sur « Aujourd’hui » (lecture seule)', () => {
+    expect(allowed('/api/hotel/today', 'POST', 'direction')).toBe(false);
+    expect(allowed('/api/hotel/today', 'POST', 'reception')).toBe(false);
+  });
+  it('réserve épingler et retirer un message à ceux qui ont l’écriture complète (canEdit)', () => {
+    for (const r of ['direction', 'reception', 'gouvernante'] as Role[]) expect(canEdit(r, 'logbook')).toBe(true);
+    for (const r of ['femme_chambre', 'technique', 'restaurant'] as Role[]) expect(canEdit(r, 'logbook')).toBe(false);
+  });
+  it('réserve les destinataires de l’e-mail à la direction', () => {
+    expect(allowed('/api/hotel/brief', 'PUT', 'direction')).toBe(true);
+    for (const r of ['gouvernante', 'femme_chambre', 'technique', 'restaurant'] as Role[]) expect(allowed('/api/hotel/brief', 'PUT', r)).toBe(false);
+    expect(canEdit('reception', 'settings')).toBe(false);
+  });
+  it('ferme /api/cron à toute session : seul le secret du cron passe par le middleware', () => {
+    for (const r of ['direction', 'reception', 'gouvernante', 'femme_chambre', 'technique', 'restaurant'] as Role[]) expect(allowed('/api/cron/daily', 'GET', r)).toBe(false);
+  });
+});
