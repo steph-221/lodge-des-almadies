@@ -128,16 +128,21 @@ $('gd-cancel').addEventListener('click', resetGd);
 
 // ---------- Alertes e-mail (direction) ----------
 async function loadAlerts() {
-  const r = await api<{ value: Record<string, string[]>; mailReady: boolean }>('GET', '/api/hotel/alerts');
+  const r = await api<{ value: Record<string, string[]>; whatsapp: Record<string, string[]>; mailReady: boolean; whatsappReady: boolean }>('GET', '/api/hotel/alerts');
   if (!r.ok) { flash(r.data.error || 'Lecture des alertes impossible.'); return; }
   const f = $<HTMLFormElement>('al-form');
   for (const [k, list] of Object.entries(r.data.value)) (f.elements.namedItem(k) as HTMLTextAreaElement).value = list.join('\n');
-  $('al-state').textContent = r.data.mailReady ? 'Envoi d’e-mails configuré.' : 'Envoi d’e-mails non configuré : les adresses sont conservées, rien n’est envoyé pour l’instant.';
+  for (const [k, list] of Object.entries(r.data.whatsapp || {})) (f.elements.namedItem(`wa_${k}`) as HTMLTextAreaElement).value = list.join('\n');
+  $('al-state').textContent = `E-mail : ${r.data.mailReady ? 'configuré' : 'non configuré'} · WhatsApp : ${r.data.whatsappReady ? 'configuré' : 'non configuré'}. Un canal non configuré conserve les saisies mais n’envoie rien.`;
   f.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const body = Object.fromEntries(['reception', 'housekeeping', 'technique', 'restaurant'].map((k) => [k, val(f, k)]));
+    const services = ['reception', 'housekeeping', 'technique', 'restaurant'];
+    const body = {
+      ...Object.fromEntries(services.map((k) => [k, val(f, k)])),
+      whatsapp: Object.fromEntries(services.map((k) => [k, val(f, `wa_${k}`)])),
+    };
     const d = await api('PUT', '/api/hotel/alerts', body);
-    flash(d.ok ? 'Adresses enregistrées.' : d.data.error || 'Enregistrement impossible.', d.ok);
+    flash(d.ok ? 'Adresses et numéros enregistrés.' : d.data.error || 'Enregistrement impossible.', d.ok);
   }, { once: false });
 }
 
