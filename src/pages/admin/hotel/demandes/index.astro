@@ -1,0 +1,42 @@
+---
+import AdminShell from '../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../lib/db';
+import { canEdit } from '../../../../lib/hotel/permissions';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+const manage = canEdit(user.role, 'requests');
+const error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+---
+<AdminShell title="Demandes" active="requests">
+  <div class="head-row">
+    <h2 style="margin:0">Demandes</h2>
+    <div class="acts">
+      <label class="check"><input type="checkbox" id="rq-sound" /> Son à l’arrivée d’une demande</label>
+      {manage && <a class="btn-link" href="/admin/hotel/demandes/reglages/">Réglages (catalogue, guide, QR)</a>}
+    </div>
+  </div>
+  <p class="hint">Demandes des clients (page ouverte par le QR code de la chambre) et demandes saisies par le personnel. La liste se met à jour toute seule.</p>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {!error && (
+    <div id="rq-app">
+      <p id="rq-msg" role="status" class="hint"></p>
+      <div id="rq-list" aria-live="polite"></div>
+      <div class="card">
+        <h3 style="margin-top:0">Saisir une demande</h3>
+        <form id="rq-form">
+          <div class="row">
+            <label>Chambre<select name="roomId" id="rq-room" required></select></label>
+            <label>Demande<select name="catalogId" id="rq-cat" required></select></label>
+            <label>Quantité<input name="qty" type="number" min="1" max="20" value="1" required /></label>
+          </div>
+          <label>Précision<input name="note" maxlength="300" autocomplete="off" /></label>
+          <div class="acts"><button class="btn" type="submit">Enregistrer la demande</button></div>
+        </form>
+      </div>
+    </div>
+  )}
+  <script>
+    import '../../../../client/hotel/demandes';
+  </script>
+</AdminShell>

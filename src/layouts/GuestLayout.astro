@@ -1,0 +1,51 @@
+---
+// Mise en page de la page cliente (QR code de la chambre) : légère, lisible sur téléphone, jamais indexée.
+interface Props { title: string; lang: 'fr' | 'en' }
+const { title, lang } = Astro.props;
+Astro.response.headers.set('cache-control', 'no-store');
+Astro.response.headers.set('x-robots-tag', 'noindex, nofollow');
+Astro.response.headers.set('referrer-policy', 'no-referrer');
+Astro.response.headers.set('x-frame-options', 'DENY');
+---
+<!doctype html>
+<html lang={lang}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="referrer" content="no-referrer" />
+  <title>{title}</title>
+  <style is:global>
+    :root{--bg:#f7f3ed;--card:#fff;--ink:#1f2a2e;--mut:#667;--line:#e2d9cc;--acc:#a8532b;--ok:#2d7a4b;--bad:#b3261e}
+    @media (prefers-color-scheme:dark){:root{--bg:#171c1e;--card:#20272a;--ink:#f0ebe3;--mut:#a3abad;--line:#35403f}}
+    *{box-sizing:border-box}
+    body{margin:0;font:17px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+    header.g{padding:16px;background:var(--card);border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    header.g h1{font-size:1.1rem;margin:0}
+    main.g{max-width:560px;margin:0 auto;padding:16px}
+    .g-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}
+    .g-card h2{margin:0 0 8px;font-size:1.05rem}
+    .g-lang a{display:inline-block;padding:6px 12px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:.9rem;margin-left:4px}
+    .g-lang a[aria-current=true]{background:var(--acc);color:#fff;border-color:var(--acc)}
+    .g-body{white-space:pre-line;margin:0}
+    .g-opt{border-top:1px solid var(--line);padding:12px 0}
+    .g-opt:first-of-type{border-top:0}
+    .g-opt strong{display:block}
+    .g-row{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+    .g-row input[type=number]{width:70px}
+    .g-row input[type=text]{flex:1;min-width:140px}
+    input,button{font:inherit}
+    input{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+    button.g-btn{border:0;background:var(--acc);color:#fff;border-radius:10px;padding:11px 18px;cursor:pointer;min-height:44px}
+    button.g-btn:disabled{opacity:.5}
+    .g-msg{min-height:1.4em;font-size:.95rem;margin:6px 0 0}
+    .g-ok{color:var(--ok)}.g-err{color:var(--bad)}
+    .g-mut{color:var(--mut);font-size:.9rem}
+    .g-pill{display:inline-block;padding:2px 10px;border:1px solid var(--line);border-radius:999px;font-size:.8rem;background:var(--bg)}
+    .g-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  </style>
+</head>
+<body>
+  <slot />
+</body>
+</html>

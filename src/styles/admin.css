@@ -67,6 +67,16 @@ label.check{display:flex;align-items:center;gap:8px;font-weight:500}
 .lines li{padding:4px 0;border-top:1px solid var(--line)}
 .lines li:first-child{border-top:0}
 .pinned{border-left:4px solid #b07d1e;padding-left:10px}
+/* Demandes : lien-bouton, pastille de compteur, planche de QR codes */
+a.btn-link{display:inline-block;padding:8px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);text-decoration:none;font-size:.92rem}
+nav.tabs .badge{display:inline-block;min-width:1.4em;margin-left:6px;padding:0 6px;border-radius:999px;background:var(--bad);color:#fff;font-size:.78rem;line-height:1.5;text-align:center}
+.qr-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+.qr-card{border:1px dashed var(--mut);border-radius:10px;padding:14px;text-align:center;background:#fff;color:#000;break-inside:avoid}
+.qr-card .hint{color:#444}
+.qr-room{font-size:1.3rem;font-weight:700;margin-bottom:6px}
+.qr-svg{width:70%;max-width:260px;margin:0 auto 8px}
+.qr-svg svg{width:100%;height:auto;display:block}
+@media (max-width:600px){.qr-grid{grid-template-columns:1fr}}
 @media print{
   @page{size:A4;margin:12mm}
   header,.tabs,.no-print,button,form{display:none!important}

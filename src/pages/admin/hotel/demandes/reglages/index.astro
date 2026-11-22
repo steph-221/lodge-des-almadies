@@ -1,0 +1,113 @@
+---
+import AdminShell from '../../../../../layouts/AdminShell.astro';
+import { dbConfigured } from '../../../../../lib/db';
+import { canEdit } from '../../../../../lib/hotel/permissions';
+
+export const prerender = false;
+const user = Astro.locals.user!;
+if (!canEdit(user.role, 'requests')) return Astro.redirect('/admin/hotel/demandes/', 302);
+const director = canEdit(user.role, 'settings');
+const error = dbConfigured() ? '' : 'La base de données n’est pas configurée (variable DATABASE_URL absente).';
+---
+<AdminShell title="Réglages des demandes" active="requests">
+  <div class="head-row no-print">
+    <h2 style="margin:0">Réglages des demandes</h2>
+    <a class="btn-link" href="/admin/hotel/demandes/">← Retour aux demandes</a>
+  </div>
+  {error && <div class="card err" role="alert">{error}</div>}
+  {!error && (
+    <div id="st-app" data-director={director ? '1' : '0'}>
+      <p id="st-msg" role="status" class="hint no-print"></p>
+
+      <div class="card no-print">
+        <h3 style="margin-top:0">Catalogue des demandes</h3>
+        <p class="hint">Ce que le client peut demander depuis la page de sa chambre. Le prix n’existe que pour le room service : une fois la demande marquée « Faite », l’extra est créé tout seul.</p>
+        <div id="cat-list"></div>
+        <form id="cat-form">
+          <input type="hidden" name="id" />
+          <div class="row">
+            <label>Libellé français<input name="labelFr" required maxlength="80" autocomplete="off" /></label>
+            <label>Libellé anglais<input name="labelEn" maxlength="80" autocomplete="off" /></label>
+            <label>Service qui reçoit
+              <select name="service">
+                <option value="reception">Réception</option>
+                <option value="housekeeping">Ménage</option>
+                <option value="technique">Technique</option>
+                <option value="restaurant">Restaurant</option>
+              </select>
+            </label>
+          </div>
+          <div class="row">
+            <label>Type
+              <select name="kind"><option value="service">Demande de service</option><option value="room_service">Room service (chiffré)</option></select>
+            </label>
+            <label>Prix (FCFA, room service)<input name="price" type="number" min="0" /></label>
+            <label>Ordre d’affichage<input name="sort" type="number" value="0" /></label>
+          </div>
+          <label class="check"><input type="checkbox" name="askNote" /> Le client doit préciser (heure du réveil, destination du taxi…)</label>
+          <label class="check"><input type="checkbox" name="active" checked /> Visible par les clients</label>
+          <div class="acts">
+            <button class="btn" type="submit" id="cat-save">Ajouter</button>
+            <button class="sm" type="button" id="cat-cancel" hidden>Annuler la modification</button>
+            <button class="sm" type="button" id="cat-starter">Ajouter les demandes courantes</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card no-print">
+        <h3 style="margin-top:0">Guide de la chambre</h3>
+        <p class="hint">Wi-Fi, chaînes TV, horaires, numéros utiles. Par défaut, une rubrique n’est visible que par une chambre occupée (utile pour le code Wi-Fi).</p>
+        <div id="gd-list"></div>
+        <form id="gd-form">
+          <input type="hidden" name="id" />
+          <div class="row">
+            <label>Titre français<input name="titleFr" required maxlength="80" autocomplete="off" /></label>
+            <label>Titre anglais<input name="titleEn" maxlength="80" autocomplete="off" /></label>
+            <label>Ordre d’affichage<input name="sort" type="number" value="0" /></label>
+          </div>
+          <div class="row">
+            <label>Texte français<textarea name="bodyFr" maxlength="2000"></textarea></label>
+            <label>Texte anglais<textarea name="bodyEn" maxlength="2000"></textarea></label>
+          </div>
+          <label class="check"><input type="checkbox" name="occupiedOnly" checked /> Réservé aux chambres occupées</label>
+          <label class="check"><input type="checkbox" name="active" checked /> Visible par les clients</label>
+          <div class="acts">
+            <button class="btn" type="submit" id="gd-save">Ajouter</button>
+            <button class="sm" type="button" id="gd-cancel" hidden>Annuler la modification</button>
+          </div>
+        </form>
+      </div>
+
+      {director && (
+        <div class="card no-print">
+          <h3 style="margin-top:0">Alertes par e-mail</h3>
+          <p class="hint">Une adresse par ligne pour chaque service : elle reçoit un e-mail à chaque nouvelle demande ou panne (numéro de chambre et libellé, jamais de nom de client). Inactif tant que l’envoi d’e-mails n’est pas configuré.</p>
+          <p id="al-state" class="hint"></p>
+          <form id="al-form">
+            <div class="row">
+              <label>Réception<textarea name="reception"></textarea></label>
+              <label>Ménage<textarea name="housekeeping"></textarea></label>
+              <label>Technique (reçoit aussi les pannes)<textarea name="technique"></textarea></label>
+              <label>Restaurant<textarea name="restaurant"></textarea></label>
+            </div>
+            <div class="acts"><button class="btn" type="submit">Enregistrer les adresses</button></div>
+          </form>
+        </div>
+      )}
+
+      {director && (
+        <div class="card no-print">
+          <h3 style="margin-top:0">QR codes des chambres</h3>
+          <p class="hint">Chaque chambre a son QR code secret. Générer un nouveau QR révoque l’ancien (l’ancien QR affichera « page introuvable »). Les adresses ne sont montrées qu’au moment de la génération : imprimez tout de suite.</p>
+          <p id="qr-origin" class="hint"></p>
+          <div class="acts"><button class="btn" type="button" id="qr-all">Générer et imprimer tous les QR</button></div>
+          <div id="qr-status"></div>
+        </div>
+      )}
+      <div id="qr-sheet" class="qr-sheet" hidden></div>
+    </div>
+  )}
+  <script>
+    import '../../../../../client/hotel/demandes-reglages';
+  </script>
+</AdminShell>

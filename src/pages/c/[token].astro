@@ -1,0 +1,119 @@
+---
+import GuestLayout from '../../layouts/GuestLayout.astro';
+import { dbConfigured } from '../../lib/db';
+import { listCatalog, listGuide, roomForToken, roomIsOpen, roomRequests } from '../../lib/hotel/requests';
+import { isTokenShape, pickLang } from '../../lib/hotel/requests-core';
+import { todayDakar } from '../../lib/hotel/tasks';
+
+export const prerender = false;
+
+const token = Astro.params.token;
+if (!isTokenShape(token) || !dbConfigured()) return new Response(null, { status: 404, headers: { 'cache-control': 'no-store' } });
+const lang = pickLang(Astro.url.searchParams.get('lang'), Astro.request.headers.get('accept-language'));
+const fr = lang === 'fr';
+
+let room: { id: number; number: string } | null = null;
+let open = false;
+let failed = false;
+let catalog: Awaited<ReturnType<typeof listCatalog>> = [];
+let guide: Awaited<ReturnType<typeof listGuide>> = [];
+let mine: Awaited<ReturnType<typeof roomRequests>> = [];
+try {
+  room = await roomForToken(token);
+  if (room) {
+    open = await roomIsOpen(room.id, todayDakar());
+    [catalog, guide, mine] = await Promise.all([open ? listCatalog(true) : [], listGuide(true), open ? roomRequests(room.id) : []]);
+  }
+} catch (e) {
+  console.error('[page client]', (e as Error).message);
+  failed = true;
+}
+// Jeton inconnu ou révoqué (QR régénéré) : 404, sans rien révéler.
+if (!failed && !room) return new Response(null, { status: 404, headers: { 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
+
+const L = fr
+  ? { title: 'Votre chambre', room: 'Chambre', guide: 'Guide de la chambre', ask: 'Que pouvons-nous faire pour vous ?', send: 'Envoyer', qty: 'Qté', note: 'Précisez (obligatoire)', noteOpt: 'Précision (facultatif)', mine: 'Vos demandes', closedTitle: 'Demandes indisponibles', closed: 'Cette chambre n’est pas ouverte aux demandes en ligne. Pour toute question, merci de vous adresser à la réception.', down: 'Service momentanément indisponible. Merci d’appeler la réception.', none: 'Aucune demande disponible pour le moment. Merci d’appeler la réception.', rs: 'Room service', other: 'Autres demandes', st: { new: 'Envoyée', doing: 'En cours', done: 'Faite', cancelled: 'Annulée' }, fcfa: 'FCFA' }
+  : { title: 'Your room', room: 'Room', guide: 'Room guide', ask: 'How can we help you?', send: 'Send', qty: 'Qty', note: 'Details (required)', noteOpt: 'Details (optional)', mine: 'Your requests', closedTitle: 'Requests unavailable', closed: 'This room is not open for online requests. For any question, please contact the front desk.', down: 'Service temporarily unavailable. Please call the front desk.', none: 'No request available right now. Please call the front desk.', rs: 'Room service', other: 'Other requests', st: { new: 'Sent', doing: 'In progress', done: 'Done', cancelled: 'Cancelled' }, fcfa: 'FCFA' };
+
+const lab = (c: { labelFr: string; labelEn: string }) => (fr ? c.labelFr : c.labelEn || c.labelFr);
+const sections = guide.filter((g) => open || !g.occupiedOnly);
+const service = catalog.filter((c) => c.kind === 'service');
+const rs = catalog.filter((c) => c.kind === 'room_service');
+const base = `/c/${token}`;
+---
+<GuestLayout title={`${L.title} | Lodge des Almadies`} lang={lang}>
+  <header class="g">
+    <h1>Lodge des Almadies</h1>
+    <span class="g-lang" aria-label="Langue / Language">
+      <a href={`${base}?lang=fr`} aria-current={fr ? 'true' : undefined} lang="fr">FR</a>
+      <a href={`${base}?lang=en`} aria-current={!fr ? 'true' : undefined} lang="en">EN</a>
+    </span>
+  </header>
+  <main class="g">
+    {failed && <div class="g-card g-err" role="alert">{L.down}</div>}
+    {room && (
+      <>
+        <h2 style="margin:6px 0">{L.room} {room.number}</h2>
+
+        {sections.length > 0 && (
+          <div class="g-card">
+            <h2>{L.guide}</h2>
+            {sections.map((g) => (
+              <div class="g-opt">
+                <strong>{fr ? g.titleFr : g.titleEn || g.titleFr}</strong>
+                <p class="g-body">{fr ? g.bodyFr : g.bodyEn || g.bodyFr}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!open && (
+          <div class="g-card"><h2>{L.closedTitle}</h2><p class="g-body">{L.closed}</p></div>
+        )}
+
+        {open && (
+          <div class="g-card" id="g-app" data-token={token} data-lang={lang}>
+            <h2>{L.ask}</h2>
+            {service.length + rs.length === 0 && <p class="g-mut">{L.none}</p>}
+            {service.length > 0 && <h3 class="g-mut" style="margin:6px 0">{L.other}</h3>}
+            {service.map((c) => (
+              <form class="g-opt g-form" data-id={c.id}>
+                <strong>{lab(c)}</strong>
+                <div class="g-row">
+                  <label class="g-mut">{L.qty} <input type="number" name="qty" min="1" max="20" value="1" inputmode="numeric" /></label>
+                  <input type="text" name="note" maxlength="300" placeholder={c.askNote ? L.note : L.noteOpt} required={c.askNote} autocomplete="off" />
+                  <button class="g-btn" type="submit">{L.send}</button>
+                </div>
+              </form>
+            ))}
+            {rs.length > 0 && <h3 class="g-mut" style="margin:14px 0 6px">{L.rs}</h3>}
+            {rs.map((c) => (
+              <form class="g-opt g-form" data-id={c.id}>
+                <strong>{lab(c)}{c.price !== null && <span class="g-mut"> · {c.price.toLocaleString(fr ? 'fr-FR' : 'en-GB')} {L.fcfa}</span>}</strong>
+                <div class="g-row">
+                  <label class="g-mut">{L.qty} <input type="number" name="qty" min="1" max="20" value="1" inputmode="numeric" /></label>
+                  <input type="text" name="note" maxlength="300" placeholder={c.askNote ? L.note : L.noteOpt} required={c.askNote} autocomplete="off" />
+                  <button class="g-btn" type="submit">{L.send}</button>
+                </div>
+              </form>
+            ))}
+            <div class="g-hp" aria-hidden="true"><label>Website <input type="text" id="g-hp" tabindex="-1" autocomplete="off" /></label></div>
+            <p id="g-msg" class="g-msg" role="status" aria-live="polite"></p>
+          </div>
+        )}
+
+        {open && mine.length > 0 && (
+          <div class="g-card">
+            <h2>{L.mine}</h2>
+            {mine.map((r) => (
+              <div class="g-opt"><strong>{r.label}{r.qty > 1 ? ` ×${r.qty}` : ''}</strong> <span class="g-pill">{L.st[r.status]}</span></div>
+            ))}
+          </div>
+        )}
+      </>
+    )}
+  </main>
+  <script>
+    import '../../client/guest';
+  </script>
+</GuestLayout>

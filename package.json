@@ -19,7 +19,8 @@
     "@astrojs/vercel": "^9.0.5",
     "@neondatabase/serverless": "^1.2.1",
     "@vercel/blob": "^2.8.2",
-    "astro": "^5.0.0"
+    "astro": "^5.0.0",
+    "qrcode-generator": "^2.0.4"
   },
   "devDependencies": {
     "pg": "^8.23.1",
