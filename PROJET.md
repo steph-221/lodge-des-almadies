@@ -41,6 +41,7 @@ Site de l'hôtel Lodge des Almadies (Dakar), avec un module « services hôtel �
 | Production | https://lodge-des-almadies.vercel.app (l'ancien site PHP lodgedesalmadies.com n'est pas encore basculé) |
 | Admin / back-office | https://lodge-des-almadies.vercel.app/admin/ |
 | Console hébergeur | https://vercel.com/cabinet-cardio-mesnana/lodge-des-almadies · Neon : https://console.neon.tech/app/projects/quiet-haze-05424490 |
+| Supervision | https://dashboard.uptimerobot.com (UptimeRobot, alerte e-mail, contrôle toutes les 5 min) |
 
 ## Variables d'environnement
 > Noms uniquement. Les valeurs restent chez l'hébergeur ou dans le gestionnaire de mots de passe.
