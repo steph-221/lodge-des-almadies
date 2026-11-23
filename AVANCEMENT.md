@@ -5,7 +5,7 @@ maj: 2026-11-22
 # Avancement — lodge-des-almadies
 
 ## Où on en est
-Le site a été refondu le 05/11. Depuis le 17/11, le module « services hôtel » est construit par lots, fusionnés dans `main` jusqu'au lot 5 (fiches de ménage papier lues par IA, #11, en production le 22/11, migration 0008). Le lot 6 (registre des cartes RFID, objets trouvés, migration 0009) est en PR, non fusionné. La lecture réelle d'écriture manuscrite reste à mesurer (pas de clé API ni de fiches réelles). Le plan ne prévoit pas de lot après le 6.
+Le site a été refondu le 05/11. Depuis le 17/11, le module « services hôtel » est construit par lots, fusionnés dans `main` jusqu'au lot 5 (fiches de ménage papier lues par IA, #11, en production le 22/11, migration 0008). Le lot 6 (registre des cartes RFID, objets trouvés, #12, migration 0009) est en production depuis le 22/11, vérifié (pages 302, API 401, tables vides). La lecture réelle d'écriture manuscrite reste à mesurer (pas de clé API ni de fiches réelles). Le plan ne prévoit pas de lot après le 6.
 
 ## Évolutions proposées
 - Ajouter `ANTHROPIC_API_KEY` sur Vercel, puis mesurer la lecture des fiches sur 10 fiches réelles et fixer le modèle (`SHEETS_MODEL`).
@@ -16,7 +16,7 @@ Le site a été refondu le 05/11. Depuis le 17/11, le module « services hôtel 
 
 ## Journal
 ### 2026-11-22 (nuit)
-- Lot 6 en PR : registre des cartes RFID (client, passe, personnel) et objets trouvés (`src/lib/hotel/keys*.ts`, routes `cards` et `lost`, page `/admin/hotel/cartes/`, migration 0009).
+- Lot 6 fusionné et en production (#12) : registre des cartes RFID (client, passe, personnel) et objets trouvés (`src/lib/hotel/keys*.ts`, routes `cards` et `lost`, page `/admin/hotel/cartes/`, migration 0009).
 - Une carte déclarée perdue ou retirée ne redevient jamais active ; une carte perdue sort du registre actif, écrit dans le cahier de liaison et le journal d'audit.
 - Lot 5 fusionné et vérifié en production (#11).
 
