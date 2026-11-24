@@ -1,11 +1,11 @@
 ---
 statut: actif
-maj: 2026-11-22
+maj: 2026-11-24
 ---
 # Avancement — lodge-des-almadies
 
 ## Où on en est
-Le site a été refondu le 05/11. Depuis le 17/11, le module « services hôtel » est construit par lots, fusionnés dans `main` jusqu'au lot 5 (fiches de ménage papier lues par IA, #11, en production le 22/11, migration 0008). Le lot 6 (registre des cartes RFID, objets trouvés, #12, migration 0009) est en production depuis le 22/11, vérifié (pages 302, API 401, tables vides). La lecture réelle d'écriture manuscrite reste à mesurer (pas de clé API ni de fiches réelles). Le plan ne prévoit pas de lot après le 6.
+Le site a été refondu le 05/11. Depuis le 17/11, le module « services hôtel » est construit par lots, fusionnés dans `main` jusqu'au lot 5 (fiches de ménage papier lues par IA, #11, en production le 22/11, migration 0008). Le lot 6 (registre des cartes RFID, objets trouvés, #12, migration 0009) est en production depuis le 22/11, vérifié (pages 302, API 401, tables vides). La lecture réelle d'écriture manuscrite reste à mesurer (pas de clé API ni de fiches réelles). Le plan est terminé ; premier ajout hors plan : l'onglet Rapports (occupation, délais des demandes et pannes, consommation d'articles), en PR, sans migration.
 
 ## Évolutions proposées
 - Ajouter `ANTHROPIC_API_KEY` sur Vercel, puis mesurer la lecture des fiches sur 10 fiches réelles et fixer le modèle (`SHEETS_MODEL`).
@@ -13,8 +13,12 @@ Le site a été refondu le 05/11. Depuis le 17/11, le module « services hôtel 
 - Faire une matinée d'essai complète avec une femme de chambre avant de généraliser.
 - Basculer le domaine lodgedesalmadies.com sur Vercel.
 - Créer la branche Neon par aperçu Vercel.
+- Autres évolutions possibles : entretien préventif (climatiseurs, groupe électrogène, piscine, extincteurs), fichier clients, synchronisation Octorate.
 
 ## Journal
+### 2026-11-24
+- Onglet Rapports (hors plan) : occupation (taux, nuitées, durée moyenne, nuit la plus chargée), délais de prise en charge et de réalisation des demandes (par service) et des pannes (par priorité), consommation et pertes d'articles. Chiffres seulement, aucun nom de client.
+- Fichiers clés : `src/lib/hotel/reports-core.ts` (logique pure, 11 tests), `reports.ts` (requêtes), route `/api/hotel/reports`, page `/admin/hotel/rapports/`. Module `reports` : direction E, réception et gouvernante L. Aucune migration.
 ### 2026-11-22 (nuit)
 - Lot 6 fusionné et en production (#12) : registre des cartes RFID (client, passe, personnel) et objets trouvés (`src/lib/hotel/keys*.ts`, routes `cards` et `lost`, page `/admin/hotel/cartes/`, migration 0009).
 - Une carte déclarée perdue ou retirée ne redevient jamais active ; une carte perdue sort du registre actif, écrit dans le cahier de liaison et le journal d'audit.
