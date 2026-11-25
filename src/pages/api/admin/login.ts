@@ -69,7 +69,10 @@ export const POST: APIRoute = async ({ request, cookies, clientAddress }) => {
   }
 };
 
-export const DELETE: APIRoute = async ({ cookies }) => {
-  cookies.delete(COOKIE, { path: '/' });
+export const DELETE: APIRoute = async ({ request, cookies }) => {
+  // Le cookie de session est posé avec Secure en HTTPS : le navigateur refuse de l'effacer par un cookie sans Secure.
+  // On reprend donc les mêmes attributs que ceux de la connexion.
+  const secure = new URL(request.url).protocol === 'https:';
+  cookies.delete(COOKIE, { path: '/', httpOnly: true, secure, sameSite: 'lax' });
   return json(200, { ok: true });
 };
