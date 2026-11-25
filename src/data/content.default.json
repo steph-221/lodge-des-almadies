@@ -258,6 +258,10 @@
         {
           "label": "Supérieure, bâtiment B (dont une adaptée PMR)",
           "fcfa": 63000
+        },
+        {
+          "label": "Supérieure côté route, bâtiment A",
+          "fcfa": 63000
         }
       ],
       "images": [
@@ -327,13 +331,6 @@
         "fcfa": 49000
       },
       {
-        "name": "Chambre supérieure",
-        "building": "A",
-        "view": "Côté route",
-        "count": 1,
-        "fcfa": 49000
-      },
-      {
         "name": "Chambre standard",
         "building": "A",
         "view": "Côté piscine",
@@ -353,6 +350,13 @@
         "view": "",
         "count": 15,
         "fcfa": 57000
+      },
+      {
+        "name": "Chambre supérieure",
+        "building": "A",
+        "view": "Côté route",
+        "count": 1,
+        "fcfa": 63000
       },
       {
         "name": "Chambre avec balcon",
