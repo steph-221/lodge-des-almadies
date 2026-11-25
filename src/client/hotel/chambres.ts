@@ -129,10 +129,28 @@ if (manage) {
     });
   }
 
+  // Bloc gris « déjà renseigné » : ce que la chambre hérite du type choisi (rien à ressaisir).
+  function renderKnown() {
+    const box = $('room-known');
+    box.textContent = '';
+    const t = types.find((x) => String(x.id) === typeSelect.value);
+    if (!t) { box.hidden = true; return; }
+    box.hidden = false;
+    const kv = (k: string, v: string) => h('div', { class: 'kv' }, h('span', {}, k), h('div', {}, v));
+    box.append(
+      h('div', { class: 't' }, h('span', {}, 'Déjà renseigné par le type de chambre'), h('span', {}, 'Rien à saisir ici')),
+      kv('Type', t.label),
+      kv('Personnes', `${t.baseCapacity} (max ${t.maxCapacity})`),
+      kv('Lits', t.beds || '—'),
+      kv('Tarif / nuit', fcfa(t.priceFcfa)),
+    );
+  }
+
   function renderTypes() {
     typeSelect.textContent = '';
     typeSelect.appendChild(h('option', { value: '' }, '— aucun —'));
     types.filter((t) => t.active).forEach((t) => typeSelect.appendChild(h('option', { value: String(t.id) }, t.label)));
+    renderKnown();
     const body = $('types-body');
     body.textContent = '';
     if (!types.length) body.appendChild(h('tr', {}, h('td', { colspan: '6', class: 'hint' }, 'Aucun type pour le moment (par exemple : Double, Twin, Suite). Vous pouvez aussi les créer en important les chambres.')));
@@ -180,6 +198,7 @@ if (manage) {
           editingRoom = r;
           fill(roomForm, { number: r.number, building: r.building, floor: r.floor, roomTypeId: r.roomTypeId ? String(r.roomTypeId) : '', minibar: r.minibar, notes: r.notes });
           $('room-form-title').textContent = `Modifier la chambre ${r.number}`;
+          renderKnown();
           roomForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
         } }, 'Modifier'),
         h('button', { class: r.active ? 'sm danger' : 'sm', type: 'button', onclick: async () => {
@@ -198,7 +217,8 @@ if (manage) {
     renderTypes(); renderRooms();
   }
 
-  const resetRoom = () => { editingRoom = null; roomForm.reset(); $('room-form-title').textContent = 'Ajouter une chambre'; };
+  const resetRoom = () => { editingRoom = null; roomForm.reset(); $('room-form-title').textContent = 'Ajouter une chambre'; renderKnown(); };
+  typeSelect.addEventListener('change', renderKnown);
   const resetType = () => { editingType = null; typeForm.reset(); renderAmenityGrid(null); $('type-form-title').textContent = 'Ajouter un type de chambre'; };
 
   roomForm.addEventListener('submit', async (e) => {
