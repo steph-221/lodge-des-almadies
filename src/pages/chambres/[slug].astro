@@ -2,11 +2,15 @@
 import Base from '../../layouts/Base.astro';
 import BookButton from '../../components/BookButton.astro';
 import { getContent, imgSrc, fmtFcfa, fmtEur } from '../../lib/content';
+import { getPublicTypes, pricesFor } from '../../lib/public-rooms';
 const { slug } = Astro.params;
 const c = await getContent();
 const r = c.rooms.find((x) => x.slug === slug);
 if (!r) return new Response(null, { status: 404 });
-const prices = r.prices.map((p) => ({ label: p.label, fcfa: fmtFcfa(p.fcfa), eur: fmtEur(p.fcfa, c.rate), raw: p.fcfa }));
+// Prix du back-office Chambres quand la base répond ; sinon, ceux du contenu de l'admin.
+const db = await getPublicTypes();
+const litSup = db?.find((x) => x.extraBed != null)?.extraBed ?? c.tarifs.litSup ?? null;
+const prices = ((db && pricesFor(r.slug, db)) ?? r.prices).map((p) => ({ label: p.label, fcfa: fmtFcfa(p.fcfa), eur: fmtEur(p.fcfa, c.rate), raw: p.fcfa }));
 const schema = [{
   '@context': 'https://schema.org',
   '@type': 'HotelRoom',
@@ -33,7 +37,7 @@ const schema = [{
         <div><h2>Équipements</h2><ul class="ticks one">{r.equipment.map((e) => <li>{e}</li>)}</ul></div>
         <div class="pin"><h2>Tarifs par nuit</h2>
           {prices.map((p) => <div class="price"><span>{p.label}</span><strong>{p.fcfa} <small>{p.eur}</small></strong></div>)}
-          <p><small>Lit supplémentaire : {fmtFcfa(c.tarifs.litSup)} par nuit. Taxe de séjour : {fmtFcfa(c.tarifs.taxeSejour)} par nuitée et par personne. Navette taxi aéroport disponible en supplément.</small></p>
+          <p><small>{litSup != null && <>Lit supplémentaire : {fmtFcfa(litSup)} par nuit. </>}Taxe de séjour : {fmtFcfa(c.tarifs.taxeSejour)} par nuitée et par personne. Navette taxi aéroport disponible en supplément.</small></p>
           <BookButton />
         </div>
       </div>

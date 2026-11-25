@@ -2,8 +2,13 @@
 import Base from '../../layouts/Base.astro';
 import BookButton from '../../components/BookButton.astro';
 import { getContent, imgSrc, fmtFcfa, fmtEur } from '../../lib/content';
+import { getPublicTypes } from '../../lib/public-rooms';
 const c = await getContent();
 const t = c.tarifs;
+// Les tarifs viennent du back-office Chambres quand la base répond ; sinon, du contenu de l'admin.
+const db = await getPublicTypes();
+const roomRows = db ? db.map((r) => ({ name: r.name, building: r.building, view: r.view, count: r.count, fcfa: r.fcfa })) : t.rooms;
+const extraBed = db?.find((r) => r.extraBed != null)?.extraBed ?? null;
 ---
 <Base title="Tarifs publics 2027 | Lodge des Almadies, Dakar" description="Tarifs publics 2027 du Lodge des Almadies : chambres, suites, restauration, en FCFA et en euros.">
   <section class="page-hero"><img src={imgSrc(t.heroImage)} alt="" /><h1>Tarifs publics 2027</h1></section>
@@ -12,11 +17,11 @@ const t = c.tarifs;
     <h2>Hébergement</h2>
     <p>{t.intro} 1 € = {c.rate} FCFA.</p>
     <div class="tarif-table">
-      {t.rooms.map((r) => (
+      {roomRows.map((r) => (
         <div class="price"><span>{r.name} · bâtiment {r.building}{r.view ? ` · ${r.view}` : ''} <small>({r.count} {r.count > 1 ? 'chambres' : 'chambre'})</small></span><strong>{fmtFcfa(r.fcfa)} <small>{fmtEur(r.fcfa, c.rate)}</small></strong></div>
       ))}
     </div>
-    <p><small>Taxe de séjour : {fmtFcfa(t.taxeSejour)} par nuitée et par personne.</small></p>
+    <p><small>{extraBed != null && <>Lit supplémentaire : {fmtFcfa(extraBed)} par nuit. </>}Taxe de séjour : {fmtFcfa(t.taxeSejour)} par nuitée et par personne.</small></p>
     <p><BookButton /></p>
 
     <h2>Services et équipements en chambre</h2>
