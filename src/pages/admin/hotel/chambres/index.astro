@@ -60,11 +60,11 @@ else if (manage) {
 
           <div class="card">
             <h3 style="margin-top:0">Types de chambre</h3>
-            <p class="hint">Un type fixe le nombre de personnes accepté : une réservation au-dessus du maximum est refusée.</p>
+            <p class="hint">Un type fixe le nombre de personnes accepté : une réservation au-dessus du maximum est refusée. Il porte aussi le descriptif de la catégorie : tarif public, emplacement, descriptions et équipements.</p>
             <p id="type-msg" role="status" class="hint"></p>
             <div class="table-wrap">
               <table class="tbl">
-                <thead><tr><th>Libellé</th><th>Code</th><th>Personnes</th><th>Lits</th><th></th></tr></thead>
+                <thead><tr><th>Libellé</th><th>Chambres</th><th>Personnes</th><th>Lits</th><th>Tarif / nuit</th><th></th></tr></thead>
                 <tbody id="types-body"></tbody>
               </table>
             </div>
@@ -77,6 +77,22 @@ else if (manage) {
                 <label>Personnes (maximum)<input name="maxCapacity" type="number" min="1" max="8" value="2" /></label>
                 <label>Lits<input name="beds" maxlength="80" placeholder="1 lit double" /></label>
               </div>
+              <div class="row">
+                <label>Nom anglais<input name="labelEn" maxlength="80" autocomplete="off" placeholder="Double Room" /></label>
+                <label>Bâtiment<input name="building" maxlength="40" autocomplete="off" placeholder="A, B…" /></label>
+                <label>Emplacement<input name="location" maxlength="120" autocomplete="off" placeholder="Côté piscine, avec balcon" /></label>
+              </div>
+              <div class="row">
+                <label>Tarif public (FCFA / nuit)<input name="priceFcfa" type="number" min="0" step="500" /></label>
+                <label>Lit supplémentaire (FCFA / nuit)<input name="extraBedFcfa" type="number" min="0" step="500" /></label>
+                <label>Superficie (m²)<input name="areaM2" type="number" min="5" max="500" step="0.5" /></label>
+              </div>
+              <label>Description courte (français)<textarea name="descriptionFr" maxlength="1000" rows="3"></textarea></label>
+              <label>Short description (anglais)<textarea name="descriptionEn" maxlength="1000" rows="3"></textarea></label>
+              <fieldset id="amenities-box" hidden>
+                <legend>Équipements</legend>
+                <div id="amenities-grid" class="amenity-grid"></div>
+              </fieldset>
               <div class="acts"><button class="btn" type="submit">Enregistrer</button><button class="sm" type="button" id="type-cancel">Annuler</button></div>
             </form>
           </div>

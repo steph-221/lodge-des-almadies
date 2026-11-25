@@ -32,7 +32,19 @@ export function cleanRoom(b: Record<string, unknown>): Clean<RoomInput> {
   return { ok: true, value: { number, building, floor, minibar: bool(b.minibar), notes, roomTypeId } };
 }
 
-export type RoomTypeInput = { code: string; label: string; baseCapacity: number; maxCapacity: number; beds: string };
+export type RoomTypeInput = {
+  code: string; label: string; baseCapacity: number; maxCapacity: number; beds: string;
+  labelEn: string; building: string; location: string; areaM2: number | null; priceFcfa: number | null; extraBedFcfa: number | null;
+  descriptionFr: string; descriptionEn: string;
+};
+
+// Montant en FCFA ou surface : vide = non renseigné ; sinon un nombre positif dans les bornes.
+const optNum = (v: unknown, max: number, decimals = false): number | null | undefined => {
+  if (v == null || v === '') return null;
+  const n = typeof v === 'number' ? v : typeof v === 'string' ? Number(v.replace(/[\s\u202f\u00a0]/g, '').replace(',', '.')) : NaN;
+  if (!Number.isFinite(n) || n < 0 || n > max || (!decimals && !Number.isInteger(n))) return undefined;
+  return decimals ? Math.round(n * 10) / 10 : n;
+};
 
 export function cleanRoomType(b: Record<string, unknown>): Clean<RoomTypeInput> {
   const code = (str(b.code, 30) ?? '').toLowerCase();
@@ -44,7 +56,15 @@ export function cleanRoomType(b: Record<string, unknown>): Clean<RoomTypeInput> 
   if (base === null || max === null || base < 1 || max > 8 || max < base) return { ok: false, error: 'Capacités invalides (1 à 8, maximum au moins égal à la base).' };
   const beds = str(b.beds, 80);
   if (beds === null) return { ok: false, error: 'Description des lits trop longue.' };
-  return { ok: true, value: { code, label, baseCapacity: base, maxCapacity: max, beds } };
+  const labelEn = str(b.labelEn, 80), building = str(b.building, 40), location = str(b.location, 120);
+  if (labelEn === null || building === null || location === null) return { ok: false, error: 'Nom anglais, bâtiment ou emplacement trop long.' };
+  const descriptionFr = str(b.descriptionFr, 1000), descriptionEn = str(b.descriptionEn, 1000);
+  if (descriptionFr === null || descriptionEn === null) return { ok: false, error: 'Description trop longue (1 000 caractères maximum).' };
+  const priceFcfa = optNum(b.priceFcfa, 10_000_000), extraBedFcfa = optNum(b.extraBedFcfa, 10_000_000);
+  if (priceFcfa === undefined || extraBedFcfa === undefined) return { ok: false, error: 'Tarif invalide (montant entier en FCFA).' };
+  const areaM2 = optNum(b.areaM2, 500, true);
+  if (areaM2 === undefined || (areaM2 !== null && areaM2 < 5)) return { ok: false, error: 'Superficie invalide (5 à 500 m²).' };
+  return { ok: true, value: { code, label, baseCapacity: base, maxCapacity: max, beds, labelEn, building, location, areaM2, priceFcfa, extraBedFcfa, descriptionFr, descriptionEn } };
 }
 
 export type StayInput = {

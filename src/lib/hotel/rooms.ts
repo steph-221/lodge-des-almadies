@@ -9,13 +9,29 @@ export const STATUS_LABEL: Record<RoomStatus, string> = {
   dirty: 'À nettoyer', in_progress: 'En cours', to_check: 'À contrôler', ready: 'Prête', out_of_service: 'Hors service',
 };
 
-export type RoomType = { id: number; code: string; label: string; baseCapacity: number; maxCapacity: number; beds: string; active: boolean };
+export const AMENITY_VALUES = ['oui', 'non', 'sur_demande', 'supplement', 'a_verifier'] as const;
+export type AmenityValue = (typeof AMENITY_VALUES)[number];
+export const AMENITY_LABEL: Record<AmenityValue, string> = { oui: 'Oui', non: 'Non', sur_demande: 'Sur demande', supplement: 'En supplément', a_verifier: 'À vérifier' };
+export type Amenity = { key: string; labelFr: string; labelEn: string; position: number };
+export type TypeAmenity = { key: string; value: AmenityValue };
+
+export type RoomType = {
+  id: number; code: string; label: string; baseCapacity: number; maxCapacity: number; beds: string; active: boolean;
+  labelEn: string; building: string; location: string; areaM2: number | null; priceFcfa: number | null; extraBedFcfa: number | null;
+  descriptionFr: string; descriptionEn: string; position: number; roomCount: number; amenities: TypeAmenity[];
+};
 export type Room = {
   id: number; number: string; building: string; floor: string; roomTypeId: number | null; typeLabel: string | null;
   maxCapacity: number | null; minibar: boolean; notes: string; active: boolean; status: RoomStatus;
 };
 
-const TYPE_COLS = `id::int as id, code, label, base_capacity::int as "baseCapacity", max_capacity::int as "maxCapacity", beds, active`;
+const TYPE_COLS = `id::int as id, code, label, base_capacity::int as "baseCapacity", max_capacity::int as "maxCapacity", beds, active,
+  label_en as "labelEn", building, location, area_m2::float8 as "areaM2", price_fcfa::int as "priceFcfa", extra_bed_fcfa::int as "extraBedFcfa",
+  description_fr as "descriptionFr", description_en as "descriptionEn", position::int as position`;
+// Nombre de chambres actives et grille des équipements, lus avec le type.
+const TYPE_EXTRA = `(select count(*)::int from rooms r where r.room_type_id = room_types.id and r.active) as "roomCount",
+  coalesce((select json_agg(json_build_object('key', a.amenity_key, 'value', a.value) order by m.position)
+    from room_type_amenities a join amenities m on m.key = a.amenity_key where a.room_type_id = room_types.id), '[]'::json) as amenities`;
 const ROOM_SELECT = `select r.id::int as id, r.number, r.building, r.floor, r.room_type_id::int as "roomTypeId", t.label as "typeLabel",
   t.max_capacity::int as "maxCapacity", r.minibar, r.notes, r.active, r.status
   from rooms r left join room_types t on t.id = r.room_type_id`;
@@ -25,17 +41,40 @@ const code23 = (e: unknown) => (e as { code?: string }).code;
 // Tri naturel : 2, 10, 101 et non 10, 101, 2.
 const natural = (a: string, b: string) => a.localeCompare(b, 'fr', { numeric: true });
 
+// Descriptif vide, pour un type créé à la volée (import de chambres).
+const NO_DETAILS = { labelEn: '', building: '', location: '', areaM2: null, priceFcfa: null, extraBedFcfa: null, descriptionFr: '', descriptionEn: '' };
+
 export async function listRoomTypes(): Promise<RoomType[]> {
-  return (await sql().query(`select ${TYPE_COLS} from room_types order by active desc, label`)) as RoomType[];
+  return (await sql().query(`select ${TYPE_COLS}, ${TYPE_EXTRA} from room_types order by active desc, position, label`)) as RoomType[];
+}
+
+export async function getRoomType(id: number): Promise<RoomType | null> {
+  return ((await sql().query(`select ${TYPE_COLS}, ${TYPE_EXTRA} from room_types where id = $1`, [id])) as RoomType[])[0] ?? null;
+}
+
+export async function listAmenities(): Promise<Amenity[]> {
+  return (await sql().query(`select key, label_fr as "labelFr", label_en as "labelEn", position::int as position from amenities order by position, key`)) as Amenity[];
+}
+
+// Remplace la grille des équipements d'un type : seules les clés connues et les valeurs prévues sont gardées.
+export async function setTypeAmenities(id: number, values: Record<string, string>): Promise<void> {
+  const known = new Set((await listAmenities()).map((a) => a.key));
+  const rows = Object.entries(values).filter(([k, v]) => known.has(k) && (AMENITY_VALUES as readonly string[]).includes(v));
+  for (const [k, v] of rows) {
+    await sql().query(
+      `insert into room_type_amenities (room_type_id, amenity_key, value) values ($1,$2,$3)
+       on conflict (room_type_id, amenity_key) do update set value = excluded.value`, [id, k, v]);
+  }
 }
 
 export async function createRoomType(v: RoomTypeInput): Promise<{ type: RoomType } | { error: string }> {
   try {
     const rows = (await sql().query(
-      `insert into room_types (code, label, base_capacity, max_capacity, beds) values ($1,$2,$3,$4,$5) returning ${TYPE_COLS}`,
-      [v.code, v.label, v.baseCapacity, v.maxCapacity, v.beds],
-    )) as RoomType[];
-    return { type: rows[0] };
+      `insert into room_types (code, label, base_capacity, max_capacity, beds, label_en, building, location, area_m2, price_fcfa, extra_bed_fcfa, description_fr, description_en)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) returning id::int as id`,
+      [v.code, v.label, v.baseCapacity, v.maxCapacity, v.beds, v.labelEn, v.building, v.location, v.areaM2, v.priceFcfa, v.extraBedFcfa, v.descriptionFr, v.descriptionEn],
+    )) as { id: number }[];
+    return { type: (await getRoomType(rows[0].id))! };
   } catch (e) {
     if (code23(e) === '23505') return { error: 'Ce code de type existe déjà.' };
     throw e;
@@ -45,10 +84,12 @@ export async function createRoomType(v: RoomTypeInput): Promise<{ type: RoomType
 export async function updateRoomType(id: number, v: RoomTypeInput & { active?: boolean }): Promise<{ type: RoomType } | { error: string }> {
   try {
     const rows = (await sql().query(
-      `update room_types set code=$2, label=$3, base_capacity=$4, max_capacity=$5, beds=$6, active=coalesce($7, active) where id=$1 returning ${TYPE_COLS}`,
-      [id, v.code, v.label, v.baseCapacity, v.maxCapacity, v.beds, v.active ?? null],
-    )) as RoomType[];
-    return rows[0] ? { type: rows[0] } : { error: 'Type inconnu.' };
+      `update room_types set code=$2, label=$3, base_capacity=$4, max_capacity=$5, beds=$6, active=coalesce($7, active),
+         label_en=$8, building=$9, location=$10, area_m2=$11, price_fcfa=$12, extra_bed_fcfa=$13, description_fr=$14, description_en=$15
+       where id=$1 returning id::int as id`,
+      [id, v.code, v.label, v.baseCapacity, v.maxCapacity, v.beds, v.active ?? null, v.labelEn, v.building, v.location, v.areaM2, v.priceFcfa, v.extraBedFcfa, v.descriptionFr, v.descriptionEn],
+    )) as { id: number }[];
+    return rows[0] ? { type: (await getRoomType(id))! } : { error: 'Type inconnu.' };
   } catch (e) {
     if (code23(e) === '23505') return { error: 'Ce code de type existe déjà.' };
     throw e;
@@ -122,7 +163,7 @@ export async function importRooms(rows: RoomImportRow[]): Promise<{ created: num
           const label = r.type.slice(0, 80);
           let code = slug(r.type);
           for (let n = 2; byKey.has(code) ; n++) code = `${slug(r.type).slice(0, 26)}-${n}`;
-          const res = await createRoomType({ code, label, baseCapacity: 2, maxCapacity: 2, beds: '' });
+          const res = await createRoomType({ code, label, baseCapacity: 2, maxCapacity: 2, beds: '', ...NO_DETAILS });
           if ('error' in res) { errors.push({ number: r.number, message: res.error }); continue; }
           typeId = res.type.id; typesCreated++;
           byKey.set(res.type.code.toLowerCase(), typeId); byKey.set(res.type.label.toLowerCase(), typeId);

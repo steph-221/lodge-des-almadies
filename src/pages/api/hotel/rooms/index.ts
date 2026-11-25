@@ -3,15 +3,15 @@ import { json, readJson } from '../../../../lib/http';
 import { actorOf, safeIp, unavailable } from '../../../../lib/hotel/api';
 import { audit } from '../../../../lib/hotel/audit';
 import { canEdit } from '../../../../lib/hotel/permissions';
-import { createRoom, listRoomTypes, listRooms } from '../../../../lib/hotel/rooms';
+import { createRoom, listAmenities, listRoomTypes, listRooms } from '../../../../lib/hotel/rooms';
 import { cleanRoom } from '../../../../lib/hotel/validate';
 
 export const prerender = false;
 
 export const GET: APIRoute = async () => {
   try {
-    const [rooms, types] = await Promise.all([listRooms(), listRoomTypes()]);
-    return json(200, { rooms, types });
+    const [rooms, types, amenities] = await Promise.all([listRooms(), listRoomTypes(), listAmenities()]);
+    return json(200, { rooms, types, amenities });
   } catch (e) { return unavailable('rooms', e); }
 };
 

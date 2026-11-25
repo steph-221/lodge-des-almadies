@@ -8,7 +8,15 @@ type Task = {
   id: number; roomNumber: string; building: string; floor: string; typeLabel: string | null; kind: string; guests: number | null;
   arrivalToday: boolean; extraBed: boolean; babyCot: boolean; status: string; assignedTo: number | null; assignedName: string | null;
 };
-type RoomType = { id: number; code: string; label: string; baseCapacity: number; maxCapacity: number; beds: string; active: boolean };
+type AmenityValue = 'oui' | 'non' | 'sur_demande' | 'supplement' | 'a_verifier';
+type Amenity = { key: string; labelFr: string; labelEn: string; position: number };
+type RoomType = {
+  id: number; code: string; label: string; baseCapacity: number; maxCapacity: number; beds: string; active: boolean;
+  labelEn: string; building: string; location: string; areaM2: number | null; priceFcfa: number | null; extraBedFcfa: number | null;
+  descriptionFr: string; descriptionEn: string; roomCount: number; amenities: { key: string; value: AmenityValue }[];
+};
+const AMENITY_LABEL: Record<AmenityValue, string> = { oui: 'Oui', non: 'Non', sur_demande: 'Sur demande', supplement: 'En supplément', a_verifier: 'À vérifier' };
+const fcfa = (n: number | null) => (n == null ? '—' : `${n.toLocaleString('fr-FR')} FCFA`);
 type Room = { id: number; number: string; building: string; floor: string; roomTypeId: number | null; typeLabel: string | null; minibar: boolean; notes: string; active: boolean; status: string };
 
 const root = document.getElementById('rooms-app')!;
@@ -88,6 +96,7 @@ $('tasks-generate')?.addEventListener('click', async (e) => {
 // ───────── Chambres et types (direction, gouvernante, réception) ─────────
 if (manage) {
   let types: RoomType[] = [];
+  let amenities: Amenity[] = [];
   let rooms: Room[] = [];
   let editingRoom: Room | null = null;
   let editingType: RoomType | null = null;
@@ -104,19 +113,43 @@ if (manage) {
     }
   };
 
+  // Grille des équipements : affichée seulement quand on modifie un type existant.
+  function renderAmenityGrid(t: RoomType | null) {
+    const box = $('amenities-box'), grid = $('amenities-grid');
+    grid.textContent = '';
+    box.hidden = !t || !amenities.length;
+    if (!t) return;
+    const current = new Map(t.amenities.map((a) => [a.key, a.value]));
+    amenities.forEach((a) => {
+      const v = current.get(a.key) ?? '';
+      grid.appendChild(h('label', { class: v === 'a_verifier' ? 'todo' : '' }, a.labelFr,
+        h('select', { name: `amenity:${a.key}` },
+          h('option', { value: '', selected: v === '' }, '—'),
+          ...Object.entries(AMENITY_LABEL).map(([k, l]) => h('option', { value: k, selected: k === v }, l)))));
+    });
+  }
+
   function renderTypes() {
     typeSelect.textContent = '';
     typeSelect.appendChild(h('option', { value: '' }, '— aucun —'));
     types.filter((t) => t.active).forEach((t) => typeSelect.appendChild(h('option', { value: String(t.id) }, t.label)));
     const body = $('types-body');
     body.textContent = '';
-    if (!types.length) body.appendChild(h('tr', {}, h('td', { colspan: '5', class: 'hint' }, 'Aucun type pour le moment (par exemple : Double, Twin, Suite). Vous pouvez aussi les créer en important les chambres.')));
+    if (!types.length) body.appendChild(h('tr', {}, h('td', { colspan: '6', class: 'hint' }, 'Aucun type pour le moment (par exemple : Double, Twin, Suite). Vous pouvez aussi les créer en important les chambres.')));
     types.forEach((t) => body.appendChild(h('tr', {},
-      h('td', {}, t.label), h('td', {}, t.code), h('td', {}, `${t.baseCapacity} (max ${t.maxCapacity})`), h('td', {}, t.beds || '—'),
+      h('td', {}, h('strong', {}, t.label), h('div', { class: 'type-desc' }, [t.code, t.location].filter(Boolean).join(' · '))),
+      h('td', {}, String(t.roomCount)), h('td', {}, `${t.baseCapacity} (max ${t.maxCapacity})`), h('td', {}, t.beds || '—'),
+      h('td', {}, fcfa(t.priceFcfa), t.extraBedFcfa != null ? h('div', { class: 'type-desc' }, `lit sup. ${fcfa(t.extraBedFcfa)}`) : ''),
       h('td', { class: 'acts' },
         h('button', { class: 'sm', type: 'button', onclick: () => {
           editingType = t;
-          fill(typeForm, { code: t.code, label: t.label, baseCapacity: String(t.baseCapacity), maxCapacity: String(t.maxCapacity), beds: t.beds });
+          fill(typeForm, {
+            code: t.code, label: t.label, baseCapacity: String(t.baseCapacity), maxCapacity: String(t.maxCapacity), beds: t.beds,
+            labelEn: t.labelEn, building: t.building, location: t.location, areaM2: t.areaM2 == null ? '' : String(t.areaM2),
+            priceFcfa: t.priceFcfa == null ? '' : String(t.priceFcfa), extraBedFcfa: t.extraBedFcfa == null ? '' : String(t.extraBedFcfa),
+            descriptionFr: t.descriptionFr, descriptionEn: t.descriptionEn,
+          });
+          renderAmenityGrid(t);
           $('type-form-title').textContent = `Modifier le type « ${t.label} »`;
           typeForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
         } }, 'Modifier'),
@@ -159,14 +192,14 @@ if (manage) {
   }
 
   async function loadRooms() {
-    const r = await api<{ rooms: Room[]; types: RoomType[] }>('GET', '/api/hotel/rooms');
+    const r = await api<{ rooms: Room[]; types: RoomType[]; amenities: Amenity[] }>('GET', '/api/hotel/rooms');
     if (!r.ok) { flash(roomMsg, r.data.error || 'Lecture impossible.'); return; }
-    rooms = r.data.rooms; types = r.data.types;
+    rooms = r.data.rooms; types = r.data.types; amenities = r.data.amenities ?? [];
     renderTypes(); renderRooms();
   }
 
   const resetRoom = () => { editingRoom = null; roomForm.reset(); $('room-form-title').textContent = 'Ajouter une chambre'; };
-  const resetType = () => { editingType = null; typeForm.reset(); $('type-form-title').textContent = 'Ajouter un type de chambre'; };
+  const resetType = () => { editingType = null; typeForm.reset(); renderAmenityGrid(null); $('type-form-title').textContent = 'Ajouter un type de chambre'; };
 
   roomForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -180,7 +213,13 @@ if (manage) {
   typeForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(typeForm);
-    const body = { code: fd.get('code'), label: fd.get('label'), baseCapacity: fd.get('baseCapacity'), maxCapacity: fd.get('maxCapacity'), beds: fd.get('beds') };
+    const body: Record<string, unknown> = {};
+    for (const k of ['code', 'label', 'baseCapacity', 'maxCapacity', 'beds', 'labelEn', 'building', 'location', 'areaM2', 'priceFcfa', 'extraBedFcfa', 'descriptionFr', 'descriptionEn']) body[k] = fd.get(k);
+    if (editingType) {
+      const grid: Record<string, string> = {};
+      for (const [k, v] of fd.entries()) if (k.startsWith('amenity:') && v) grid[k.slice(8)] = String(v);
+      body.amenities = grid;
+    }
     const r = editingType ? await api('PATCH', `/api/hotel/room-types/${editingType.id}`, body) : await api('POST', '/api/hotel/room-types', body);
     if (!r.ok) { flash(typeMsg, r.data.error || 'Enregistrement impossible.'); return; }
     flash(typeMsg, editingType ? 'Type modifié.' : 'Type ajouté.', true);
