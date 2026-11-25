@@ -74,5 +74,8 @@ export const DELETE: APIRoute = async ({ request, cookies }) => {
   // On reprend donc les mêmes attributs que ceux de la connexion.
   const secure = new URL(request.url).protocol === 'https:';
   cookies.delete(COOKIE, { path: '/', httpOnly: true, secure, sameSite: 'lax' });
-  return json(200, { ok: true });
+  // Filet de sécurité : si le navigateur refuse d'effacer le cookie, Clear-Site-Data le supprime de force (HTTPS seulement).
+  const res = json(200, { ok: true });
+  if (secure) res.headers.set('clear-site-data', '"cookies"');
+  return res;
 };
