@@ -1,6 +1,12 @@
 // Déconnexion commune à toutes les pages de l'espace Services hôtel.
-document.getElementById('logout')?.addEventListener('click', async () => {
-  await fetch('/api/admin/login', { method: 'DELETE' });
+const logout = document.getElementById('logout');
+logout?.addEventListener('click', async () => {
+  try {
+    const res = await fetch('/api/admin/login', { method: 'DELETE' });
+    // On vérifie que la session est bien fermée avant de quitter la page, et on affiche la cause sinon.
+    const chk = await fetch('/api/hotel/me');
+    if (chk.status !== 401) { logout.textContent = `Échec (code ${res.status}/${chk.status})`; return; }
+  } catch { logout.textContent = 'Échec (réseau)'; return; }
   location.href = '/admin/';
 });
 

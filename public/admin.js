@@ -337,7 +337,12 @@
   async function init() {
     // La déconnexion est branchée en premier : elle doit marcher même si le chargement du contenu échoue.
     $('logout').addEventListener('click', async function () {
-      try { await fetch('/api/admin/login', { method: 'DELETE' }); } catch (e) { /* réseau coupé : on recharge quand même */ }
+      try {
+        var res = await fetch('/api/admin/login', { method: 'DELETE' });
+        // On vérifie que la session est bien fermée avant de quitter la page, et on affiche la cause sinon.
+        var chk = await fetch('/api/admin/content');
+        if (chk.status !== 401) { msg('Déconnexion impossible (code ' + res.status + ', session ' + chk.status + '). Fermez le navigateur ou contactez l’assistance.', 'err'); return; }
+      } catch (e) { msg('Déconnexion impossible : ' + e.message, 'err'); return; }
       location.href = '/admin/';
     });
     var r = await fetch('/api/admin/content');
