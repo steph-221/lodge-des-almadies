@@ -1,6 +1,6 @@
 ---
 statut: actif
-maj: 2026-11-22
+maj: 2026-11-25
 ---
 # Avancement — lodge-des-almadies
 
@@ -15,6 +15,12 @@ Le site a été refondu le 05/11. Depuis le 17/11, le module « services hôtel 
 - Créer la branche Neon par aperçu Vercel.
 
 ## Journal
+### 2026-11-25
+- Descriptif des chambres (tableau Excel de STEPH) en PR : migration 0010 avec 10 types de chambre (tarif 2027, lit sup., descriptions FR/EN), 32 équipements par type et les 36 chambres. Insertion seulement si absent : rien de saisi dans l'application n'est écrasé. C'est la seule migration qui contient des données de l'hôtel (base de production vide le 25/11).
+- Back-office chambres : tarif, emplacement, descriptions et grille d'équipements modifiables par type.
+- Site : tableau des tarifs en 10 catégories (36 chambres), pages Suites / Double / Twin et llms.txt alignés sur le descriptif.
+- Points à confirmer par l'hôtel : balcon des standards B, superficies, tarif de la 201, chambre « double uniquement » côté piscine.
+
 ### 2026-11-22 (nuit)
 - Lot 6 fusionné et en production (#12) : registre des cartes RFID (client, passe, personnel) et objets trouvés (`src/lib/hotel/keys*.ts`, routes `cards` et `lost`, page `/admin/hotel/cartes/`, migration 0009).
 - Une carte déclarée perdue ou retirée ne redevient jamais active ; une carte perdue sort du registre actif, écrit dans le cahier de liaison et le journal d'audit.

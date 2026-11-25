@@ -171,28 +171,38 @@
     {
       "slug": "suites",
       "name": "Suites",
-      "intro": "Trois suites spacieuses et calmes, à la décoration raffinée et personnalisée. L’une d’elles dispose d’un petit salon et d’une terrasse privée donnant sur la piscine. Lit supplémentaire possible sur demande.",
-      "guests": "2 personnes max.",
+      "intro": "Trois suites calmes et spacieuses. Les deux suites du bâtiment B, nos plus grands hébergements, ont un coin salon, une baignoire et une machine à café Nespresso. La suite junior du bâtiment A s’ouvre sur une terrasse privative côté piscine. Lit supplémentaire possible sur demande.",
+      "guests": "2 personnes (+1 lit supplémentaire)",
       "beds": "Lit king-size",
       "equipment": [
+        "Coin salon",
         "Minibar",
-        "Bouilloire",
-        "Écran plat LCD et câble satellite",
-        "Coffre individuel",
-        "Climatisation",
+        "Machine à café Nespresso",
+        "Sèche-cheveux",
+        "Climatisation et ventilateur de plafond",
         "Wi-Fi haut débit gratuit",
+        "TV écran plat",
+        "Coffre-fort",
+        "Plateau d’accueil : bouilloire, café, thé et infusions",
+        "Salle de bain privative avec douche",
+        "Produits d’accueil et serviettes",
+        "Fer et planche à repasser",
+        "Téléphone",
         "Bureau",
+        "Penderie",
         "Moustiquaire",
-        "Sèche-cheveux et fer à repasser sur demande",
-        "Corbeille de fruits à l’arrivée"
+        "Chambre non-fumeur",
+        "Accès à la piscine",
+        "Baignoire (suites du bâtiment B)",
+        "Terrasse privative et vue piscine (suite junior)"
       ],
       "prices": [
         {
-          "label": "Côté terrasse / piscine",
+          "label": "Suite junior avec terrasse, côté piscine (bâtiment A)",
           "fcfa": 78000
         },
         {
-          "label": "Côté cour",
+          "label": "Suite (bâtiment B)",
           "fcfa": 89000
         }
       ],
@@ -207,28 +217,46 @@
     {
       "slug": "double",
       "name": "Chambres Double",
-      "intro": "Toutes les commodités nécessaires. Certaines chambres ont un balcon, d’autres communiquent avec une chambre twin, idéal pour les familles avec enfants. Lit supplémentaire possible sur demande.",
-      "guests": "2 personnes max.",
+      "intro": "Toutes les commodités nécessaires, côté route ou côté piscine. Certaines chambres ont un balcon, la 201 communique avec la 203, idéal pour les familles avec enfants. Une chambre supérieure est adaptée aux personnes à mobilité réduite (accès de plain-pied, barres d’appui, passages élargis). Lit supplémentaire possible sur demande.",
+      "guests": "2 personnes (+1 lit supplémentaire)",
       "beds": "Lit double",
       "equipment": [
-        "Écran plat LCD et câble satellite",
-        "Coffre individuel",
-        "Climatisation",
+        "Climatisation et ventilateur de plafond",
         "Wi-Fi haut débit gratuit",
+        "TV écran plat",
+        "Coffre-fort",
+        "Plateau d’accueil : bouilloire, café, thé et infusions",
+        "Salle de bain privative avec douche",
+        "Produits d’accueil et serviettes",
+        "Fer et planche à repasser",
+        "Téléphone",
         "Bureau",
-        "Moustiquaire"
+        "Penderie",
+        "Moustiquaire",
+        "Chambre non-fumeur",
+        "Accès à la piscine",
+        "Minibar (chambres supérieures ; en supplément dans les autres)",
+        "Sèche-cheveux sur demande"
       ],
       "prices": [
         {
-          "label": "Côté route",
+          "label": "Côté route, bâtiment A",
           "fcfa": 49000
         },
         {
-          "label": "Côté piscine",
+          "label": "Côté piscine, bâtiment A (avec ou sans balcon)",
           "fcfa": 53000
         },
         {
-          "label": "Chambre spacieuse avec minibar",
+          "label": "Standard, bâtiment B",
+          "fcfa": 57000
+        },
+        {
+          "label": "Côté route avec balcon, bâtiment A",
+          "fcfa": 63000
+        },
+        {
+          "label": "Supérieure, bâtiment B (dont une adaptée PMR)",
           "fcfa": 63000
         }
       ],
@@ -243,33 +271,39 @@
     {
       "slug": "twin",
       "name": "Chambres Twin",
-      "intro": "Pensées pour les voyages d’affaires et les séjours entre amis. Certaines ont un balcon. Sur demande, la chambre peut être transformée en double, et un lit supplémentaire ajouté.",
-      "guests": "2 personnes max.",
+      "intro": "Pensées pour les voyages d’affaires et les séjours entre amis. Sur demande, la chambre peut être transformée en double, et un lit supplémentaire ajouté.",
+      "guests": "2 personnes (+1 lit supplémentaire)",
       "beds": "Deux lits individuels",
       "equipment": [
-        "Écran plat LCD et câble satellite",
-        "Coffre individuel",
-        "Climatisation",
+        "Climatisation et ventilateur de plafond",
         "Wi-Fi haut débit gratuit",
+        "TV écran plat",
+        "Coffre-fort",
+        "Plateau d’accueil : bouilloire, café, thé et infusions",
+        "Salle de bain privative avec douche",
+        "Produits d’accueil et serviettes",
+        "Fer et planche à repasser",
+        "Téléphone",
         "Bureau",
-        "Moustiquaire"
+        "Penderie",
+        "Moustiquaire",
+        "Chambre non-fumeur",
+        "Accès à la piscine",
+        "Minibar en supplément",
+        "Sèche-cheveux sur demande"
       ],
       "prices": [
         {
-          "label": "Côté route",
+          "label": "Côté route, bâtiment A",
           "fcfa": 49000
         },
         {
-          "label": "Côté piscine",
+          "label": "Côté piscine, bâtiment A",
           "fcfa": 53000
         },
         {
-          "label": "Annexe, côté cour ou route",
+          "label": "Standard, bâtiment B",
           "fcfa": 57000
-        },
-        {
-          "label": "Chambre spacieuse avec minibar",
-          "fcfa": 63000
         }
       ],
       "images": [
@@ -289,14 +323,28 @@
         "name": "Chambre standard",
         "building": "A",
         "view": "Côté route",
-        "count": 7,
+        "count": 3,
+        "fcfa": 49000
+      },
+      {
+        "name": "Chambre supérieure",
+        "building": "A",
+        "view": "Côté route",
+        "count": 1,
         "fcfa": 49000
       },
       {
         "name": "Chambre standard",
         "building": "A",
         "view": "Côté piscine",
-        "count": 7,
+        "count": 4,
+        "fcfa": 53000
+      },
+      {
+        "name": "Chambre avec balcon",
+        "building": "A",
+        "view": "Côté piscine",
+        "count": 3,
         "fcfa": 53000
       },
       {
@@ -307,36 +355,53 @@
         "fcfa": 57000
       },
       {
-        "name": "Chambre supérieure avec mini-bar",
-        "building": "B",
+        "name": "Chambre avec balcon",
+        "building": "A",
         "view": "Côté route",
-        "count": 3,
+        "count": 4,
         "fcfa": 63000
       },
       {
-        "name": "Suite junior avec mini-bar",
+        "name": "Chambre supérieure avec minibar",
+        "building": "B",
+        "view": "",
+        "count": 2,
+        "fcfa": 63000
+      },
+      {
+        "name": "Chambre supérieure PMR avec minibar",
+        "building": "B",
+        "view": "Accès de plain-pied",
+        "count": 1,
+        "fcfa": 63000
+      },
+      {
+        "name": "Suite junior avec terrasse et minibar",
         "building": "A",
         "view": "Côté piscine",
         "count": 1,
         "fcfa": 78000
       },
       {
-        "name": "Suite avec mini-bar",
+        "name": "Suite avec minibar",
         "building": "B",
-        "view": "Côté cour",
+        "view": "",
         "count": 2,
         "fcfa": 89000
       }
     ],
     "equipements": [
       "Wi-Fi haut débit gratuit",
-      "Climatisation",
-      "Téléphone",
-      "Écran plat LCD",
+      "Climatisation et ventilateur de plafond",
+      "TV écran plat",
       "Coffre-fort",
+      "Bouilloire, café, thé et infusions",
+      "Salle de bain privative",
+      "Fer et planche à repasser",
+      "Téléphone",
+      "Bureau et penderie",
       "Moustiquaire",
-      "Bouilloire, thé et café",
-      "Salle de bain privative"
+      "Chambres non-fumeur"
     ],
     "taxeSejour": 1000,
     "restauration": [
@@ -356,6 +421,10 @@
       {
         "subject": "Taxe de séjour",
         "detail": "1 000 FCFA par nuitée et par personne"
+      },
+      {
+        "subject": "Lit supplémentaire",
+        "detail": "10 000 FCFA par nuit, dans toutes les catégories"
       },
       {
         "subject": "Piscine",
@@ -407,7 +476,8 @@
         }
       ],
       "note": "Calcul à partir des tarifs 2027, hors hébergement."
-    }
+    },
+    "litSup": 10000
   },
   "seminaire": {
     "heroImage": "sem-01",
