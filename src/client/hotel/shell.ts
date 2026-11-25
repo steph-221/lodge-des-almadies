@@ -1,8 +1,10 @@
 // Déconnexion commune à toutes les pages de l'espace Services hôtel.
+// Astro refuse toute écriture sans content-type dont l'origine ne correspond pas à son URL interne (403 derrière le proxy Vercel) : on en envoie un.
+const JSON_HEADERS = { 'content-type': 'application/json' };
 const logout = document.getElementById('logout');
 logout?.addEventListener('click', async () => {
   try {
-    const res = await fetch('/api/admin/login', { method: 'DELETE' });
+    const res = await fetch('/api/admin/login', { method: 'DELETE', headers: JSON_HEADERS });
     // On vérifie que la session est bien fermée avant de quitter la page, et on affiche la cause sinon.
     const chk = await fetch('/api/hotel/me');
     if (chk.status !== 401) { logout.textContent = `Échec (code ${res.status}/${chk.status})`; return; }
