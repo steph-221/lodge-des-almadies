@@ -335,12 +335,16 @@
   }
 
   async function init() {
+    // La déconnexion est branchée en premier : elle doit marcher même si le chargement du contenu échoue.
+    $('logout').addEventListener('click', async function () {
+      try { await fetch('/api/admin/login', { method: 'DELETE' }); } catch (e) { /* réseau coupé : on recharge quand même */ }
+      location.href = '/admin/';
+    });
     var r = await fetch('/api/admin/content');
     if (r.status === 401) return location.reload();
     c = await r.json();
     render();
     $('save').addEventListener('click', save);
-    $('logout').addEventListener('click', async function () { await fetch('/api/admin/login', { method: 'DELETE' }); location.reload(); });
     $('reset').addEventListener('click', async function () {
       if (!confirm('Remplacer tout le contenu par celui d’origine ? Vos modifications seront perdues.')) return;
       await fetch('/api/admin/content', { method: 'DELETE' });
