@@ -1,7 +1,7 @@
 /* Lodge des Almadies — discipline Apple : lumière d'abord, un seul accent, typographie + espace, verre uniquement sur la navigation. */
 :root{
   --bg:#faf7f2;--bg-alt:#f1ebe2;--ink:#2b2622;--muted:#6f655b;
-  --accent:#9a6b3f;--accent-d:#7a5230;--card:#fff;--line:#e6dfd5;--max:1140px;
+  --accent:#9a6b3f;--accent-d:#7a5230;--gold:#d9a441;--stone:#e6dfd5;--card:#fff;--line:#e6dfd5;--max:1140px;
   --r:20px;--r-sm:12px;
   --spring:cubic-bezier(.22,1,.36,1);
   --ease-out:cubic-bezier(.16,1,.3,1);
@@ -74,7 +74,7 @@ a.card:active{transform:scale(.985);transition-duration:.12s}
 
 /* Section sombre unique (bascule de thème au scroll) */
 .dark-sec{background:#1b1815;color:#ece5db}
-.js .dark-sec{background:transparent}
+.js .dark-sec{background:#1b1815}
 .dark-sec h2,.dark-sec h3{color:#fff}
 .dark-sec .card{background:#27221e;box-shadow:none}
 .dark-sec .card p{color:#a89d90}
@@ -130,3 +130,83 @@ nav li.sub:hover>ul,nav li.sub:focus-within>ul{visibility:visible;opacity:1;tran
 }
 @media(prefers-contrast:more){header.top{background:var(--bg)}.card{border:1px solid var(--ink)}}
 @media(prefers-reduced-transparency:reduce){header.top,nav,nav li.sub>ul{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* ===== Habillage 2027 : titres fins en capitales, en-tête transparent, sections alternées ===== */
+body{font-family:"Jost",system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:300}
+h1,h2,h3{font-family:"Jost",system-ui,sans-serif;font-weight:300;text-transform:uppercase;letter-spacing:.08em;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(2.1rem,6vw,4.4rem);letter-spacing:.14em}
+h2{font-size:clamp(1.7rem,4vw,2.8rem);color:var(--accent-d)}
+body[data-theme="dark"] h2,.dark-sec h2{color:#fff}
+h3{font-size:1.2rem;letter-spacing:.1em}
+.eyebrow{display:block;font-size:.78rem;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:1.1rem;font-weight:400}
+.dark-sec .eyebrow{color:var(--gold)}
+.btn{border-radius:0;background:var(--gold);text-transform:uppercase;letter-spacing:.18em;font-size:.8rem;font-weight:500;padding:15px 34px}
+.btn:hover{background:var(--accent);box-shadow:none;transform:translateY(-2px)}
+.link{display:inline-block;margin-top:1rem;text-transform:uppercase;letter-spacing:.2em;font-size:.76rem;text-decoration:none;color:inherit;border-bottom:1px solid currentColor;padding-bottom:4px}
+.card{border-radius:0}
+.lead{font-weight:300}
+
+/* En-tête : transparent sur la photo, sombre après défilement */
+header.top{position:fixed;left:0;right:0;top:0;background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;color:#fff;transition:background .4s,box-shadow .4s}
+header.top .wrap{min-height:84px}
+header.top img{height:46px;filter:brightness(0) invert(1)}
+header.top.scrolled,header.top.menu-open{background:rgba(27,24,21,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:none}
+header.top.scrolled .wrap{min-height:68px}
+header.top nav a{color:#fff;text-transform:uppercase;letter-spacing:.16em;font-size:.74rem;opacity:.92}
+header.top nav a:hover,header.top nav a[aria-current]{color:var(--gold);opacity:1}
+header.top nav .btn{color:#fff!important;padding:10px 22px;min-height:40px;font-size:.72rem}
+header.top .burger{color:#fff}
+header.top nav li.sub>ul{background:rgba(27,24,21,.95);border-radius:0}
+header.top nav li.sub>ul a{letter-spacing:.1em}
+header.top nav li.sub>ul a:hover{background:rgba(255,255,255,.08)}
+@media(max-width:900px){header.top nav{background:rgba(27,24,21,.97)}header.top nav a{font-size:.9rem}}
+:root{--nav-h:84px}
+.hero::after{background:linear-gradient(rgba(0,0,0,.45),rgba(0,0,0,.28) 45%,rgba(0,0,0,.6))}
+.page-hero::after{background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.2) 60%,rgba(0,0,0,.35))}
+.page-hero{height:clamp(300px,46vh,460px);padding-top:60px}
+.hero{min-height:100svh}
+.hero h1{font-weight:300;font-size:clamp(1.9rem,4.6vw,3.5rem);letter-spacing:.12em}
+.hero p{letter-spacing:.1em;margin-bottom:7rem;font-weight:300}
+
+/* Barre de réservation façon hôtel */
+.book{position:absolute;left:50%;bottom:9vh;transform:translateX(-50%);width:min(960px,92vw);background:#fff;color:var(--ink);display:grid;grid-template-columns:1.1fr 1.1fr 1.4fr auto;text-align:left;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.book div{padding:20px 26px;border-right:1px solid var(--stone)}
+.book b{display:block;font-weight:500;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase}
+.book span{color:var(--muted);font-size:.92rem}
+.book .btn{align-self:stretch;display:grid;place-items:center;padding:0 36px}
+@media(max-width:760px){.book{grid-template-columns:1fr 1fr;bottom:4vh}.book div:nth-child(3){grid-column:1/3;border-top:1px solid var(--stone)}.book .btn{grid-column:1/3;padding:18px}.hero p{margin-bottom:11rem}}
+
+/* Sections texte + photo */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+.split.rev>:first-child{order:2}
+.split p{color:var(--muted)}.dark-sec .split p{color:#b9ae9f}
+@media(max-width:860px){.split{grid-template-columns:1fr;gap:36px}.split.rev>:first-child{order:0}}
+.photo{overflow:hidden}.photo img{width:100%;aspect-ratio:4/5;object-fit:cover;transition:transform 1.4s var(--ease-out)}.photo:hover img{transform:scale(1.05)}
+.collage{position:relative;padding-bottom:70px}
+.collage .photo:first-child{width:78%}
+.collage .photo:last-child{position:absolute;right:0;bottom:0;width:48%;border:10px solid var(--bg-alt)}
+.collage .photo:last-child img{aspect-ratio:1}
+.head{text-align:center;max-width:720px;margin:0 auto 56px}.head p{color:var(--muted)}
+
+/* Cartes chambres */
+.rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.room{position:relative;overflow:hidden;color:#fff!important;text-decoration:none;aspect-ratio:3/4;display:block}
+.room img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.4s var(--ease-out)}
+.room:hover img{transform:scale(1.07)}
+.room::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 45%,rgba(0,0,0,.7))}
+.room div{position:absolute;left:28px;right:28px;bottom:26px;z-index:2}
+.room h3{font-size:1.4rem;margin:0 0 .2em;color:#fff}.room small{letter-spacing:.14em;text-transform:uppercase;font-size:.72rem;opacity:.85}
+@media(max-width:860px){.rooms{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:78%;overflow-x:auto;scroll-snap-type:x mandatory}.room{scroll-snap-align:start}}
+
+/* Chiffres clés */
+.chips{display:grid;grid-template-columns:repeat(4,1fr);margin-top:64px;border-top:1px solid var(--stone)}
+.chips div{padding:30px 22px;text-align:center;border-right:1px solid var(--stone);font-size:.76rem;letter-spacing:.18em;text-transform:uppercase}
+.chips div:last-child{border:0}.chips em{display:block;font:italic 400 2rem "Cormorant Garamond",serif;color:var(--accent);letter-spacing:0;text-transform:none;margin-bottom:.2rem}
+@media(max-width:760px){.chips{grid-template-columns:1fr 1fr}.chips div:nth-child(2){border-right:0}.chips div{border-bottom:1px solid var(--stone)}}
+
+/* Bandeau photos + questions */
+.strip{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.strip div{overflow:hidden}.strip img{aspect-ratio:3/4;object-fit:cover;width:100%;transition:transform 1s var(--ease-out)}.strip div:hover img{transform:scale(1.08)}
+@media(max-width:760px){.strip{grid-template-columns:repeat(2,1fr)}.strip div:nth-child(n+5){display:none}}
+details{border-bottom:1px solid var(--stone);padding:22px 0}summary{cursor:pointer;list-style:none;text-transform:uppercase;letter-spacing:.1em;font-size:.92rem;display:flex;justify-content:space-between;gap:16px}
+summary::-webkit-details-marker{display:none}summary::after{content:"+";color:var(--accent);font-size:1.4rem;line-height:1}details[open] summary::after{content:"–"}details p{color:var(--muted);margin:.8rem 0 0}
+footer h3{font-size:.8rem;letter-spacing:.25em}footer img.flogo{height:60px;filter:brightness(0) invert(1);margin-bottom:18px}

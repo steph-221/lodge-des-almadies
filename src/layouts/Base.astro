@@ -48,12 +48,14 @@ const graph = [jsonLd, ...schema];
   <meta property="og:locale" content="fr_FR" />
   <link rel="icon" href="/img/logo.png" />
   <meta name="theme-color" content="#faf7f2" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
   <script is:inline>document.documentElement.classList.add('js')</script>
   <script type="application/ld+json" set:html={JSON.stringify(graph)} />
 </head>
 <body>
   <a class="skip" href="#main">Aller au contenu</a>
-  <header class="top">
+  <header class="top" id="top">
     <div class="wrap">
       <a href="/"><img src="/img/logo.png" alt={site.name} height="48" /></a>
       <button class="burger" aria-expanded="false" aria-controls="menu" id="burger">Menu</button>
@@ -74,7 +76,7 @@ const graph = [jsonLd, ...schema];
   <footer>
     <div class="wrap">
       <div class="grid">
-        <div><h3>{site.name}</h3><p>{site.address}<br />À 15 minutes du centre-ville.</p></div>
+        <div><img class="flogo" src="/img/logo.png" alt={site.name} /><p>{site.address}<br />À 15 minutes du centre-ville.</p></div>
         <div><h3>Navigation</h3><ul>{footerNav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}</ul></div>
         <div><h3>Contact</h3><p><a href={`tel:${site.phoneHref}`}>{site.phone}</a><br /><a href={`mailto:${site.email}`}>{site.email}</a><br /><a href={site.tripadvisor} rel="noopener" target="_blank">Avis Tripadvisor</a></p></div>
       </div>
@@ -86,7 +88,7 @@ const graph = [jsonLd, ...schema];
     (function () {
       var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
       var b = document.getElementById('burger'), m = document.getElementById('menu'), hd = document.querySelector('header.top');
-      b.addEventListener('click', function () { var o = m.classList.toggle('open'); b.setAttribute('aria-expanded', o); });
+      b.addEventListener('click', function () { var o = m.classList.toggle('open'); b.setAttribute('aria-expanded', o); hd.classList.toggle('menu-open', o); });
 
       // Révélation au scroll
       var sel = 'main h2,main .lead,main .card,main .price,main .thumbs img,main .bento img,main .gal img,main .tarif-table,main form,main ul.ticks';
