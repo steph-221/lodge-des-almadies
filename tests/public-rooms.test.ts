@@ -10,7 +10,7 @@ describe('tarifs publics depuis la base', () => {
     expect(cleanView('Bâtiment B')).toBe('');
   });
   const t = (code: string, name: string, fcfa: number, twin = false): PublicType =>
-    ({ code, name, building: 'A', view: '', fcfa, extraBed: 10000, count: 1, twin, suite: /^suite/i.test(name) });
+    ({ code, name, building: 'A', view: '', fcfa, extraBed: 10000, count: 1, twin, suite: /^suite/i.test(name), amenities: [] });
   const types = [t('std-ar', 'Chambre Standard côté route', 49000, true), t('bal-ar', 'Chambre côté route avec balcon', 63000), t('sjr-ap', 'Suite Junior avec terrasse', 78000)];
   it('répartit les types entre les pages suites, double et twin', () => {
     expect(pricesFor('suites', types)?.map((p) => p.fcfa)).toEqual([78000]);

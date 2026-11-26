@@ -113,6 +113,28 @@ if (manage) {
     }
   };
 
+  // Équipements d'une chambre : valeur du type par défaut, écart seulement si on choisit autre chose.
+  type RoomAmenity = { key: string; labelFr: string; value: AmenityValue | null; typeValue: AmenityValue | null; own: boolean };
+  let roomGrid = false;
+  async function renderRoomAmenities(room: Room | null) {
+    const box = $('room-amenities-box'), grid = $('room-amenities-grid');
+    grid.textContent = '';
+    roomGrid = false;
+    box.hidden = true;
+    if (!room || !room.roomTypeId) return;
+    const r = await api<{ amenities: RoomAmenity[] }>('GET', `/api/hotel/rooms/${room.id}/amenities`);
+    if (!r.ok || editingRoom?.id !== room.id) return;
+    r.data.amenities.forEach((a) => {
+      const inherited = a.typeValue ? AMENITY_LABEL[a.typeValue] : '—';
+      grid.appendChild(h('label', { class: a.own ? 'own' : '' }, a.labelFr,
+        h('select', { name: `ramenity:${a.key}` },
+          h('option', { value: '', selected: !a.own }, `Comme le type (${inherited})`),
+          ...Object.entries(AMENITY_LABEL).map(([k, l]) => h('option', { value: k, selected: a.own && a.value === k }, l)))));
+    });
+    roomGrid = true;
+    box.hidden = false;
+  }
+
   // Grille des équipements : affichée seulement quand on modifie un type existant.
   function renderAmenityGrid(t: RoomType | null) {
     const box = $('amenities-box'), grid = $('amenities-grid');
@@ -199,6 +221,7 @@ if (manage) {
           fill(roomForm, { number: r.number, building: r.building, floor: r.floor, roomTypeId: r.roomTypeId ? String(r.roomTypeId) : '', minibar: r.minibar, notes: r.notes });
           $('room-form-title').textContent = `Modifier la chambre ${r.number}`;
           renderKnown();
+          void renderRoomAmenities(r);
           roomForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
         } }, 'Modifier'),
         h('button', { class: r.active ? 'sm danger' : 'sm', type: 'button', onclick: async () => {
@@ -217,7 +240,7 @@ if (manage) {
     renderTypes(); renderRooms();
   }
 
-  const resetRoom = () => { editingRoom = null; roomForm.reset(); $('room-form-title').textContent = 'Ajouter une chambre'; renderKnown(); };
+  const resetRoom = () => { editingRoom = null; roomForm.reset(); $('room-form-title').textContent = 'Ajouter une chambre'; renderKnown(); void renderRoomAmenities(null); };
   typeSelect.addEventListener('change', renderKnown);
   const resetType = () => { editingType = null; typeForm.reset(); renderAmenityGrid(null); $('type-form-title').textContent = 'Ajouter un type de chambre'; };
 
@@ -227,6 +250,12 @@ if (manage) {
     const body = { number: fd.get('number'), building: fd.get('building'), floor: fd.get('floor'), roomTypeId: fd.get('roomTypeId') || null, minibar: fd.get('minibar') === 'on', notes: fd.get('notes') };
     const r = editingRoom ? await api('PATCH', `/api/hotel/rooms/${editingRoom.id}`, body) : await api('POST', '/api/hotel/rooms', body);
     if (!r.ok) { flash(roomMsg, r.data.error || 'Enregistrement impossible.'); return; }
+    if (editingRoom && roomGrid) {
+      const grid: Record<string, string> = {};
+      for (const [k, v] of fd.entries()) if (k.startsWith('ramenity:')) grid[k.slice(9)] = String(v);
+      const a = await api('PUT', `/api/hotel/rooms/${editingRoom.id}/amenities`, { amenities: grid });
+      if (!a.ok) { flash(roomMsg, a.data.error || 'Chambre enregistrée, mais pas ses équipements.'); return; }
+    }
     flash(roomMsg, editingRoom ? 'Chambre modifiée.' : 'Chambre ajoutée.', true);
     resetRoom(); await loadRooms();
   });

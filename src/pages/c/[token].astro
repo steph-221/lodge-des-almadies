@@ -2,6 +2,8 @@
 import GuestLayout from '../../layouts/GuestLayout.astro';
 import { dbConfigured } from '../../lib/db';
 import { listCatalog, listGuide, roomForToken, roomIsOpen, roomRequests } from '../../lib/hotel/requests';
+import { getRoomSheet, type RoomSheet } from '../../lib/hotel/rooms';
+import { groupForGuest } from '../../lib/hotel/amenities-core';
 import { isTokenShape, pickLang } from '../../lib/hotel/requests-core';
 import { todayDakar } from '../../lib/hotel/tasks';
 
@@ -18,11 +20,12 @@ let failed = false;
 let catalog: Awaited<ReturnType<typeof listCatalog>> = [];
 let guide: Awaited<ReturnType<typeof listGuide>> = [];
 let mine: Awaited<ReturnType<typeof roomRequests>> = [];
+let sheet: RoomSheet | null = null;
 try {
   room = await roomForToken(token);
   if (room) {
     open = await roomIsOpen(room.id, todayDakar());
-    [catalog, guide, mine] = await Promise.all([open ? listCatalog(true) : [], listGuide(true), open ? roomRequests(room.id) : []]);
+    [catalog, guide, mine, sheet] = await Promise.all([open ? listCatalog(true) : [], listGuide(true), open ? roomRequests(room.id) : [], getRoomSheet(room.id).catch(() => null)]);
   }
 } catch (e) {
   console.error('[page client]', (e as Error).message);
@@ -32,14 +35,17 @@ try {
 if (!failed && !room) return new Response(null, { status: 404, headers: { 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
 
 const L = fr
-  ? { title: 'Votre chambre', room: 'Chambre', guide: 'Guide de la chambre', ask: 'Que pouvons-nous faire pour vous ?', send: 'Envoyer', qty: 'Qté', note: 'Précisez (obligatoire)', noteOpt: 'Précision (facultatif)', mine: 'Vos demandes', closedTitle: 'Demandes indisponibles', closed: 'Cette chambre n’est pas ouverte aux demandes en ligne. Pour toute question, merci de vous adresser à la réception.', down: 'Service momentanément indisponible. Merci d’appeler la réception.', none: 'Aucune demande disponible pour le moment. Merci d’appeler la réception.', rs: 'Room service', other: 'Autres demandes', st: { new: 'Envoyée', doing: 'En cours', done: 'Faite', cancelled: 'Annulée' }, fcfa: 'FCFA' }
-  : { title: 'Your room', room: 'Room', guide: 'Room guide', ask: 'How can we help you?', send: 'Send', qty: 'Qty', note: 'Details (required)', noteOpt: 'Details (optional)', mine: 'Your requests', closedTitle: 'Requests unavailable', closed: 'This room is not open for online requests. For any question, please contact the front desk.', down: 'Service temporarily unavailable. Please call the front desk.', none: 'No request available right now. Please call the front desk.', rs: 'Room service', other: 'Other requests', st: { new: 'Sent', doing: 'In progress', done: 'Done', cancelled: 'Cancelled' }, fcfa: 'FCFA' };
+  ? { title: 'Votre chambre', room: 'Chambre', guide: 'Guide de la chambre', ask: 'Que pouvons-nous faire pour vous ?', send: 'Envoyer', qty: 'Qté', note: 'Précisez (obligatoire)', noteOpt: 'Précision (facultatif)', mine: 'Vos demandes', closedTitle: 'Demandes indisponibles', closed: 'Cette chambre n’est pas ouverte aux demandes en ligne. Pour toute question, merci de vous adresser à la réception.', down: 'Service momentanément indisponible. Merci d’appeler la réception.', none: 'Aucune demande disponible pour le moment. Merci d’appeler la réception.', rs: 'Room service', other: 'Autres demandes', st: { new: 'Envoyée', doing: 'En cours', done: 'Faite', cancelled: 'Annulée' }, fcfa: 'FCFA', equip: 'Votre chambre en détail', incl: 'Inclus', onReq: 'Sur demande à la réception', extra: 'En supplément (facturé)', m2: 'm²' }
+  : { title: 'Your room', room: 'Room', guide: 'Room guide', ask: 'How can we help you?', send: 'Send', qty: 'Qty', note: 'Details (required)', noteOpt: 'Details (optional)', mine: 'Your requests', closedTitle: 'Requests unavailable', closed: 'This room is not open for online requests. For any question, please contact the front desk.', down: 'Service temporarily unavailable. Please call the front desk.', none: 'No request available right now. Please call the front desk.', rs: 'Room service', other: 'Other requests', st: { new: 'Sent', doing: 'In progress', done: 'Done', cancelled: 'Cancelled' }, fcfa: 'FCFA', equip: 'Your room in detail', incl: 'Included', onReq: 'On request at the front desk', extra: 'Extra charge', m2: 'm²' };
 
 const lab = (c: { labelFr: string; labelEn: string }) => (fr ? c.labelFr : c.labelEn || c.labelFr);
 const sections = guide.filter((g) => open || !g.occupiedOnly);
 const service = catalog.filter((c) => c.kind === 'service');
 const rs = catalog.filter((c) => c.kind === 'room_service');
 const base = `/c/${token}`;
+const eq = sheet ? groupForGuest(sheet.amenities) : null;
+const eqLab = (a: { labelFr: string; labelEn: string }) => (fr ? a.labelFr : a.labelEn || a.labelFr);
+const facts = sheet ? [fr ? sheet.typeLabel.replace(/\s*\(bâtiment [^)]*\)\s*$/i, '') : sheet.typeLabelEn || sheet.typeLabel, sheet.areaM2 ? `${sheet.areaM2.toLocaleString(fr ? 'fr-FR' : 'en-GB')} ${L.m2}` : '', sheet.beds].filter(Boolean).join(' · ') : '';
 ---
 <GuestLayout title={`${L.title} | Lodge des Almadies`} lang={lang}>
   <header class="g">
@@ -54,6 +60,16 @@ const base = `/c/${token}`;
     {room && (
       <>
         <h2 style="margin:6px 0">{L.room} {room.number}</h2>
+
+        {sheet && eq && (
+          <div class="g-card">
+            <h2>{L.equip}</h2>
+            <p class="g-mut" style="margin:0 0 6px">{facts}</p>
+            {eq.included.length > 0 && <div class="g-opt"><strong>{L.incl}</strong><p class="g-body">{eq.included.map(eqLab).join(' · ')}</p></div>}
+            {eq.onRequest.length > 0 && <div class="g-opt"><strong>{L.onReq}</strong><p class="g-body">{eq.onRequest.map(eqLab).join(' · ')}</p></div>}
+            {eq.extra.length > 0 && <div class="g-opt"><strong>{L.extra}</strong><p class="g-body">{eq.extra.map(eqLab).join(' · ')}</p></div>}
+          </div>
+        )}
 
         {sections.length > 0 && (
           <div class="g-card">

@@ -2,13 +2,14 @@
 import Base from '../../layouts/Base.astro';
 import BookButton from '../../components/BookButton.astro';
 import { getContent, imgSrc, fmtFcfa, fmtEur } from '../../lib/content';
-import { getPublicTypes, pricesFor } from '../../lib/public-rooms';
+import { equipmentFor, getPublicTypes, pricesFor } from '../../lib/public-rooms';
 const { slug } = Astro.params;
 const c = await getContent();
 const r = c.rooms.find((x) => x.slug === slug);
 if (!r) return new Response(null, { status: 404 });
 // Prix du back-office Chambres quand la base répond ; sinon, ceux du contenu de l'admin.
 const db = await getPublicTypes();
+const eq = db ? equipmentFor(r.slug, db) : null;
 const litSup = db?.find((x) => x.extraBed != null)?.extraBed ?? c.tarifs.litSup ?? null;
 const prices = ((db && pricesFor(r.slug, db)) ?? r.prices).map((p) => ({ label: p.label, fcfa: fmtFcfa(p.fcfa), eur: fmtEur(p.fcfa, c.rate), raw: p.fcfa }));
 const schema = [{
@@ -19,7 +20,7 @@ const schema = [{
   bed: { '@type': 'BedDetails', typeOfBed: r.beds },
   occupancy: { '@type': 'QuantitativeValue', maxValue: 3 },
   image: r.images.map((i) => new URL(imgSrc(i), 'https://lodgedesalmadies.com').href),
-  amenityFeature: r.equipment.map((name) => ({ '@type': 'LocationFeatureSpecification', name, value: true })),
+  amenityFeature: (eq ? eq.all : r.equipment).map((name) => ({ '@type': 'LocationFeatureSpecification', name, value: true })),
   containedInPlace: { '@id': 'https://lodgedesalmadies.com/#hotel' },
   makesOffer: prices.map((p) => ({ '@type': 'Offer', name: p.label, priceCurrency: 'XOF', price: String(p.raw) })),
 }];
@@ -34,7 +35,11 @@ const schema = [{
         {r.images.map((i) => <img src={imgSrc(i)} alt={r.name} loading="lazy" />)}
       </div>
       <div class="grid g2">
-        <div><h2>Équipements</h2><ul class="ticks one">{r.equipment.map((e) => <li>{e}</li>)}</ul></div>
+        <div>
+          <h2>Équipements</h2>
+          <ul class="ticks one">{(eq ? eq.all : r.equipment).map((e) => <li>{e}</li>)}</ul>
+          {eq && eq.some.length > 0 && <><h3>Selon la chambre</h3><ul class="ticks one">{eq.some.map((e) => <li>{e}</li>)}</ul></>}
+        </div>
         <div class="pin"><h2>Tarifs par nuit</h2>
           {prices.map((p) => <div class="price"><span>{p.label}</span><strong>{p.fcfa} <small>{p.eur}</small></strong></div>)}
           <p><small>{litSup != null && <>Lit supplémentaire : {fmtFcfa(litSup)} par nuit. </>}Taxe de séjour : {fmtFcfa(c.tarifs.taxeSejour)} par nuitée et par personne. Navette taxi aéroport disponible en supplément.</small></p>
