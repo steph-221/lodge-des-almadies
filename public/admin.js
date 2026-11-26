@@ -335,15 +335,24 @@
   }
 
   async function init() {
+    // La déconnexion est branchée en premier : elle doit marcher même si le chargement du contenu échoue.
+    $('logout').addEventListener('click', async function () {
+      try {
+        var res = await fetch('/api/admin/login', { method: 'DELETE', headers: { 'content-type': 'application/json' } });
+        // On vérifie que la session est bien fermée avant de quitter la page, et on affiche la cause sinon.
+        var chk = await fetch('/api/admin/content');
+        if (chk.status !== 401) { msg('Déconnexion impossible (code ' + res.status + ', session ' + chk.status + '). Fermez le navigateur ou contactez l’assistance.', 'err'); return; }
+      } catch (e) { msg('Déconnexion impossible : ' + e.message, 'err'); return; }
+      location.href = '/admin/';
+    });
     var r = await fetch('/api/admin/content');
     if (r.status === 401) return location.reload();
     c = await r.json();
     render();
     $('save').addEventListener('click', save);
-    $('logout').addEventListener('click', async function () { await fetch('/api/admin/login', { method: 'DELETE' }); location.reload(); });
     $('reset').addEventListener('click', async function () {
       if (!confirm('Remplacer tout le contenu par celui d’origine ? Vos modifications seront perdues.')) return;
-      await fetch('/api/admin/content', { method: 'DELETE' });
+      await fetch('/api/admin/content', { method: 'DELETE', headers: { 'content-type': 'application/json' } });
       location.reload();
     });
     window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
