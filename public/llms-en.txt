@@ -8,18 +8,18 @@ Email: hotel@lodgedesalmadies.com
 Payment: FCFA, euro, US dollar, Visa and Mastercard cards
 
 ## Rooms and rates (per night, 2 guests + 1 extra bed at 10,000 FCFA, 1-night minimum)
-- [Suites](https://lodgedesalmadies.com/en/chambres/suites/): king-size bed, 78,000 FCFA (Junior Suite with terrace, pool side) to 89,000 FCFA (Building B suite)
-- [Double Rooms](https://lodgedesalmadies.com/en/chambres/double/): 49,000 to 63,000 FCFA
-- [Twin Rooms](https://lodgedesalmadies.com/en/chambres/twin/): 49,000 to 57,000 FCFA
+- [Suites](https://lodgedesalmadies.com/en/rooms/suites/): king-size bed, 78,000 FCFA (Junior Suite with terrace, pool side) to 89,000 FCFA (Building B suite)
+- [Double Rooms](https://lodgedesalmadies.com/en/rooms/double/): 49,000 to 63,000 FCFA
+- [Twin Rooms](https://lodgedesalmadies.com/en/rooms/twin/): 49,000 to 57,000 FCFA
 
 ## Services
 - [The hotel](https://lodgedesalmadies.com/en/hotel/): amenities, L'ENVERS restaurant, LAPESCHARDIÈRE and ZAMANI boutiques
-- [Seminars](https://lodgedesalmadies.com/en/seminaires/): a 70 m² meeting room for 40 people, fully equipped (130,000 FCFA per day)
-- [Rates](https://lodgedesalmadies.com/en/tarifs/): rooms, dining, seminars
+- [Meetings & Events](https://lodgedesalmadies.com/en/meetings-events/): a 70 m² meeting room for 40 people, fully equipped (130,000 FCFA per day)
+- [Rates](https://lodgedesalmadies.com/en/rates/): rooms, dining, seminars
 - [Services](https://lodgedesalmadies.com/en/services/)
 - [L'ENVERS Restaurant](https://lodgedesalmadies.com/en/restaurant/)
 - [Boutiques](https://lodgedesalmadies.com/en/boutiques/)
-- [Gallery](https://lodgedesalmadies.com/en/galerie/)
+- [Gallery](https://lodgedesalmadies.com/en/gallery/)
 
 ## Practical
 - [FAQ](https://lodgedesalmadies.com/en/faq/)

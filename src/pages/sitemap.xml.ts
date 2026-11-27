@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getContent } from '../lib/content';
+import { localePath } from '../lib/i18n';
 
 export const prerender = false;
 
@@ -9,7 +10,7 @@ const ORIGIN = 'https://lodgedesalmadies.com';
 export const GET: APIRoute = async () => {
   const c = await getContent();
   const paths = ['/', '/hotel/', '/tarifs/', '/tarifs/seminaire/', '/services/', '/restaurant/', '/boutiques/', '/seminaires/', '/galerie/', '/faq/', '/contact/', ...c.rooms.map((r) => `/chambres/${r.slug}/`)];
-  const en = (p: string) => (p === '/' ? '/en/' : `/en${p}`);
+  const en = (p: string) => localePath('en', p);
   const entry = (loc: string, p: string) =>
     `<url><loc>${ORIGIN}${loc}</loc>` +
     `<xhtml:link rel="alternate" hreflang="fr" href="${ORIGIN}${p}"/>` +

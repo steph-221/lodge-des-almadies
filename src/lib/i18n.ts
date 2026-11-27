@@ -16,20 +16,37 @@ export const langOf = (url: URL | string): Lang => {
   return /^\/en(\/|$)/.test(p) ? 'en' : 'fr';
 };
 
-// « /tarifs/ » -> « /en/tarifs/ » ; un lien déjà préfixé, externe ou technique est laissé tel quel.
+// Adresses anglaises : les chemins français sont remplacés par leur équivalent anglais (le plus long d'abord).
+const ROUTES: [string, string][] = [
+  ['/tarifs/seminaire/', '/rates/meetings-events/'],
+  ['/tarifs/', '/rates/'],
+  ['/seminaires/', '/meetings-events/'],
+  ['/chambres/', '/rooms/'],
+  ['/galerie/', '/gallery/'],
+];
+const swap = (path: string, from: 0 | 1): string => {
+  const slash = path.endsWith('/') ? path : path + '/';
+  for (const r of ROUTES) if (slash.startsWith(r[from])) return r[1 - from] + slash.slice(r[from].length) + '';
+  return path;
+};
+const fixSlash = (orig: string, out: string): string => (orig.endsWith('/') || out === orig ? out : out.replace(/\/$/, ''));
+
+// « /tarifs/ » -> « /en/rates/ » ; un lien déjà préfixé, externe ou technique est laissé tel quel.
 export function localePath(lang: Lang, href: string): string {
   if (lang === 'fr' || !href.startsWith('/') || href.startsWith('//')) return href;
   if (/^\/(en(\/|$)|img\/|api\/|admin|c\/|_)/.test(href)) return href;
-  return href === '/' ? '/en/' : `/en${href}`;
+  const [path, ...q] = href.split('?');
+  const out = path === '/' ? '/en/' : '/en' + fixSlash(path, swap(path, 0));
+  return q.length ? `${out}?${q.join('?')}` : out;
 }
 
 // Chemin équivalent dans l'autre langue (pour le sélecteur FR | EN et les balises hreflang).
 export function switchPath(lang: Lang, pathname: string): string {
   if (lang === 'en') {
-    const p = pathname.replace(/^\/en(?=\/|$)/, '');
-    return p || '/';
+    const p = pathname.replace(/^\/en(?=\/|$)/, '') || '/';
+    return fixSlash(p, swap(p, 1));
   }
-  return pathname === '/' ? '/en/' : `/en${pathname}`;
+  return pathname === '/' ? '/en/' : '/en' + fixSlash(pathname, swap(pathname, 0));
 }
 
 export type T = ((fr: string, vars?: Record<string, string | number>) => string) & { lang: Lang; has: (fr: string) => boolean };

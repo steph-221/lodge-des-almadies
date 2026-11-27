@@ -21,7 +21,10 @@ describe('chemins par langue', () => {
   });
   it('préfixe les liens internes en anglais et laisse le reste', () => {
     expect(localePath('en', '/')).toBe('/en/');
-    expect(localePath('en', '/tarifs/')).toBe('/en/tarifs/');
+    expect(localePath('en', '/tarifs/')).toBe('/en/rates/');
+    expect(localePath('en', '/tarifs/seminaire/')).toBe('/en/rates/meetings-events/');
+    expect(localePath('en', '/seminaires/')).toBe('/en/meetings-events/');
+    expect(localePath('en', '/chambres/twin/')).toBe('/en/rooms/twin/');
     expect(localePath('en', '/contact/?objet=seminaire')).toBe('/en/contact/?objet=seminaire');
     expect(localePath('en', '/en/hotel/')).toBe('/en/hotel/');
     expect(localePath('en', '/img/logo.png')).toBe('/img/logo.png');
@@ -32,13 +35,17 @@ describe('chemins par langue', () => {
     expect(switchPath('fr', '/')).toBe('/en/');
     expect(switchPath('fr', '/hotel/')).toBe('/en/hotel/');
     expect(switchPath('en', '/en/')).toBe('/');
-    expect(switchPath('en', '/en/chambres/twin/')).toBe('/chambres/twin/');
+    expect(switchPath('en', '/en/rooms/twin/')).toBe('/chambres/twin/');
+    expect(switchPath('en', '/en/rates/meetings-events/')).toBe('/tarifs/seminaire/');
+    expect(switchPath('en', '/en/meetings-events/')).toBe('/seminaires/');
+    expect(switchPath('fr', '/tarifs/seminaire/')).toBe('/en/rates/meetings-events/');
   });
 });
 
 describe('traduction', () => {
   it('traduit par le texte français, avec variables', () => {
     expect(t('Réserver')).toBe('Book now');
+    expect(t('Séminaires')).toBe('Meetings & Events');
     expect(t('{n} chambres', { n: 3 })).toBe('3 rooms');
     expect(makeT('fr')('Réserver')).toBe('Réserver');
   });
