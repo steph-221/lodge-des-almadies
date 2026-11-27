@@ -31,7 +31,7 @@ export async function getStay(id: number): Promise<Stay | null> {
 // Capacité : un type de chambre peut limiter le nombre de personnes (la capacité maximale compte lit d'appoint et lit bébé).
 async function capacityError(roomId: number, guests: number): Promise<string | null> {
   const rows = (await sql().query(
-    `select r.number, r.active, t.max_capacity::int as max from rooms r left join room_types t on t.id = r.room_type_id where r.id = $1`, [roomId],
+    `select r.number, r.active, coalesce(r.max_capacity, t.max_capacity)::int as max from rooms r left join room_types t on t.id = r.room_type_id where r.id = $1`, [roomId],
   )) as { number: string; active: boolean; max: number | null }[];
   const r = rows[0];
   if (!r) return 'Chambre inconnue.';

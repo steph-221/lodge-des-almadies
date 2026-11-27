@@ -22,7 +22,7 @@ const extraBed = db?.find((r) => r.extraBed != null)?.extraBed ?? null;
     <p>{tf.intro} {lang === 'en' ? `€1 = ${c.rate} FCFA.` : `1 € = ${c.rate} FCFA.`}</p>
     <div class="tarif-table">
       {roomRows.map((r) => (
-        <div class="price"><span>{r.name} · {t('bâtiment')} {r.building}{r.view ? ` · ${r.view}` : ''} <small>({t(r.count > 1 ? '{n} chambres' : '{n} chambre', { n: r.count })})</small></span><strong>{fmtFcfa(r.fcfa, lang)} <small>{fmtEur(r.fcfa, c.rate, lang)}</small></strong></div>
+        <div class="price"><span>{r.name} · {t('bâtiment')} {r.building}{r.view ? ` · ${r.view}` : ''} <small>({t(r.count > 1 ? '{n} chambres' : '{n} chambre', { n: r.count })})</small></span><strong class="amt">{fmtFcfa(r.fcfa, lang)} <small>{fmtEur(r.fcfa, c.rate, lang)}</small></strong></div>
       ))}
     </div>
     <p><small>{extraBed != null && <>{t('Lit supplémentaire : {price} par nuit.', { price: fmtFcfa(extraBed, lang) })} </>}{t('Taxe de séjour : {price} par nuitée et par personne.', { price: fmtFcfa(tf.taxeSejour, lang) })}</small></p>
@@ -32,7 +32,7 @@ const extraBed = db?.find((r) => r.extraBed != null)?.extraBed ?? null;
     <ul class="ticks">{tf.equipements.map((e) => <li>{e}</li>)}</ul>
 
     <h2>{t('Restauration et bar')}</h2>
-    {tf.restauration.map((r) => <div class="price"><span>{r.label} <small>· {r.detail}</small></span><strong>{fmtFcfa(r.fcfa, lang)} <small>{fmtEur(r.fcfa, c.rate, lang)}</small></strong></div>)}
+    {tf.restauration.map((r) => <div class="price"><span>{r.label} <small>· {r.detail}</small></span><strong class="amt">{fmtFcfa(r.fcfa, lang)} <small>{fmtEur(r.fcfa, c.rate, lang)}</small></strong></div>)}
     <p>{tf.restaurationNote}</p>
 
     <h2>{t('Informations complémentaires')}</h2>

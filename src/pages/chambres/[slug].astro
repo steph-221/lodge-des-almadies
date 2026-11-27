@@ -47,7 +47,7 @@ const schema = [{
           {eq && eq.some.length > 0 && <><h3>{t('Selon la chambre')}</h3><ul class="ticks one">{eq.some.map((e) => <li>{e}</li>)}</ul></>}
         </div>
         <div class="pin"><h2>{t('Tarifs par nuit')}</h2>
-          {prices.map((p) => <div class="price"><span>{p.label}</span><strong>{p.fcfa} <small>{p.eur}</small></strong></div>)}
+          {prices.map((p) => <div class="price"><span>{p.label}</span><strong class="amt">{p.fcfa} <small>{p.eur}</small></strong></div>)}
           <p><small>{litSup != null && <>{t('Lit supplémentaire : {price} par nuit.', { price: fmtFcfa(litSup, lang) })} </>}{t('Taxe de séjour : {price} par nuitée et par personne.', { price: fmtFcfa(c.tarifs.taxeSejour, lang) })} {t('Navette taxi aéroport disponible en supplément.')}</small></p>
           <BookButton />
         </div>

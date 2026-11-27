@@ -15,6 +15,9 @@ Le site a été refondu le 05/11. Depuis le 17/11, le module « services hôtel 
 - Créer la branche Neon par aperçu Vercel.
 
 ## Journal
+### 2026-11-27 (suite)
+- Prix sur une seule ligne sur /tarifs/ et les pages chambres (« 49 000 FCFA ≈ 75 € » ne se coupe plus, c'est le libellé qui passe à la ligne).
+- Nombre de personnes par chambre : migration 0012 (`rooms.base_capacity` et `max_capacity`, vides = comme le type). Réglable dans la fiche chambre du back-office (2/2 sans lit supplémentaire, 2/3 avec, 3/3 chambre triple). Le contrôle de capacité des séjours et la page client du QR code utilisent la capacité effective.
 ### 2026-11-27 (anglais)
 - Site public en anglais sous `/en/` (accueil, hôtel, chambres, tarifs, restaurant, séminaires, boutiques, galerie, FAQ, contact), sélecteur FR | EN, `hreflang`, plan du site bilingue. Dictionnaire `src/i18n/en.json`, mode d'emploi et glossaire dans `docs/i18n.md`. Les textes de la base utilisent les colonnes anglaises déjà présentes. Admin et page QR `/c/` restent en français.
 

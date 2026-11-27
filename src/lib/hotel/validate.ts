@@ -15,7 +15,7 @@ const int = (v: unknown): number | null => {
   return Number.isInteger(n) ? n : null;
 };
 
-export type RoomInput = { number: string; building: string; floor: string; minibar: boolean; notes: string; roomTypeId: number | null };
+export type RoomInput = { number: string; building: string; floor: string; minibar: boolean; notes: string; roomTypeId: number | null; baseCapacity?: number | null; maxCapacity?: number | null };
 
 export function cleanRoom(b: Record<string, unknown>): Clean<RoomInput> {
   const number = str(b.number, 20);
@@ -29,7 +29,12 @@ export function cleanRoom(b: Record<string, unknown>): Clean<RoomInput> {
     roomTypeId = int(b.roomTypeId);
     if (roomTypeId === null || roomTypeId <= 0) return { ok: false, error: 'Type de chambre inconnu.' };
   }
-  return { ok: true, value: { number, building, floor, minibar: bool(b.minibar), notes, roomTypeId } };
+  // Capacité propre à la chambre : vide = comme le type.
+  const cap = (v: unknown): number | null | undefined => (v === undefined || v === null || v === '' ? null : int(v) !== null && int(v)! >= 1 && int(v)! <= 8 ? int(v)! : undefined);
+  const baseCapacity = cap(b.baseCapacity), maxCapacity = cap(b.maxCapacity);
+  if (baseCapacity === undefined || maxCapacity === undefined) return { ok: false, error: 'Nombre de personnes : de 1 à 8.' };
+  if (baseCapacity !== null && maxCapacity !== null && maxCapacity < baseCapacity) return { ok: false, error: 'Le maximum ne peut pas être inférieur au nombre de base.' };
+  return { ok: true, value: { number, building, floor, minibar: bool(b.minibar), notes, roomTypeId, baseCapacity, maxCapacity } };
 }
 
 export type RoomTypeInput = {
