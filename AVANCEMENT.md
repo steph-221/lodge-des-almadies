@@ -15,6 +15,9 @@ Le site a été refondu le 05/11. Depuis le 17/11, le module « services hôtel 
 - Créer la branche Neon par aperçu Vercel.
 
 ## Journal
+### 2026-11-27 (anglais)
+- Site public en anglais sous `/en/` (accueil, hôtel, chambres, tarifs, restaurant, séminaires, boutiques, galerie, FAQ, contact), sélecteur FR | EN, `hreflang`, plan du site bilingue. Dictionnaire `src/i18n/en.json`, mode d'emploi et glossaire dans `docs/i18n.md`. Les textes de la base utilisent les colonnes anglaises déjà présentes. Admin et page QR `/c/` restent en français.
+
 ### 2026-11-26
 - Mise à jour du descriptif des chambres (nouveau tableau de STEPH) : migration 0011 (superficies, literie « triple », « frigo bar », nouveau type STD-B2 pour les 13 standards du bâtiment B sans lit supplémentaire).
 - Équipements par chambre : une chambre hérite de la grille de son type, `room_amenities` ne garde que les écarts (203 communique avec la 201 ; les 205 et 207 forment le type STD-AR2, sans communication). Réglable dans le back-office Chambres, listing Excel (`/api/hotel/rooms/amenities`).

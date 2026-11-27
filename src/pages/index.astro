@@ -1,14 +1,18 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getContent, imgSrc } from '../lib/content';
-const { home, rooms, faq, hotel, restaurant, seminaire, boutiques } = await getContent();
+import { langOf, localePath, makeT } from '../lib/i18n';
+const lang = langOf(Astro.url);
+const t = makeT(lang);
+const L = (h: string) => localePath(lang, h);
+const { home, rooms, faq, hotel, restaurant, seminaire, boutiques } = await getContent(lang);
 const webp = (u: string) => (/^\/img\/.+\.jpg$/.test(u) ? u.replace(/\.jpg$/, '.webp') : null);
 const slides = home.carousel.length ? home.carousel : [home.heroImage];
-const svc = (href: string) => home.services.find((s) => s.href === href);
+const svc = (href: string) => home.services.find((s) => s.href === L(href));
 const sem = svc('/seminaires/'), resto = svc('/restaurant/'), shop = svc('/boutiques/');
 const strip = ['g-apero', 'g-decor', 'svc-piscine', 'g-seminaires', 'p-049_DSC_2308'];
 ---
-<Base title="Lodge des Almadies | Hôtel Dakar | Restaurant | Séminaires | Piscine">
+<Base title={t('Lodge des Almadies | Hôtel Dakar | Restaurant | Séminaires | Piscine')}>
   <section class="hero">
     <div class="hero-media">
       {slides.map((sl, i) => <picture>{webp(imgSrc(sl)) && <source srcset={webp(imgSrc(sl))!} type="image/webp" />}<img src={imgSrc(sl)} alt="" class={i === 0 ? 'on' : undefined} fetchpriority={i === 0 ? 'high' : undefined} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" /></picture>)}
@@ -17,45 +21,45 @@ const strip = ['g-apero', 'g-decor', 'svc-piscine', 'g-seminaires', 'p-049_DSC_2
       <h1>{home.title}</h1>
       <p>{home.subtitle}</p>
     </div>
-    <div class="book"><div><b>Arrivée</b><span>Choisissez une date</span></div><div><b>Départ</b><span>Choisissez une date</span></div><div><b>Chambres et personnes</b><span>2 adultes · 1 chambre</span></div><a class="btn" href="/contact/">Réserver</a></div>
+    <div class="book"><div><b>{t('Arrivée')}</b><span>{t('Choisissez une date')}</span></div><div><b>{t('Départ')}</b><span>{t('Choisissez une date')}</span></div><div><b>{t('Chambres et personnes')}</b><span>{t('2 adultes · 1 chambre')}</span></div><a class="btn" href={L('/contact/')}>{t('Réserver')}</a></div>
   </section>
 
   <section class="alt">
     <div class="wrap split rev">
-      <div class="collage"><div class="photo"><img src={imgSrc('g-reception')} alt="La réception" loading="lazy" /></div><div class="photo"><img src={imgSrc('g-relax')} alt="Espace détente" loading="lazy" /></div></div>
-      <div><span class="eyebrow">Bienvenue</span><h2>{home.welcomeTitle}</h2><p>{home.welcomeText}</p><p>{hotel.intro}</p><a class="link" href="/hotel/">Découvrir l’hôtel</a></div>
+      <div class="collage"><div class="photo"><img src={imgSrc('g-reception')} alt={t('La réception')} loading="lazy" /></div><div class="photo"><img src={imgSrc('g-relax')} alt={t('Espace détente')} loading="lazy" /></div></div>
+      <div><span class="eyebrow">{t('Bienvenue')}</span><h2>{home.welcomeTitle}</h2><p>{home.welcomeText}</p><p>{hotel.intro}</p><a class="link" href={L('/hotel/')}>{t('Découvrir l’hôtel')}</a></div>
     </div>
   </section>
 
   <section>
     <div class="wrap">
-      <div class="head"><span class="eyebrow">Hébergement</span><h2>Ma chambre, comme à la maison</h2><p>Suites spacieuses, chambres doubles et chambres twin : toutes climatisées, avec Wi-Fi haut débit gratuit.</p></div>
+      <div class="head"><span class="eyebrow">{t('Hébergement')}</span><h2>{t('Ma chambre, comme à la maison')}</h2><p>{t('Suites spacieuses, chambres doubles et chambres twin : toutes climatisées, avec Wi-Fi haut débit gratuit.')}</p></div>
       <div class="rooms">
-        {rooms.map((r) => <a class="room" href={`/chambres/${r.slug}/`}><img src={imgSrc(r.images[0] ?? 'hotel')} alt={r.name} loading="lazy" /><div><h3>{r.name}</h3><small>{r.beds}</small></div></a>)}
+        {rooms.map((r) => <a class="room" href={L(`/chambres/${r.slug}/`)}><img src={imgSrc(r.images[0] ?? 'hotel')} alt={r.name} loading="lazy" /><div><h3>{r.name}</h3><small>{r.beds}</small></div></a>)}
       </div>
-      <div class="center" style="margin-top:44px"><a class="btn" href="/tarifs/">Voir les tarifs</a></div>
-      <div class="chips"><div><em>36</em>chambres et suites</div><div><em>24h/24</em>réception</div><div><em>Wi-Fi</em>haut débit gratuit</div><div><em>Piscine</em>au cœur du Lodge</div></div>
+      <div class="center" style="margin-top:44px"><a class="btn" href={L('/tarifs/')}>{t('Voir les tarifs')}</a></div>
+      <div class="chips"><div><em>36</em>{t('chambres et suites')}</div><div><em>{t('24h/24')}</em>{t('réception')}</div><div><em>Wi-Fi</em>{t('haut débit gratuit')}</div><div><em>{t('Piscine')}</em>{t('au cœur du Lodge')}</div></div>
     </div>
   </section>
 
   {resto && <section class="dark-sec" data-theme-section>
     <div class="wrap split">
-      <div><span class="eyebrow">Restaurant</span><h2>Rendez-vous à L’ENVERS</h2><p>{restaurant.intro}</p><p>{restaurant.hours}</p><a class="link" href="/restaurant/">Voir le restaurant</a></div>
-      <div class="photo"><img src={imgSrc(restaurant.images[1] ?? resto.img)} alt="Restaurant L’ENVERS" loading="lazy" /></div>
+      <div><span class="eyebrow">{t('Restaurant')}</span><h2>{t('Rendez-vous à L’ENVERS')}</h2><p>{restaurant.intro}</p><p>{restaurant.hours}</p><a class="link" href={L('/restaurant/')}>{t('Voir le restaurant')}</a></div>
+      <div class="photo"><img src={imgSrc(restaurant.images[1] ?? resto.img)} alt={t('Restaurant L’ENVERS')} loading="lazy" /></div>
     </div>
   </section>}
 
   {sem && <section>
     <div class="wrap split">
-      <div class="photo"><img src={imgSrc(sem.img)} alt="Salle de séminaire" loading="lazy" /></div>
-      <div><span class="eyebrow">Séminaires</span><h2>Travailler en toute sérénité</h2><p>{seminaire.intro}</p><p>{seminaire.capacity}</p><a class="link" href="/seminaires/">Organiser un séminaire</a></div>
+      <div class="photo"><img src={imgSrc(sem.img)} alt={t('Salle de séminaire')} loading="lazy" /></div>
+      <div><span class="eyebrow">{t('Séminaires')}</span><h2>{t('Travailler en toute sérénité')}</h2><p>{seminaire.intro}</p><p>{seminaire.capacity}</p><a class="link" href={L('/seminaires/')}>{t('Organiser un séminaire')}</a></div>
     </div>
   </section>}
 
   {shop && <section class="alt">
     <div class="wrap split rev">
-      <div class="photo"><img src={imgSrc(shop.img)} alt="Boutiques" loading="lazy" /></div>
-      <div><span class="eyebrow">Boutiques</span><h2>Créateurs africains</h2><p>{boutiques.intro} {boutiques.items.map((b) => `${b.name} : ${b.text}`).join(' ')}</p><a class="link" href="/boutiques/">Découvrir les boutiques</a></div>
+      <div class="photo"><img src={imgSrc(shop.img)} alt={t('Boutiques')} loading="lazy" /></div>
+      <div><span class="eyebrow">{t('Boutiques')}</span><h2>{t('Créateurs africains')}</h2><p>{boutiques.intro} {boutiques.items.map((b) => `${b.name}${lang === 'en' ? ':' : ' :'} ${b.text}`).join(' ')}</p><a class="link" href={L('/boutiques/')}>{t('Découvrir les boutiques')}</a></div>
     </div>
   </section>}
 
@@ -63,9 +67,9 @@ const strip = ['g-apero', 'g-decor', 'svc-piscine', 'g-seminaires', 'p-049_DSC_2
 
   <section>
     <div class="wrap" style="max-width:820px">
-      <div class="head"><span class="eyebrow">Infos pratiques</span><h2>Questions fréquentes</h2></div>
+      <div class="head"><span class="eyebrow">{t('Infos pratiques')}</span><h2>{t('Questions fréquentes')}</h2></div>
       {faq.slice(0, 5).map((f) => <details><summary>{f.q}</summary><p>{f.a}</p></details>)}
-      <div class="center" style="margin-top:36px"><a class="link" href="/faq/">Toutes les questions</a></div>
+      <div class="center" style="margin-top:36px"><a class="link" href={L('/faq/')}>{t('Toutes les questions')}</a></div>
     </div>
   </section>
 </Base>

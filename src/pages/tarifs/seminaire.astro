@@ -1,23 +1,27 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { getContent, imgSrc, fmtFcfa, fmtEur } from '../../lib/content';
-const c = await getContent();
-const t = c.tarifs;
-const total = t.budgetExample.lines.reduce((n, l) => n + l.fcfa, 0);
+import { langOf, localePath, makeT } from '../../lib/i18n';
+const lang = langOf(Astro.url);
+const t = makeT(lang);
+const L = (h: string) => localePath(lang, h);
+const c = await getContent(lang);
+const tf = c.tarifs;
+const total = tf.budgetExample.lines.reduce((n, l) => n + l.fcfa, 0);
 ---
-<Base title="Tarifs séminaire 2027 | Lodge des Almadies, Dakar" description="Tarifs de la salle de séminaire du Lodge des Almadies : location à la journée, pause-café, exemple de budget.">
-  <section class="page-hero"><img src={imgSrc(t.seminaireHeroImage)} alt="" /><h1>Tarifs séminaire 2027</h1></section>
+<Base title={t('Tarifs séminaire 2027 | Lodge des Almadies, Dakar')} description={t('Tarifs de la salle de séminaire du Lodge des Almadies : location à la journée, pause-café, exemple de budget.')}>
+  <section class="page-hero"><img src={imgSrc(tf.seminaireHeroImage)} alt="" /><h1>{t('Tarifs séminaire 2027')}</h1></section>
   <section><div class="wrap">
-    <p class="center"><a href="/tarifs/">Tarifs publics</a> · <strong>Séminaire</strong></p>
-    <p class="lead">{t.seminaireIntro}</p>
-    <h2>La salle de réunion</h2>
-    {t.seminaireInfo.map((i) => <div class="price"><span>{i.label}</span><strong>{i.value}</strong></div>)}
-    {t.seminaire.map((r) => <div class="price"><span>{r.label} <small>· {r.detail}</small></span><strong>{fmtFcfa(r.fcfa)} <small>{fmtEur(r.fcfa, c.rate)}</small></strong></div>)}
+    <p class="center"><a href={L('/tarifs/')}>{t('Tarifs publics')}</a> · <strong>{t('Séminaire')}</strong></p>
+    <p class="lead">{tf.seminaireIntro}</p>
+    <h2>{t('La salle de réunion')}</h2>
+    {tf.seminaireInfo.map((i) => <div class="price"><span>{i.label}</span><strong>{i.value}</strong></div>)}
+    {tf.seminaire.map((r) => <div class="price"><span>{r.label} <small>· {r.detail}</small></span><strong>{fmtFcfa(r.fcfa, lang)} <small>{fmtEur(r.fcfa, c.rate, lang)}</small></strong></div>)}
 
-    <h2>{t.budgetExample.title}</h2>
-    {t.budgetExample.lines.map((l) => <div class="price"><span>{l.label}</span><strong>{fmtFcfa(l.fcfa)}</strong></div>)}
-    <div class="price"><span><strong>Total</strong></span><strong>{fmtFcfa(total)}</strong></div>
-    <p><small>{t.budgetExample.note}</small></p>
-    <p style="margin-top:24px"><a class="btn" href="/contact/?objet=seminaire">Demander un devis</a></p>
+    <h2>{tf.budgetExample.title}</h2>
+    {tf.budgetExample.lines.map((l) => <div class="price"><span>{l.label}</span><strong>{fmtFcfa(l.fcfa, lang)}</strong></div>)}
+    <div class="price"><span><strong>{t('Total')}</strong></span><strong>{fmtFcfa(total, lang)}</strong></div>
+    <p><small>{tf.budgetExample.note}</small></p>
+    <p style="margin-top:24px"><a class="btn" href={L('/contact/?objet=seminaire')}>{t('Demander un devis')}</a></p>
   </div></section>
 </Base>

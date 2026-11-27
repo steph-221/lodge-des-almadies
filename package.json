@@ -12,7 +12,8 @@
     "db:migrate": "node db/migrate.mjs",
     "db:status": "node db/migrate.mjs --status",
     "db:seed:dev": "node db/seed-dev.mjs",
-    "build:vercel": "node db/migrate.mjs && astro build"
+    "build:vercel": "node db/migrate.mjs && astro build",
+    "i18n:missing": "node scripts/i18n-missing.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.12.0",

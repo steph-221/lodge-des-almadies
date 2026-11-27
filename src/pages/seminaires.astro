@@ -1,31 +1,35 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getContent, imgSrc, fmtFcfa, fmtEur } from '../lib/content';
-const c = await getContent();
+import { langOf, localePath, makeT } from '../lib/i18n';
+const lang = langOf(Astro.url);
+const t = makeT(lang);
+const L = (h: string) => localePath(lang, h);
+const c = await getContent(lang);
 const s = c.seminaire;
 const [salle, pause] = c.tarifs.seminaire;
 ---
-<Base title="Séminaires | Lodge des Almadies, Dakar" description="Une salle de séminaire de 70 m² (jusqu’à 40 personnes), climatisée et équipée, avec restauration et hébergement sur place.">
-  <section class="page-hero"><img src={imgSrc(s.heroImage)} alt="" /><h1>Séminaires</h1></section>
+<Base title={t('Séminaires | Lodge des Almadies, Dakar')} description={t('Une salle de séminaire de 70 m² (jusqu’à 40 personnes), climatisée et équipée, avec restauration et hébergement sur place.')}>
+  <section class="page-hero"><img src={imgSrc(s.heroImage)} alt="" /><h1>{t('Séminaires')}</h1></section>
   <section><div class="wrap">
     <p class="lead">{s.intro}</p>
     <div class="grid g2">
       <div>
-        <h2>La salle</h2>
+        <h2>{t('La salle')}</h2>
         <p>{s.capacity}</p>
-        <div class="price"><span>{salle.label}</span><strong>{fmtFcfa(salle.fcfa)} <small>{fmtEur(salle.fcfa, c.rate)}</small></strong></div>
-        <div class="price"><span>{pause.label} (par personne)</span><strong>{fmtFcfa(pause.fcfa)} <small>{fmtEur(pause.fcfa, c.rate)}</small></strong></div>
-        <h2>Équipements</h2>
+        <div class="price"><span>{salle.label}</span><strong>{fmtFcfa(salle.fcfa, lang)} <small>{fmtEur(salle.fcfa, c.rate, lang)}</small></strong></div>
+        <div class="price"><span>{pause.label} ({t('par personne')})</span><strong>{fmtFcfa(pause.fcfa, lang)} <small>{fmtEur(pause.fcfa, c.rate, lang)}</small></strong></div>
+        <h2>{t('Équipements')}</h2>
         <ul class="ticks one">{s.equipment.map((e) => <li>{e}</li>)}</ul>
       </div>
       <div>
-        <h2>Services (en supplément)</h2>
+        <h2>{t('Services (en supplément)')}</h2>
         <ul class="ticks one">{s.services.map((e) => <li>{e}</li>)}</ul>
-        <a class="btn" href="/contact/?objet=seminaire">Demander un devis</a>
+        <a class="btn" href={L('/contact/?objet=seminaire')}>{t('Demander un devis')}</a>
       </div>
     </div>
     <div class="grid g3 thumbs" style="margin-top:40px">
-      {s.images.map((i) => <img src={imgSrc(i)} alt="Salle de séminaire" loading="lazy" />)}
+      {s.images.map((i) => <img src={imgSrc(i)} alt={t('Salle de séminaire')} loading="lazy" />)}
     </div>
   </div></section>
 </Base>

@@ -1,10 +1,14 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getContent, imgSrc } from '../lib/content';
-const { services } = await getContent();
+import { langOf, localePath, makeT } from '../lib/i18n';
+const lang = langOf(Astro.url);
+const t = makeT(lang);
+const L = (h: string) => localePath(lang, h);
+const { services } = await getContent(lang);
 ---
-<Base title="Services | Lodge des Almadies, Dakar" description="Restaurant L’ENVERS, salle de séminaire, boutiques et piscine au Lodge des Almadies, Dakar.">
-  <section class="page-hero"><img src={imgSrc(services.heroImage)} alt="" /><h1>Services</h1></section>
+<Base title={t('Services | Lodge des Almadies, Dakar')} description={t('Restaurant L’ENVERS, salle de séminaire, boutiques et piscine au Lodge des Almadies, Dakar.')}>
+  <section class="page-hero"><img src={imgSrc(services.heroImage)} alt="" /><h1>{t('Services')}</h1></section>
   <section><div class="wrap">
     <p class="lead">{services.intro}</p>
     <div class="grid g2">

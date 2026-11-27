@@ -39,7 +39,10 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   if (!nom || !message || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)) {
     return json(400, { error: 'invalid', message: 'Merci de vérifier les champs du formulaire.' });
   }
+  // Le visiteur écrit depuis la version anglaise du site : l'équipe répond en anglais.
+  const english = clean(d.lang, 2) === 'en';
   const lines: [string, string][] = [
+    ...(english ? ([['Langue', 'Anglais (EN) : répondre en anglais']] as [string, string][]) : []),
     ['Objet', LABEL[objet]], ['Nom', nom], ['E-mail', email], ['Téléphone', clean(d.telephone, 40)],
     ...(objet === 'seminaire'
       ? ([['Date souhaitée', clean(d.date_seminaire, 20)], ['Participants', clean(d.participants, 5)]] as [string, string][])
@@ -51,7 +54,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { authorization: `Bearer ${resendKey}`, 'content-type': 'application/json' },
-    body: JSON.stringify({ from, to: [to], reply_to: email, subject: `[${LABEL[objet]}] Demande de ${nom}`, html }),
+    body: JSON.stringify({ from, to: [to], reply_to: email, subject: `[${LABEL[objet]}]${english ? ' [EN]' : ''} Demande de ${nom}`, html }),
   });
   if (!res.ok) return json(502, { error: 'send_failed', message: 'Envoi impossible pour le moment. Écrivez-nous à ' + to + '.' });
   return json(200, { ok: true });

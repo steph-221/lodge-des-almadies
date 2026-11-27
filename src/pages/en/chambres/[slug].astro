@@ -1,0 +1,8 @@
+---
+import Page from '../../chambres/[slug].astro';
+import { getContent } from '../../../lib/content';
+// Une page ne peut renvoyer un 404 que depuis son propre code : on vérifie le type de chambre ici avant d'afficher la page française partagée.
+const { slug } = Astro.params;
+if (!(await getContent()).rooms.some((r) => r.slug === slug)) return new Response(null, { status: 404 });
+---
+<Page />
