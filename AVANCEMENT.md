@@ -15,6 +15,12 @@ Le site a été refondu le 05/11. Depuis le 17/11, le module « services hôtel 
 - Créer la branche Neon par aperçu Vercel.
 
 ## Journal
+### 2026-11-26
+- Mise à jour du descriptif des chambres (nouveau tableau de STEPH) : migration 0011 (superficies, literie « triple », « frigo bar », nouveau type STD-B2 pour les 13 standards du bâtiment B sans lit supplémentaire).
+- Équipements par chambre : une chambre hérite de la grille de son type, `room_amenities` ne garde que les écarts (203 communique avec la 201 ; les 205 et 207 forment le type STD-AR2, sans communication). Réglable dans le back-office Chambres, listing Excel (`/api/hotel/rooms/amenities`).
+- Page client du QR code : bloc « Votre chambre en détail » (inclus / sur demande / en supplément). Pages chambres du site : équipements lus dans la base.
+- Réponses de STEPH (27/11) : les chambres 103 à 106 restent à 49 000 FCFA ; « double ou twin » = lits collés ou séparés, « double » = pas de twin ; lit supplémentaire seulement dans les types indiqués ; « minibar » retiré de la description de la suite (on garde « frigo bar »). Le tableau compte maintenant 13 types : STD-B2, STD-AR2 (205, 207) et STD-AP2 (202, 204, 208) sont « sans lit supplémentaire ».
+
 ### 2026-11-25
 - Descriptif des chambres (tableau Excel de STEPH) en PR : migration 0010 avec 10 types de chambre (tarif 2027, lit sup., descriptions FR/EN), 32 équipements par type et les 36 chambres. Insertion seulement si absent : rien de saisi dans l'application n'est écrasé. C'est la seule migration qui contient des données de l'hôtel (base de production vide le 25/11).
 - Back-office chambres : tarif, emplacement, descriptions et grille d'équipements modifiables par type.

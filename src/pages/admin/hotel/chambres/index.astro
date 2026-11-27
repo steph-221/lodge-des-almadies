@@ -33,7 +33,7 @@ else if (manage) {
       {manage && (
         <>
           <div class="card">
-            <div class="head-row"><h3 style="margin:0">Liste des chambres</h3><span class="hint" id="rooms-count"></span></div>
+            <div class="head-row"><h3 style="margin:0">Liste des chambres</h3><span class="hint" id="rooms-count"></span><a class="sm" href="/api/hotel/rooms/amenities" download>Listing des équipements (Excel)</a></div>
             <p id="room-msg" role="status" class="hint"></p>
             <div class="table-wrap">
               <table class="tbl">
@@ -53,6 +53,11 @@ else if (manage) {
                 <label>Type<select name="roomTypeId"></select></label>
               </div>
               <div class="known" id="room-known" hidden></div>
+              <fieldset id="room-amenities-box" hidden>
+                <legend>Équipements de cette chambre</legend>
+                <p class="hint">Chaque chambre reprend les équipements de son type. Ne changez que ce qui diffère (par exemple : la 203 communique avec la 201, pas la 205). Le client voit « Oui », « Sur demande » et « En supplément » ; « Non » et « À vérifier » restent cachés.</p>
+                <div id="room-amenities-grid" class="amenity-grid"></div>
+              </fieldset>
               <label class="check"><input type="checkbox" name="minibar" /> Minibar dans la chambre</label>
               <label>Remarques<textarea name="notes" maxlength="500" rows="2"></textarea></label>
               <div class="acts"><button class="btn" type="submit">Enregistrer</button><button class="sm" type="button" id="room-cancel">Annuler</button></div>

@@ -1,4 +1,6 @@
 import { sql } from '../db';
+import { AMENITY_VALUES, isAmenityValue, type AmenityValue, type AmenityItem } from './amenities-core';
+export { AMENITY_VALUES, type AmenityValue };
 import type { RoomImportRow } from './import';
 import type { RoomInput, RoomTypeInput } from './validate';
 
@@ -9,9 +11,6 @@ export const STATUS_LABEL: Record<RoomStatus, string> = {
   dirty: 'À nettoyer', in_progress: 'En cours', to_check: 'À contrôler', ready: 'Prête', out_of_service: 'Hors service',
 };
 
-export const AMENITY_VALUES = ['oui', 'non', 'sur_demande', 'supplement', 'a_verifier'] as const;
-export type AmenityValue = (typeof AMENITY_VALUES)[number];
-export const AMENITY_LABEL: Record<AmenityValue, string> = { oui: 'Oui', non: 'Non', sur_demande: 'Sur demande', supplement: 'En supplément', a_verifier: 'À vérifier' };
 export type Amenity = { key: string; labelFr: string; labelEn: string; position: number };
 export type TypeAmenity = { key: string; value: AmenityValue };
 
@@ -180,4 +179,69 @@ export async function importRooms(rows: RoomImportRow[]): Promise<{ created: num
     }
   }
   return { created, updated, typesCreated, errors };
+}
+
+// ---------- Équipements par chambre ----------
+// Une chambre hérite de la grille de son type ; room_amenities ne garde que les écarts (ex. communication : 203 oui, 205 non).
+
+export type RoomAmenity = AmenityItem & { typeValue: AmenityValue | null; own: boolean };
+
+export async function listRoomAmenities(roomId: number): Promise<RoomAmenity[]> {
+  return (await sql().query(
+    `select m.key, m.label_fr as "labelFr", m.label_en as "labelEn", coalesce(ra.value, ta.value) as value, ta.value as "typeValue", (ra.value is not null) as own
+     from amenities m
+     join rooms r on r.id = $1
+     left join room_type_amenities ta on ta.room_type_id = r.room_type_id and ta.amenity_key = m.key
+     left join room_amenities ra on ra.room_id = r.id and ra.amenity_key = m.key
+     order by m.position, m.key`, [roomId],
+  )) as RoomAmenity[];
+}
+
+// values : clé -> valeur ; '' ou valeur identique à celle du type = retour à l'héritage. Renvoie le nombre d'écarts enregistrés.
+export async function setRoomAmenities(roomId: number, values: Record<string, unknown>): Promise<number> {
+  const current = new Map((await listRoomAmenities(roomId)).map((a) => [a.key, a]));
+  for (const [k, v] of Object.entries(values)) {
+    const a = current.get(k);
+    if (!a) continue;
+    if (v === '' || v === null || (isAmenityValue(v) && v === a.typeValue)) {
+      await sql().query(`delete from room_amenities where room_id = $1 and amenity_key = $2`, [roomId, k]);
+    } else if (isAmenityValue(v)) {
+      await sql().query(
+        `insert into room_amenities (room_id, amenity_key, value) values ($1,$2,$3)
+         on conflict (room_id, amenity_key) do update set value = excluded.value`, [roomId, k, v]);
+    }
+  }
+  return ((await sql().query(`select count(*)::int as n from room_amenities where room_id = $1`, [roomId])) as { n: number }[])[0].n;
+}
+
+// Toutes les chambres actives avec leurs équipements effectifs (pour le listing CSV).
+export async function listAmenityMatrix(): Promise<{ number: string; building: string; typeLabel: string; values: Record<string, AmenityValue | null> }[]> {
+  const rows = (await sql().query(
+    `select r.number, r.building, coalesce(t.label, '') as "typeLabel", m.key, coalesce(ra.value, ta.value) as value
+     from rooms r
+     cross join amenities m
+     left join room_types t on t.id = r.room_type_id
+     left join room_type_amenities ta on ta.room_type_id = r.room_type_id and ta.amenity_key = m.key
+     left join room_amenities ra on ra.room_id = r.id and ra.amenity_key = m.key
+     where r.active`,
+  )) as { number: string; building: string; typeLabel: string; key: string; value: AmenityValue | null }[];
+  const by = new Map<string, { number: string; building: string; typeLabel: string; values: Record<string, AmenityValue | null> }>();
+  for (const r of rows) {
+    const e = by.get(r.number) ?? { number: r.number, building: r.building, typeLabel: r.typeLabel, values: {} };
+    e.values[r.key] = r.value;
+    by.set(r.number, e);
+  }
+  return [...by.values()].sort((a, b) => natural(a.number, b.number));
+}
+
+// Fiche d'une chambre pour le client (page du QR code) : caractéristiques du type et équipements effectifs.
+export type RoomSheet = { typeLabel: string; typeLabelEn: string; building: string; areaM2: number | null; beds: string; amenities: AmenityItem[] };
+
+export async function getRoomSheet(roomId: number): Promise<RoomSheet | null> {
+  const t = (await sql().query(
+    `select t.label as "typeLabel", t.label_en as "typeLabelEn", coalesce(nullif(r.building, ''), t.building) as building, t.area_m2::float8 as "areaM2", t.beds
+     from rooms r join room_types t on t.id = r.room_type_id where r.id = $1`, [roomId],
+  )) as Omit<RoomSheet, 'amenities'>[];
+  if (!t[0]) return null;
+  return { ...t[0], amenities: await listRoomAmenities(roomId) };
 }

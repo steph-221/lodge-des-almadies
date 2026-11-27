@@ -244,16 +244,16 @@
           "fcfa": 49000
         },
         {
+          "label": "Côté route avec balcon, bâtiment A",
+          "fcfa": 49000
+        },
+        {
           "label": "Côté piscine, bâtiment A (avec ou sans balcon)",
           "fcfa": 53000
         },
         {
           "label": "Standard, bâtiment B",
           "fcfa": 57000
-        },
-        {
-          "label": "Côté route avec balcon, bâtiment A",
-          "fcfa": 63000
         },
         {
           "label": "Supérieure, bâtiment B (dont une adaptée PMR)",
@@ -363,7 +363,7 @@
         "building": "A",
         "view": "Côté route",
         "count": 4,
-        "fcfa": 63000
+        "fcfa": 49000
       },
       {
         "name": "Chambre supérieure avec minibar",
