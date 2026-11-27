@@ -1,7 +1,8 @@
 import defaults from '../data/content.default.json';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { head, put } from '@vercel/blob';
-import { fmtNumber, makeT, translateTree, type Lang } from './i18n';
+import { fmtNumber, getOverridesVersion, makeT, translateTree, type Lang } from './i18n';
+import { loadTranslations } from './translations';
 
 export type Content = typeof defaults;
 
@@ -13,7 +14,7 @@ const env = (k: string): string | undefined => (import.meta.env as any)[k] ?? pr
 const useBlob = () => Boolean(env('BLOB_READ_WRITE_TOKEN'));
 
 let cache: { at: number; value: Content } | null = null;
-const cacheEn = new WeakMap<Content, Content>();
+const cacheEn = new WeakMap<Content, { ver: number; value: Content }>();
 
 const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v));
 
@@ -53,9 +54,11 @@ export async function getContent(lang: Lang = 'fr'): Promise<Content> {
     cache = { at: Date.now(), value: fr };
   }
   if (lang === 'fr') return fr;
+  await loadTranslations();
+  const ver = getOverridesVersion();
   let en = cacheEn.get(fr);
-  if (!en) { en = translateTree(fr, makeT('en')); cacheEn.set(fr, en); }
-  return en;
+  if (!en || en.ver !== ver) { en = { ver, value: translateTree(fr, makeT('en')) }; cacheEn.set(fr, en); }
+  return en.value;
 }
 
 export async function saveContent(next: Content): Promise<void> {

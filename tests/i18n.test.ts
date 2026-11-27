@@ -105,3 +105,26 @@ describe('chambres en anglais (textes venus de la base)', () => {
     expect(typeName({ ...a, nameEn: undefined }, 'en')).toBe('Chambre Standard côté piscine');
   });
 });
+
+describe('corrections saisies dans l’admin', () => {
+  it('passent avant le dictionnaire, et se retirent', async () => {
+    const { setOverrides } = await import('../src/lib/i18n');
+    setOverrides({ 'Réserver': 'Reserve' });
+    expect(makeT('en')('Réserver')).toBe('Reserve');
+    expect(makeT('fr')('Réserver')).toBe('Réserver');
+    setOverrides({});
+    expect(makeT('en')('Réserver')).toBe('Book now');
+  });
+  it('liste les phrases manquantes en premier et marque les corrections', async () => {
+    const { buildEntries, checkEdit } = await import('../src/lib/translation-list');
+    const rows = buildEntries({ A: 'a', B: 'b' }, { B: 'bb' }, { title: 'Nouvelle phrase', img: 'hotel', n: 3 });
+    expect(rows[0]).toMatchObject({ fr: 'Nouvelle phrase', missing: true, where: 'content' });
+    expect(rows.find((r) => r.fr === 'B')).toMatchObject({ en: 'bb', base: 'b', custom: true, missing: false });
+    expect(rows.some((r) => r.fr === 'hotel')).toBe(false);
+    const allowed = new Set(rows.map((r) => r.fr));
+    expect(checkEdit('A', 'x', allowed)).toBeNull();
+    expect(checkEdit('Inconnue', 'x', allowed)).toBe('Phrase inconnue');
+    expect(checkEdit('{n} chambres', '{n} rooms', new Set(['{n} chambres']))).toBeNull();
+    expect(checkEdit('{n} chambres', 'rooms', new Set(['{n} chambres']))).toMatch(/accolades/);
+  });
+});

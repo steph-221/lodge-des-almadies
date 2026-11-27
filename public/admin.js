@@ -293,6 +293,11 @@
       return h('div', { class: 'card' }, imageField('Photo du bandeau', c.pageHeroes, 'faq'),
         objList('Questions', c.faq, { q: '', a: '' }, function (f) { return h('div', {}, field('Question', f, 'q'), field('Réponse', f, 'a', { area: true })); }));
     }],
+    translations: ['Traductions EN', function () {
+      var box = h('div', { class: 'card' }, h('p', { class: 'hint' }, 'Chargement des traductions…'));
+      loadTranslations(box);
+      return box;
+    }],
     settings: ['Réglages', function () {
       var s = c.site;
       return h('div', {},
@@ -313,6 +318,60 @@
         })));
     }]
   };
+
+
+  /* ---------- traductions anglaises ---------- */
+  var tr = { entries: null, filter: 'missing', q: '' };
+  async function loadTranslations(box) {
+    try {
+      var r = await fetch('/api/admin/translations');
+      if (r.status === 401) return location.reload();
+      var j = await r.json();
+      if (!r.ok) throw new Error(j.error || 'Erreur');
+      tr.entries = j.entries;
+      drawTranslations(box);
+    } catch (e) { box.textContent = ''; box.appendChild(h('p', { class: 'err' }, 'Chargement impossible : ' + e.message)); }
+  }
+  function drawTranslations(box) {
+    box.textContent = '';
+    var missing = tr.entries.filter(function (e) { return e.missing; }).length;
+    var q = tr.q.toLowerCase();
+    var rows = tr.entries.filter(function (e) {
+      if (tr.filter === 'missing' && !e.missing) return false;
+      if (tr.filter === 'custom' && !e.custom) return false;
+      if (tr.filter === 'content' && e.where !== 'content') return false;
+      return !q || e.fr.toLowerCase().indexOf(q) >= 0 || e.en.toLowerCase().indexOf(q) >= 0;
+    });
+    var sel = h('select', { onchange: function (ev) { tr.filter = ev.target.value; drawTranslations(box); } },
+      [['missing', 'Traductions manquantes'], ['content', 'Textes modifiables du site'], ['custom', 'Mes corrections'], ['all', 'Tout']].map(function (o) { return h('option', { value: o[0], selected: tr.filter === o[0] }, o[1]); }));
+    var search = h('input', { type: 'search', placeholder: 'Rechercher un mot…', value: tr.q });
+    search.addEventListener('input', function () { tr.q = search.value; var pos = search.selectionStart; drawTranslations(box); var s2 = box.querySelector('input[type=search]'); s2.focus(); s2.setSelectionRange(pos, pos); });
+    box.appendChild(h('h2', {}, 'Version anglaise du site'));
+    box.appendChild(h('p', { class: 'hint' }, 'Chaque texte du site est écrit en français ; sa traduction anglaise est en dessous. Corrigez la case et cliquez sur le bouton « Enregistrer » de cette phrase (le bouton du bas de page ne concerne pas cet onglet) : la page anglaise change en moins d’une minute. Quand vous modifiez un texte français dans les autres onglets, il apparaît ici « traduction manquante » : tant qu’il n’est pas traduit, le site anglais l’affiche en français. Une case vide rétablit la traduction d’origine.'));
+    box.appendChild(h('p', {}, missing ? h('strong', { class: 'err' }, missing + ' traduction' + (missing > 1 ? 's' : '') + ' manquante' + (missing > 1 ? 's' : '')) : h('strong', { class: 'ok' }, 'Toutes les phrases sont traduites.')));
+    box.appendChild(h('div', { class: 'row' }, h('label', {}, 'Afficher', sel), h('label', {}, 'Recherche', search)));
+    if (!rows.length) box.appendChild(h('p', { class: 'hint' }, 'Rien à afficher avec ce filtre.'));
+    rows.slice(0, 200).forEach(function (e) { box.appendChild(trRow(e, box)); });
+    if (rows.length > 200) box.appendChild(h('p', { class: 'hint' }, rows.length - 200 + ' autres phrases : affinez avec la recherche.'));
+  }
+  function trRow(e, box) {
+    var area = h('textarea', { rows: Math.max(2, Math.ceil(e.fr.length / 70)), placeholder: 'Traduction anglaise de : ' + e.fr });
+    area.value = e.en;
+    var state = h('span', { class: 'hint' }, e.missing ? 'Traduction manquante' : e.custom ? 'Correction enregistrée' : '');
+    var btn = h('button', { type: 'button', class: 'btn' }, 'Enregistrer');
+    btn.addEventListener('click', async function () {
+      btn.disabled = true; state.textContent = 'Enregistrement…';
+      try {
+        var r = await fetch('/api/admin/translations', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ fr: e.fr, en: area.value }) });
+        var j = await r.json().catch(function () { return {}; });
+        if (!r.ok) throw new Error(j.error || 'Erreur');
+        e.en = j.en; e.custom = j.custom; e.missing = !j.en; area.value = j.en;
+        state.textContent = e.missing ? 'Traduction manquante' : e.custom ? 'Enregistré' : 'Traduction d’origine rétablie';
+      } catch (er) { state.textContent = er.message; }
+      btn.disabled = false;
+    });
+    return h('div', { class: 'card' }, h('p', {}, h('strong', {}, 'FR'), ' ', e.fr), h('label', {}, 'EN', area), h('div', { class: 'row' }, btn, state));
+  }
 
   function render() {
     var nav = $('tabs'); nav.textContent = '';

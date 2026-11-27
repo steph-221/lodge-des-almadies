@@ -11,6 +11,13 @@ export const DEFAULT_LANG: Lang = 'fr';
 
 const DICT: Record<Lang, Record<string, string>> = { fr: {}, en: en as Record<string, string> };
 
+// Corrections saisies dans l'admin (onglet « Traductions EN »), par-dessus le dictionnaire du dépôt.
+let overrides: Record<string, string> = {};
+let overridesVersion = 0;
+export const setOverrides = (o: Record<string, string>): void => { overrides = o; overridesVersion++; };
+export const getOverridesVersion = (): number => overridesVersion;
+export const baseDictionary = (): Record<string, string> => DICT.en;
+
 export const langOf = (url: URL | string): Lang => {
   const p = typeof url === 'string' ? url : url.pathname;
   return /^\/en(\/|$)/.test(p) ? 'en' : 'fr';
@@ -54,17 +61,29 @@ export type T = ((fr: string, vars?: Record<string, string | number>) => string)
 export function makeT(lang: Lang): T {
   const d = DICT[lang];
   const f = ((fr: string, vars?: Record<string, string | number>) => {
-    let s = d[fr] ?? fr;
+    let s = (lang === 'en' && overrides[fr]) || d[fr] || fr;
     if (vars) s = s.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? String(vars[k]) : m));
     return s;
   }) as T;
   f.lang = lang;
-  f.has = (fr: string) => lang === 'fr' || fr in d;
+  f.has = (fr: string) => lang === 'fr' || fr in d || !!overrides[fr];
   return f;
 }
 
 // Champs qui ne sont pas du texte à traduire (adresses, identifiants, images).
 const SKIP_KEYS = new Set(['href', 'img', 'src', 'slug', 'images', 'carousel', 'heroImage', 'seminaireHeroImage', 'phone', 'phoneHref', 'email', 'maps', 'tripadvisor', 'url', 'menuImages', 'restaurantPhone', 'pageHeroes', 'building']);
+
+// Textes français d'un arbre de contenu qui méritent une traduction (hors liens, images, téléphones…).
+export function contentStrings(tree: unknown): string[] {
+  const out = new Set<string>();
+  const walk = (v: any, key = ''): void => {
+    if (typeof v === 'string') { if (!SKIP_KEYS.has(key) && /\p{L}/u.test(v)) out.add(v); }
+    else if (Array.isArray(v)) v.forEach((x) => walk(x, key));
+    else if (v && typeof v === 'object') Object.entries(v).forEach(([k, x]) => { if (!SKIP_KEYS.has(k)) walk(x, k); });
+  };
+  walk(tree);
+  return [...out];
+}
 
 // Traduit toutes les chaînes d'un arbre de contenu (celui de /admin) et préfixe ses liens internes. Chiffres, prix et images sont conservés.
 export function translateTree<X>(tree: X, t: T): X {
