@@ -302,5 +302,9 @@
   "Avec balcon": "With balcony",
   "Terrasse": "Terrace",
   "Frigo bar": "Mini-fridge",
-  "Suite junior": "Junior Suite"
+  "Suite junior": "Junior Suite",
+  "2 personnes": "2 guests",
+  "2 personnes (+1 lit supplémentaire possible selon la chambre)": "2 guests (+1 extra bed possible, depending on the room)",
+  "Lit double ou twin selon la chambre": "Double or twin bed, depending on the room",
+  "Lits séparés ou lit double selon la chambre": "Twin beds or double bed, depending on the room"
 }

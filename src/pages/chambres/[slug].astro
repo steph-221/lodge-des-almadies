@@ -2,7 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import BookButton from '../../components/BookButton.astro';
 import { getContent, imgSrc, fmtFcfa, fmtEur } from '../../lib/content';
-import { equipmentFor, getPublicTypes, pricesFor } from '../../lib/public-rooms';
+import { equipmentFor, getPublicTypes, pricesFor, summaryFor } from '../../lib/public-rooms';
 import { langOf, localePath, makeT } from '../../lib/i18n';
 const lang = langOf(Astro.url);
 const t = makeT(lang);
@@ -14,6 +14,7 @@ if (!r) return new Response(null, { status: 404 });
 // Prix du back-office Chambres quand la base répond ; sinon, ceux du contenu de l'admin.
 const db = await getPublicTypes();
 const eq = db ? equipmentFor(r.slug, db, lang) : null;
+const sum = db ? summaryFor(r.slug, db) : null;
 const litSup = db?.find((x) => x.extraBed != null)?.extraBed ?? c.tarifs.litSup ?? null;
 const prices = ((db && pricesFor(r.slug, db, lang, t)) ?? r.prices).map((p) => ({ label: p.label, fcfa: fmtFcfa(p.fcfa, lang), eur: fmtEur(p.fcfa, c.rate, lang), raw: p.fcfa }));
 const schema = [{
@@ -22,7 +23,7 @@ const schema = [{
   inLanguage: lang,
   name: r.name,
   description: r.intro,
-  bed: { '@type': 'BedDetails', typeOfBed: r.beds },
+  bed: { '@type': 'BedDetails', typeOfBed: sum?.beds ?? r.beds },
   occupancy: { '@type': 'QuantitativeValue', maxValue: 3 },
   image: r.images.map((i) => new URL(imgSrc(i), 'https://lodgedesalmadies.com').href),
   amenityFeature: (eq ? eq.all : r.equipment).map((name) => ({ '@type': 'LocationFeatureSpecification', name, value: true })),
@@ -35,7 +36,7 @@ const schema = [{
   <section>
     <div class="wrap">
       <p class="lead">{r.intro}</p>
-      <p class="center"><strong>{r.guests}</strong> · {r.beds} · {t('1 nuit minimum')}</p>
+      <p class="center"><strong>{t(sum?.guests ?? r.guests)}</strong> · {t(sum?.beds ?? r.beds)} · {t('1 nuit minimum')}</p>
       <div class="grid g3 thumbs" style="margin:32px 0">
         {r.images.map((i) => <img src={imgSrc(i)} alt={r.name} loading="lazy" />)}
       </div>
