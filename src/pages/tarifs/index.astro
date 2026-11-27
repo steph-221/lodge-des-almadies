@@ -25,7 +25,7 @@ const extraBed = db?.find((r) => r.extraBed != null)?.extraBed ?? null;
         <div class="price"><span>{r.name} · {t('bâtiment')} {r.building}{r.view ? ` · ${r.view}` : ''} <small>({t(r.count > 1 ? '{n} chambres' : '{n} chambre', { n: r.count })})</small></span><strong class="amt">{fmtFcfa(r.fcfa, lang)} <small>{fmtEur(r.fcfa, c.rate, lang)}</small></strong></div>
       ))}
     </div>
-    <p><small>{extraBed != null && <>{t('Lit supplémentaire : {price} par nuit.', { price: fmtFcfa(extraBed, lang) })} </>}{t('Taxe de séjour : {price} par nuitée et par personne.', { price: fmtFcfa(tf.taxeSejour, lang) })}</small></p>
+    <p><small>{extraBed != null && <>{t('Lit supplémentaire : {price} par nuit.', { price: fmtFcfa(extraBed, lang) })}{' '}</>}{t('Taxe de séjour : {price} par nuitée et par personne.', { price: fmtFcfa(tf.taxeSejour, lang) })}</small></p>
     <p><BookButton /></p>
 
     <h2>{t('Services et équipements en chambre')}</h2>
