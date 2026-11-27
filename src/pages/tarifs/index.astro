@@ -18,7 +18,7 @@ const extraBed = db?.find((r) => r.extraBed != null)?.extraBed ?? null;
     <p>{t.intro} 1 € = {c.rate} FCFA.</p>
     <div class="tarif-table">
       {roomRows.map((r) => (
-        <div class="price"><span>{r.name} · bâtiment {r.building}{r.view ? ` · ${r.view}` : ''} <small>({r.count} {r.count > 1 ? 'chambres' : 'chambre'})</small></span><strong>{fmtFcfa(r.fcfa)} <small>{fmtEur(r.fcfa, c.rate)}</small></strong></div>
+        <div class="price"><span>{r.name} · bâtiment {r.building}{r.view ? ` · ${r.view}` : ''} <small>({r.count} {r.count > 1 ? 'chambres' : 'chambre'})</small></span><strong class="amt">{fmtFcfa(r.fcfa)} <small>{fmtEur(r.fcfa, c.rate)}</small></strong></div>
       ))}
     </div>
     <p><small>{extraBed != null && <>Lit supplémentaire : {fmtFcfa(extraBed)} par nuit. </>}Taxe de séjour : {fmtFcfa(t.taxeSejour)} par nuitée et par personne.</small></p>
@@ -28,7 +28,7 @@ const extraBed = db?.find((r) => r.extraBed != null)?.extraBed ?? null;
     <ul class="ticks">{t.equipements.map((e) => <li>{e}</li>)}</ul>
 
     <h2>Restauration et bar</h2>
-    {t.restauration.map((r) => <div class="price"><span>{r.label} <small>· {r.detail}</small></span><strong>{fmtFcfa(r.fcfa)} <small>{fmtEur(r.fcfa, c.rate)}</small></strong></div>)}
+    {t.restauration.map((r) => <div class="price"><span>{r.label} <small>· {r.detail}</small></span><strong class="amt">{fmtFcfa(r.fcfa)} <small>{fmtEur(r.fcfa, c.rate)}</small></strong></div>)}
     <p>{t.restaurationNote}</p>
 
     <h2>Informations complémentaires</h2>

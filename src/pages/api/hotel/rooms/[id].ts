@@ -30,7 +30,7 @@ export const PATCH: APIRoute = async ({ params, request, locals, clientAddress }
     // Fiche : champs absents = valeurs actuelles (modification partielle possible).
     const merged = {
       number: current.number, building: current.building, floor: current.floor, minibar: current.minibar,
-      notes: current.notes, roomTypeId: current.roomTypeId, ...b,
+      notes: current.notes, roomTypeId: current.roomTypeId, baseCapacity: current.ownBaseCapacity, maxCapacity: current.ownMaxCapacity, ...b,
     };
     const c = cleanRoom(merged);
     if (!c.ok) return json(400, { error: c.error });

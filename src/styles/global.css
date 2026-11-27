@@ -96,6 +96,8 @@ a.card:active{transform:scale(.985);transition-duration:.12s}
 .lightbox button{position:absolute;top:16px;right:16px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:1.4rem;cursor:pointer}
 
 .price{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+/* Le prix reste sur une seule ligne (« 49 000 FCFA ≈ 75 € ») ; c'est le libellé qui passe à la ligne. */
+.price>span{flex:1 1 auto;min-width:0}.price>strong{text-align:right}.price>strong.amt{flex:none;white-space:nowrap}
 ul.ticks{list-style:none;padding:0;columns:2 240px}ul.ticks.one{columns:1}ul.ticks li{padding-left:1.5em;position:relative;margin-bottom:.5em}ul.ticks li::before{content:"✓";position:absolute;left:0;color:var(--accent)}
 form{display:grid;gap:16px;max-width:560px}[hidden]{display:none!important}label{display:grid;gap:6px;font-weight:600;font-size:.95rem}
 input,textarea,select{font:inherit;min-height:44px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r-sm);background:#fff;transition:border-color .2s,box-shadow .2s}

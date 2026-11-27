@@ -37,7 +37,7 @@ else if (manage) {
             <p id="room-msg" role="status" class="hint"></p>
             <div class="table-wrap">
               <table class="tbl">
-                <thead><tr><th>N°</th><th>Bât.</th><th>Étage</th><th>Type</th><th>Minibar</th><th>État</th><th></th></tr></thead>
+                <thead><tr><th>N°</th><th>Bât.</th><th>Étage</th><th>Type</th><th>Pers.</th><th>Minibar</th><th>État</th><th></th></tr></thead>
                 <tbody id="rooms-body"></tbody>
               </table>
             </div>
@@ -53,6 +53,14 @@ else if (manage) {
                 <label>Type<select name="roomTypeId"></select></label>
               </div>
               <div class="known" id="room-known" hidden></div>
+              <fieldset>
+                <legend>Nombre de personnes</legend>
+                <p class="hint" id="room-cap-hint">Laissez vide pour reprendre celui du type. Le maximum compte le lit supplémentaire : 2 et 2 (pas de lit supplémentaire), 2 et 3 (avec), 3 et 3 (chambre triple).</p>
+                <div class="row">
+                  <label>Personnes (base)<input name="baseCapacity" type="number" min="1" max="8" inputmode="numeric" placeholder="comme le type" /></label>
+                  <label>Personnes (maximum)<input name="maxCapacity" type="number" min="1" max="8" inputmode="numeric" placeholder="comme le type" /></label>
+                </div>
+              </fieldset>
               <fieldset id="room-amenities-box" hidden>
                 <legend>Équipements de cette chambre</legend>
                 <p class="hint">Chaque chambre reprend les équipements de son type. Ne changez que ce qui diffère (par exemple : la 203 communique avec la 201, pas la 205). Le client voit « Oui », « Sur demande » et « En supplément » ; « Non » et « À vérifier » restent cachés.</p>

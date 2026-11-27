@@ -21,7 +21,9 @@ export type RoomType = {
 };
 export type Room = {
   id: number; number: string; building: string; floor: string; roomTypeId: number | null; typeLabel: string | null;
-  maxCapacity: number | null; minibar: boolean; notes: string; active: boolean; status: RoomStatus;
+  // Capacité effective (celle de la chambre, sinon celle du type) et ce qui est propre à la chambre (null = comme le type).
+  baseCapacity: number | null; maxCapacity: number | null; ownBaseCapacity: number | null; ownMaxCapacity: number | null;
+  minibar: boolean; notes: string; active: boolean; status: RoomStatus;
 };
 
 const TYPE_COLS = `id::int as id, code, label, base_capacity::int as "baseCapacity", max_capacity::int as "maxCapacity", beds, active,
@@ -32,7 +34,8 @@ const TYPE_EXTRA = `(select count(*)::int from rooms r where r.room_type_id = ro
   coalesce((select json_agg(json_build_object('key', a.amenity_key, 'value', a.value) order by m.position)
     from room_type_amenities a join amenities m on m.key = a.amenity_key where a.room_type_id = room_types.id), '[]'::json) as amenities`;
 const ROOM_SELECT = `select r.id::int as id, r.number, r.building, r.floor, r.room_type_id::int as "roomTypeId", t.label as "typeLabel",
-  t.max_capacity::int as "maxCapacity", r.minibar, r.notes, r.active, r.status
+  coalesce(r.base_capacity, t.base_capacity)::int as "baseCapacity", coalesce(r.max_capacity, t.max_capacity)::int as "maxCapacity",
+  r.base_capacity::int as "ownBaseCapacity", r.max_capacity::int as "ownMaxCapacity", r.minibar, r.notes, r.active, r.status
   from rooms r left join room_types t on t.id = r.room_type_id`;
 
 const code23 = (e: unknown) => (e as { code?: string }).code;
@@ -104,11 +107,21 @@ export async function getRoom(id: number): Promise<Room | null> {
   return ((await sql().query(`${ROOM_SELECT} where r.id = $1`, [id])) as Room[])[0] ?? null;
 }
 
+// Une capacité propre à la chambre doit rester cohérente avec celle du type : le maximum ne passe pas sous le nombre de base.
+async function capacityConflict(roomTypeId: number | null, base: number | null | undefined, max: number | null | undefined): Promise<string | null> {
+  if ((base ?? null) === null && (max ?? null) === null) return null;
+  const t = roomTypeId ? ((await sql().query(`select base_capacity::int as base, max_capacity::int as max from room_types where id = $1`, [roomTypeId])) as { base: number; max: number }[])[0] : null;
+  const b = base ?? t?.base ?? 2, m = max ?? t?.max ?? b;
+  return m < b ? `Capacité incohérente : maximum ${m} pour ${b} personnes de base.` : null;
+}
+
 export async function createRoom(v: RoomInput): Promise<{ room: Room } | { error: string }> {
+  const conflict = await capacityConflict(v.roomTypeId, v.baseCapacity, v.maxCapacity);
+  if (conflict) return { error: conflict };
   try {
     const ins = (await sql().query(
-      `insert into rooms (number, building, floor, room_type_id, minibar, notes) values ($1,$2,$3,$4,$5,$6) returning id::int as id`,
-      [v.number, v.building, v.floor, v.roomTypeId, v.minibar, v.notes],
+      `insert into rooms (number, building, floor, room_type_id, minibar, notes, base_capacity, max_capacity) values ($1,$2,$3,$4,$5,$6,$7,$8) returning id::int as id`,
+      [v.number, v.building, v.floor, v.roomTypeId, v.minibar, v.notes, v.baseCapacity ?? null, v.maxCapacity ?? null],
     )) as { id: number }[];
     return { room: (await getRoom(ins[0].id))! };
   } catch (e) {
@@ -119,10 +132,12 @@ export async function createRoom(v: RoomInput): Promise<{ room: Room } | { error
 }
 
 export async function updateRoom(id: number, v: RoomInput & { active?: boolean }): Promise<{ room: Room } | { error: string }> {
+  const conflict = await capacityConflict(v.roomTypeId, v.baseCapacity, v.maxCapacity);
+  if (conflict) return { error: conflict };
   try {
     const rows = (await sql().query(
-      `update rooms set number=$2, building=$3, floor=$4, room_type_id=$5, minibar=$6, notes=$7, active=coalesce($8, active) where id=$1 returning id::int as id`,
-      [id, v.number, v.building, v.floor, v.roomTypeId, v.minibar, v.notes, v.active ?? null],
+      `update rooms set number=$2, building=$3, floor=$4, room_type_id=$5, minibar=$6, notes=$7, active=coalesce($8, active), base_capacity=$9, max_capacity=$10 where id=$1 returning id::int as id`,
+      [id, v.number, v.building, v.floor, v.roomTypeId, v.minibar, v.notes, v.active ?? null, v.baseCapacity ?? null, v.maxCapacity ?? null],
     )) as { id: number }[];
     if (!rows[0]) return { error: 'Chambre inconnue.' };
     return { room: (await getRoom(id))! };
@@ -235,11 +250,12 @@ export async function listAmenityMatrix(): Promise<{ number: string; building: s
 }
 
 // Fiche d'une chambre pour le client (page du QR code) : caractéristiques du type et équipements effectifs.
-export type RoomSheet = { typeLabel: string; typeLabelEn: string; building: string; areaM2: number | null; beds: string; amenities: AmenityItem[] };
+export type RoomSheet = { typeLabel: string; typeLabelEn: string; building: string; areaM2: number | null; beds: string; baseCapacity: number | null; maxCapacity: number | null; amenities: AmenityItem[] };
 
 export async function getRoomSheet(roomId: number): Promise<RoomSheet | null> {
   const t = (await sql().query(
-    `select t.label as "typeLabel", t.label_en as "typeLabelEn", coalesce(nullif(r.building, ''), t.building) as building, t.area_m2::float8 as "areaM2", t.beds
+    `select t.label as "typeLabel", t.label_en as "typeLabelEn", coalesce(nullif(r.building, ''), t.building) as building, t.area_m2::float8 as "areaM2", t.beds,
+       coalesce(r.base_capacity, t.base_capacity)::int as "baseCapacity", coalesce(r.max_capacity, t.max_capacity)::int as "maxCapacity"
      from rooms r join room_types t on t.id = r.room_type_id where r.id = $1`, [roomId],
   )) as Omit<RoomSheet, 'amenities'>[];
   if (!t[0]) return null;

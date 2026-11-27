@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { cleanRoomType } from '../src/lib/hotel/validate';
+import { cleanRoom, cleanRoomType } from '../src/lib/hotel/validate';
 import content from '../src/data/content.default.json';
 
 describe('cleanRoomType (descriptif)', () => {
@@ -30,5 +30,22 @@ describe('descriptif des chambres', () => {
   });
   it('le tableau des tarifs du site compte les mêmes 36 chambres', () => {
     expect(content.tarifs.rooms.reduce((n, r) => n + r.count, 0)).toBe(36);
+  });
+});
+
+describe('cleanRoom (capacité propre à la chambre)', () => {
+  it('vide = comme le type', () => {
+    expect(cleanRoom({ number: '101', baseCapacity: '', maxCapacity: '' })).toMatchObject({ ok: true, value: { baseCapacity: null, maxCapacity: null } });
+  });
+  it('accepte 2/2, 2/3 et 3/3', () => {
+    for (const [b, m] of [[2, 2], [2, 3], [3, 3]]) expect(cleanRoom({ number: '101', baseCapacity: b, maxCapacity: String(m) })).toMatchObject({ ok: true, value: { baseCapacity: b, maxCapacity: m } });
+  });
+  it('accepte seulement le maximum (le nombre de base reste celui du type)', () => {
+    expect(cleanRoom({ number: '101', maxCapacity: 3 })).toMatchObject({ ok: true, value: { baseCapacity: null, maxCapacity: 3 } });
+  });
+  it('refuse un maximum sous le nombre de base, 0 et plus de 8', () => {
+    expect(cleanRoom({ number: '101', baseCapacity: 3, maxCapacity: 2 })).toMatchObject({ ok: false });
+    expect(cleanRoom({ number: '101', baseCapacity: 0 })).toMatchObject({ ok: false });
+    expect(cleanRoom({ number: '101', maxCapacity: 9 })).toMatchObject({ ok: false });
   });
 });
