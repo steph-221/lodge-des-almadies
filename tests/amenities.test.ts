@@ -68,7 +68,15 @@ describe('migration 0011', () => {
     expect(moved).not.toContain("'005'");
     expect(moved).not.toContain("'111'");
   });
-  it('ne touche pas au tarif des chambres 103 à 106 (valeur du tableau en attente de confirmation)', () => {
-    expect(/price_fcfa/.test(sql.split('insert into room_types')[0])).toBe(false);
+  it('met le tarif des chambres 103 à 106 à 49 000 FCFA, seulement s\'il est encore à 63 000', () => {
+    expect(sql).toContain("update room_types set price_fcfa = 49000 where lower(code) = 'bal-ar' and price_fcfa = 63000");
+  });
+  it('répartit les types sans lit supplémentaire : 205 et 207, 202 204 et 208', () => {
+    expect(sql).toContain("number in ('205', '207')");
+    expect(sql).toContain("number in ('202', '204', '208')");
+  });
+  it('ne garde plus « minibar » dans la nouvelle description de la suite', () => {
+    const updated = /update room_types set description_fr = 'Notre plus grand[^;]*;/.exec(sql)![0].split('where')[0];
+    expect(updated).not.toMatch(/minibar/i);
   });
 });
