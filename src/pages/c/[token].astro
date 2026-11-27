@@ -45,7 +45,8 @@ const rs = catalog.filter((c) => c.kind === 'room_service');
 const base = `/c/${token}`;
 const eq = sheet ? groupForGuest(sheet.amenities) : null;
 const eqLab = (a: { labelFr: string; labelEn: string }) => (fr ? a.labelFr : a.labelEn || a.labelFr);
-const facts = sheet ? [fr ? sheet.typeLabel.replace(/\s*\(bâtiment [^)]*\)\s*$/i, '') : sheet.typeLabelEn || sheet.typeLabel, sheet.areaM2 ? `${sheet.areaM2.toLocaleString(fr ? 'fr-FR' : 'en-GB')} ${L.m2}` : '', sheet.beds].filter(Boolean).join(' · ') : '';
+const facts = sheet ? [fr ? sheet.typeLabel.replace(/\s*\(bâtiment [^)]*\)\s*$/i, '') : sheet.typeLabelEn || sheet.typeLabel, sheet.areaM2 ? `${sheet.areaM2.toLocaleString(fr ? 'fr-FR' : 'en-GB')} ${L.m2}` : '', sheet.beds,
+  sheet.baseCapacity ? (fr ? `${sheet.baseCapacity} personne${sheet.baseCapacity > 1 ? 's' : ''}${sheet.maxCapacity && sheet.maxCapacity > sheet.baseCapacity ? ` (jusqu'à ${sheet.maxCapacity} avec lit supplémentaire)` : ''}` : `${sheet.baseCapacity} guest${sheet.baseCapacity > 1 ? 's' : ''}${sheet.maxCapacity && sheet.maxCapacity > sheet.baseCapacity ? ` (up to ${sheet.maxCapacity} with an extra bed)` : ''}`) : ''].filter(Boolean).join(' · ') : '';
 ---
 <GuestLayout title={`${L.title} | Lodge des Almadies`} lang={lang}>
   <header class="g">

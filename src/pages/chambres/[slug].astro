@@ -42,7 +42,7 @@ const schema = [{
           {eq && eq.some.length > 0 && <><h3>Selon la chambre</h3><ul class="ticks one">{eq.some.map((e) => <li>{e}</li>)}</ul></>}
         </div>
         <div class="pin"><h2>Tarifs par nuit</h2>
-          {prices.map((p) => <div class="price"><span>{p.label}</span><strong>{p.fcfa} <small>{p.eur}</small></strong></div>)}
+          {prices.map((p) => <div class="price"><span>{p.label}</span><strong class="amt">{p.fcfa} <small>{p.eur}</small></strong></div>)}
           <p><small>{litSup != null && <>Lit supplémentaire : {fmtFcfa(litSup)} par nuit. </>}Taxe de séjour : {fmtFcfa(c.tarifs.taxeSejour)} par nuitée et par personne. Navette taxi aéroport disponible en supplément.</small></p>
           <BookButton />
         </div>

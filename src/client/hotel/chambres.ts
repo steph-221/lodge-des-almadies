@@ -17,7 +17,7 @@ type RoomType = {
 };
 const AMENITY_LABEL: Record<AmenityValue, string> = { oui: 'Oui', non: 'Non', sur_demande: 'Sur demande', supplement: 'En supplément', a_verifier: 'À vérifier' };
 const fcfa = (n: number | null) => (n == null ? '—' : `${n.toLocaleString('fr-FR')} FCFA`);
-type Room = { id: number; number: string; building: string; floor: string; roomTypeId: number | null; typeLabel: string | null; minibar: boolean; notes: string; active: boolean; status: string };
+type Room = { id: number; number: string; building: string; floor: string; roomTypeId: number | null; typeLabel: string | null; baseCapacity: number | null; maxCapacity: number | null; ownBaseCapacity: number | null; ownMaxCapacity: number | null; minibar: boolean; notes: string; active: boolean; status: string };
 
 const root = document.getElementById('rooms-app')!;
 const manage = root.dataset.manage === '1';
@@ -158,6 +158,8 @@ if (manage) {
     const t = types.find((x) => String(x.id) === typeSelect.value);
     if (!t) { box.hidden = true; return; }
     box.hidden = false;
+    (roomForm.elements.namedItem('baseCapacity') as HTMLInputElement).placeholder = `comme le type (${t.baseCapacity})`;
+    (roomForm.elements.namedItem('maxCapacity') as HTMLInputElement).placeholder = `comme le type (${t.maxCapacity})`;
     const kv = (k: string, v: string) => h('div', { class: 'kv' }, h('span', {}, k), h('div', {}, v));
     box.append(
       h('div', { class: 't' }, h('span', {}, 'Déjà renseigné par le type de chambre'), h('span', {}, 'Rien à saisir ici')),
@@ -203,9 +205,10 @@ if (manage) {
   function renderRooms() {
     const body = $('rooms-body');
     body.textContent = '';
-    if (!rooms.length) body.appendChild(h('tr', {}, h('td', { colspan: '7', class: 'hint' }, 'Aucune chambre pour le moment : ajoutez-les une par une ci-dessous, ou importez un fichier.')));
+    if (!rooms.length) body.appendChild(h('tr', {}, h('td', { colspan: '8', class: 'hint' }, 'Aucune chambre pour le moment : ajoutez-les une par une ci-dessous, ou importez un fichier.')));
     rooms.forEach((r) => body.appendChild(h('tr', { class: r.active ? '' : 'off' },
       h('td', {}, h('strong', {}, r.number)), h('td', {}, r.building || '—'), h('td', {}, r.floor || '—'), h('td', {}, r.typeLabel || '—'),
+      h('td', { title: r.ownBaseCapacity != null || r.ownMaxCapacity != null ? 'Propre à cette chambre' : 'Comme le type' }, r.baseCapacity != null ? `${r.baseCapacity}${r.maxCapacity != null && r.maxCapacity !== r.baseCapacity ? `–${r.maxCapacity}` : ''}${r.ownBaseCapacity != null || r.ownMaxCapacity != null ? ' *' : ''}` : '—'),
       h('td', {}, r.minibar ? 'Oui' : '—'),
       h('td', {}, h('select', {
         'aria-label': `État de la chambre ${r.number}`,
@@ -218,7 +221,7 @@ if (manage) {
       h('td', { class: 'acts' },
         h('button', { class: 'sm', type: 'button', onclick: () => {
           editingRoom = r;
-          fill(roomForm, { number: r.number, building: r.building, floor: r.floor, roomTypeId: r.roomTypeId ? String(r.roomTypeId) : '', minibar: r.minibar, notes: r.notes });
+          fill(roomForm, { number: r.number, building: r.building, floor: r.floor, roomTypeId: r.roomTypeId ? String(r.roomTypeId) : '', baseCapacity: String(r.ownBaseCapacity ?? ''), maxCapacity: String(r.ownMaxCapacity ?? ''), minibar: r.minibar, notes: r.notes });
           $('room-form-title').textContent = `Modifier la chambre ${r.number}`;
           renderKnown();
           void renderRoomAmenities(r);
@@ -247,7 +250,7 @@ if (manage) {
   roomForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(roomForm);
-    const body = { number: fd.get('number'), building: fd.get('building'), floor: fd.get('floor'), roomTypeId: fd.get('roomTypeId') || null, minibar: fd.get('minibar') === 'on', notes: fd.get('notes') };
+    const body = { number: fd.get('number'), building: fd.get('building'), floor: fd.get('floor'), roomTypeId: fd.get('roomTypeId') || null, baseCapacity: fd.get('baseCapacity'), maxCapacity: fd.get('maxCapacity'), minibar: fd.get('minibar') === 'on', notes: fd.get('notes') };
     const r = editingRoom ? await api('PATCH', `/api/hotel/rooms/${editingRoom.id}`, body) : await api('POST', '/api/hotel/rooms', body);
     if (!r.ok) { flash(roomMsg, r.data.error || 'Enregistrement impossible.'); return; }
     if (editingRoom && roomGrid) {

@@ -15,6 +15,10 @@ Le site a été refondu le 05/11. Depuis le 17/11, le module « services hôtel 
 - Créer la branche Neon par aperçu Vercel.
 
 ## Journal
+### 2026-11-27 (suite)
+- Prix sur une seule ligne sur /tarifs/ et les pages chambres (« 49 000 FCFA ≈ 75 € » ne se coupe plus, c'est le libellé qui passe à la ligne).
+- Nombre de personnes par chambre : migration 0012 (`rooms.base_capacity` et `max_capacity`, vides = comme le type). Réglable dans la fiche chambre du back-office (2/2 sans lit supplémentaire, 2/3 avec, 3/3 chambre triple). Le contrôle de capacité des séjours et la page client du QR code utilisent la capacité effective.
+
 ### 2026-11-26
 - Mise à jour du descriptif des chambres (nouveau tableau de STEPH) : migration 0011 (superficies, literie « triple », « frigo bar », nouveau type STD-B2 pour les 13 standards du bâtiment B sans lit supplémentaire).
 - Équipements par chambre : une chambre hérite de la grille de son type, `room_amenities` ne garde que les écarts (203 communique avec la 201 ; les 205 et 207 forment le type STD-AR2, sans communication). Réglable dans le back-office Chambres, listing Excel (`/api/hotel/rooms/amenities`).
