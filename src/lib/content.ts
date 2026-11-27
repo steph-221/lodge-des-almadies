@@ -1,6 +1,8 @@
 import defaults from '../data/content.default.json';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { head, put } from '@vercel/blob';
+import { fmtNumber, getOverridesVersion, makeT, translateTree, type Lang } from './i18n';
+import { loadTranslations } from './translations';
 
 export type Content = typeof defaults;
 
@@ -12,6 +14,7 @@ const env = (k: string): string | undefined => (import.meta.env as any)[k] ?? pr
 const useBlob = () => Boolean(env('BLOB_READ_WRITE_TOKEN'));
 
 let cache: { at: number; value: Content } | null = null;
+const cacheEn = new WeakMap<Content, { ver: number; value: Content }>();
 
 const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v));
 
@@ -40,12 +43,22 @@ async function readStored(): Promise<any | null> {
   }
 }
 
-export async function getContent(): Promise<Content> {
-  if (cache && Date.now() - cache.at < CACHE_MS) return cache.value;
-  const stored = await readStored();
-  const value = stored ? (merge(clone(defaults), stored) as Content) : clone(defaults);
-  cache = { at: Date.now(), value };
-  return value;
+// Contenu du site (valeurs par défaut + modifications de /admin). En anglais, chaque texte est traduit par le dictionnaire (src/i18n/en.json) ;
+// une phrase absente du dictionnaire (par exemple un texte tout juste modifié dans /admin) reste en français.
+export async function getContent(lang: Lang = 'fr'): Promise<Content> {
+  let fr: Content;
+  if (cache && Date.now() - cache.at < CACHE_MS) fr = cache.value;
+  else {
+    const stored = await readStored();
+    fr = stored ? (merge(clone(defaults), stored) as Content) : clone(defaults);
+    cache = { at: Date.now(), value: fr };
+  }
+  if (lang === 'fr') return fr;
+  await loadTranslations();
+  const ver = getOverridesVersion();
+  let en = cacheEn.get(fr);
+  if (!en || en.ver !== ver) { en = { ver, value: translateTree(fr, makeT('en')) }; cacheEn.set(fr, en); }
+  return en.value;
 }
 
 export async function saveContent(next: Content): Promise<void> {
@@ -70,5 +83,5 @@ export const getDefaults = (): Content => clone(defaults);
 // "hotel" -> /img/hotel.jpg ; une URL ou un chemin absolu est conservé tel quel.
 export const imgSrc = (s: string): string => (/^(https?:)?\/\//.test(s) || s.startsWith('/') ? s : `/img/${s}.jpg`);
 
-export const fmtFcfa = (n: number): string => `${Math.round(n).toLocaleString('fr-FR').replace(/ /g, ' ')} FCFA`;
-export const fmtEur = (n: number, rate: number): string => `≈ ${Math.round(n / rate).toLocaleString('fr-FR')} €`;
+export const fmtFcfa = (n: number, lang: Lang = 'fr'): string => `${fmtNumber(n, lang)} FCFA`;
+export const fmtEur = (n: number, rate: number, lang: Lang = 'fr'): string => (lang === 'en' ? `≈ €${fmtNumber(n / rate, lang)}` : `≈ ${fmtNumber(n / rate, lang)} €`);

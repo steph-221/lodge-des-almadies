@@ -1,40 +1,49 @@
 ---
 import '../styles/global.css';
 import BookButton from '../components/BookButton.astro';
-import { getContent, imgSrc } from '../lib/content';
+import { getContent } from '../lib/content';
+import { langOf, localePath, makeT, ogLocale, switchPath } from '../lib/i18n';
 interface Props { title: string; description?: string; schema?: object[]; noindex?: boolean; }
-const c = await getContent();
+const lang = langOf(Astro.url);
+const t = makeT(lang);
+const L = (h: string) => localePath(lang, h);
+const c = await getContent(lang);
 const { site } = c;
 const nav = c.nav as { href: string; label: string; children?: { href: string; label: string }[] }[];
 const footerNav = nav.flatMap((n) => [n, ...(n.children ?? [])]).filter((n, i, a) => a.findIndex((m) => m.href === n.href) === i);
-const { title, description = `${site.name} : hôtel 3 étoiles aux Almadies, Dakar. Chambres, restaurant, piscine et salle de séminaire.`, schema = [], noindex = false } = Astro.props;
+const { title, description = t('{name} : hôtel 3 étoiles aux Almadies, Dakar. Chambres, restaurant, piscine et salle de séminaire.', { name: site.name }), schema = [], noindex = false } = Astro.props;
 const path = Astro.url.pathname;
+const otherLang = lang === 'en' ? 'fr' : 'en';
+const otherPath = switchPath(lang, path);
+const origin = 'https://lodgedesalmadies.com';
+const homeHref = L('/');
+const isHere = (href: string) => path === href || path === href.replace(/\/$/, '');
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Hotel',
   '@id': 'https://lodgedesalmadies.com/#hotel',
   name: site.name,
-  description: 'Hôtel 3 étoiles de 36 chambres aux Almadies, Dakar, avec restaurant, piscine, salle de séminaire et boutiques.',
+  description: t('Hôtel 3 étoiles de 36 chambres aux Almadies, Dakar, avec restaurant, piscine, salle de séminaire et boutiques.'),
   telephone: site.phone,
   email: site.email,
-  url: 'https://lodgedesalmadies.com',
+  url: lang === 'en' ? `${origin}/en/` : origin,
   image: 'https://lodgedesalmadies.com/img/hotel.jpg',
   logo: 'https://lodgedesalmadies.com/img/logo.png',
   starRating: { '@type': 'Rating', ratingValue: '3' },
   numberOfRooms: 36,
-  inLanguage: 'fr',
+  inLanguage: lang,
   currenciesAccepted: 'XOF, EUR, USD',
-  paymentAccepted: 'Espèces, Visa, Mastercard',
+  paymentAccepted: t('Espèces, Visa, Mastercard'),
   sameAs: [site.tripadvisor, site.maps],
   hasMap: site.maps,
   geo: { '@type': 'GeoCoordinates', latitude: 14.7399266, longitude: -17.5150638 },
   address: { '@type': 'PostalAddress', streetAddress: 'Route de l’OCI', addressLocality: 'Dakar', addressCountry: 'SN' },
-  amenityFeature: ['Piscine', 'Restaurant', 'Bar', 'Wi-Fi gratuit', 'Réception 24h/24', 'Parking', 'Groupe électrogène', 'Salle de séminaire'].map((name) => ({ '@type': 'LocationFeatureSpecification', name, value: true })),
+  amenityFeature: ['Piscine', 'Restaurant', 'Bar', 'Wi-Fi gratuit', 'Réception 24h/24', 'Parking', 'Groupe électrogène', 'Salle de séminaire'].map((name) => ({ '@type': 'LocationFeatureSpecification', name: t(name), value: true })),
 };
 const graph = [jsonLd, ...schema];
 ---
 <!doctype html>
-<html lang="fr">
+<html lang={lang}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -42,10 +51,14 @@ const graph = [jsonLd, ...schema];
   <meta name="description" content={description} />
   {noindex && <meta name="robots" content="noindex,nofollow" />}
   <link rel="canonical" href={new URL(path, Astro.site)} />
+  <link rel="alternate" hreflang="fr" href={new URL(lang === 'fr' ? path : otherPath, Astro.site)} />
+  <link rel="alternate" hreflang="en" href={new URL(lang === 'en' ? path : otherPath, Astro.site)} />
+  <link rel="alternate" hreflang="x-default" href={new URL(lang === 'fr' ? path : otherPath, Astro.site)} />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:image" content="https://lodgedesalmadies.com/img/hotel.jpg" />
-  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:locale" content={ogLocale(lang)} />
+  <meta property="og:locale:alternate" content={ogLocale(otherLang)} />
   <link rel="icon" href="/img/logo.png" />
   <meta name="theme-color" content="#faf7f2" />
   <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -54,19 +67,20 @@ const graph = [jsonLd, ...schema];
   <script type="application/ld+json" set:html={JSON.stringify(graph)} />
 </head>
 <body>
-  <a class="skip" href="#main">Aller au contenu</a>
+  <a class="skip" href="#main">{t('Aller au contenu')}</a>
   <header class="top" id="top">
     <div class="wrap">
-      <a href="/"><img src="/img/logo.png" alt={site.name} height="48" /></a>
-      <button class="burger" aria-expanded="false" aria-controls="menu" id="burger">Menu</button>
-      <nav id="menu" aria-label="Navigation principale">
+      <a href={homeHref}><img src="/img/logo.png" alt={site.name} height="48" /></a>
+      <button class="burger" aria-expanded="false" aria-controls="menu" id="burger">{t('Menu')}</button>
+      <nav id="menu" aria-label={t('Navigation principale')}>
         <ul>
           {nav.map((n) => (
             <li class={n.children?.length ? 'sub' : undefined}>
-              <a href={n.href} aria-current={path === n.href ? 'page' : undefined}>{n.label}</a>
-              {n.children?.length ? <ul>{n.children.map((c) => <li><a href={c.href} aria-current={path === c.href ? 'page' : undefined}>{c.label}</a></li>)}</ul> : null}
+              <a href={n.href} aria-current={isHere(n.href) ? 'page' : undefined}>{n.label}</a>
+              {n.children?.length ? <ul>{n.children.map((c) => <li><a href={c.href} aria-current={isHere(c.href) ? 'page' : undefined}>{c.label}</a></li>)}</ul> : null}
             </li>
           ))}
+          <li class="lang"><a href={otherPath + Astro.url.search} hreflang={otherLang} lang={otherLang} rel="alternate" aria-label={lang === 'fr' ? 'Switch to English' : 'Passer en français'}>{lang === 'fr' ? 'EN' : 'FR'}</a></li>
           <li><BookButton /></li>
         </ul>
       </nav>
@@ -76,14 +90,14 @@ const graph = [jsonLd, ...schema];
   <footer>
     <div class="wrap">
       <div class="grid">
-        <div><img class="flogo" src="/img/logo.png" alt={site.name} /><p>{site.address}<br />À 15 minutes du centre-ville.</p></div>
-        <div><h3>Navigation</h3><ul>{footerNav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}</ul></div>
-        <div><h3>Contact</h3><p><a href={`tel:${site.phoneHref}`}>{site.phone}</a><br /><a href={`mailto:${site.email}`}>{site.email}</a><br /><a href={site.tripadvisor} rel="noopener" target="_blank">Avis Tripadvisor</a></p></div>
+        <div><img class="flogo" src="/img/logo.png" alt={site.name} /><p>{site.address}<br />{t('À 15 minutes du centre-ville.')}</p></div>
+        <div><h3>{t('Navigation')}</h3><ul>{footerNav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}</ul></div>
+        <div><h3>Contact</h3><p><a href={`tel:${site.phoneHref}`}>{site.phone}</a><br /><a href={`mailto:${site.email}`}>{site.email}</a><br /><a href={site.tripadvisor} rel="noopener" target="_blank">{t('Avis Tripadvisor')}</a></p></div>
       </div>
       <p class="copy">© {new Date().getFullYear()} {site.name}</p>
     </div>
   </footer>
-  <div class="lightbox" id="lb" role="dialog" aria-modal="true" aria-label="Photo agrandie"><button type="button" id="lb-x" aria-label="Fermer">×</button><img alt="" /></div>
+  <div class="lightbox" id="lb" role="dialog" aria-modal="true" aria-label={t('Photo agrandie')}><button type="button" id="lb-x" aria-label={t('Fermer')}>×</button><img alt="" /></div>
   <script is:inline>
     (function () {
       var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;

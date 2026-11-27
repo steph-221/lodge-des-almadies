@@ -1,53 +1,75 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getContent, imgSrc } from '../lib/content';
-const { site, pageHeroes } = await getContent();
+import { langOf, localePath, makeT } from '../lib/i18n';
+const lang = langOf(Astro.url);
+const t = makeT(lang);
+const L = (h: string) => localePath(lang, h);
+const { site, pageHeroes } = await getContent(lang);
 const sitekey = (import.meta.env as any).PUBLIC_TURNSTILE_SITEKEY ?? process.env.PUBLIC_TURNSTILE_SITEKEY ?? '';
 const objet = Astro.url.searchParams.get('objet') === 'seminaire' ? 'seminaire' : 'sejour';
+// Textes utilisés par le script du formulaire (messages d'état, aide à la saisie), dans la langue de la page.
+const msgs = {
+  lang,
+  sending: t('Envoi en cours…'),
+  sent: t('Merci, votre message a bien été envoyé. Nous vous répondons rapidement.'),
+  mailto: t('Votre messagerie va s’ouvrir pour envoyer la demande.'),
+  subject: t('Demande'),
+  name: t('Nom'), email: t('E-mail'), phone: t('Téléphone'),
+  captcha: t('Vérification anti-spam échouée, merci de réessayer.'),
+  invalid: t('Merci de vérifier les champs du formulaire.'),
+  failed: t('Envoi impossible. Merci de réessayer ou de nous écrire à {email}.', { email: site.email }),
+  network: t('Erreur réseau. Merci de réessayer.'),
+  sejour: t('Dites-nous ce dont vous avez besoin : dates, nombre de personnes, type de chambre…'),
+  seminaire: t('Pour votre devis : type d’événement, nombre de participants, date, pauses-café, déjeuner, hébergement des participants…'),
+  autre: t('Votre message'),
+};
 ---
-<Base title="Contact et réservation | Lodge des Almadies, Dakar" description="Contactez le Lodge des Almadies pour réserver ou demander un devis séminaire : Route de l’OCI, Dakar. Tél. (+221) 33 869 03 45.">
-  <section class="page-hero"><img src={imgSrc(pageHeroes.contact)} alt="" /><h1>Contact et réservation</h1></section>
+<Base title={t('Contact et réservation | Lodge des Almadies, Dakar')} description={t('Contactez le Lodge des Almadies pour réserver ou demander un devis séminaire : Route de l’OCI, Dakar. Tél. (+221) 33 869 03 45.')}>
+  <section class="page-hero"><img src={imgSrc(pageHeroes.contact)} alt="" /><h1>{t('Contact et réservation')}</h1></section>
   <section><div class="wrap grid g2">
     <div>
-      <h2>Nous écrire</h2>
+      <h2>{t('Nous écrire')}</h2>
       <form id="contact-form" action={`mailto:${site.email}`} method="post" enctype="text/plain" data-sitekey={sitekey} data-mailto={site.email}>
-        <label>Objet de la demande
+        <label>{t('Objet de la demande')}
           <select name="objet" id="objet">
-            <option value="sejour" selected={objet === 'sejour'}>Séjour / réservation</option>
-            <option value="seminaire" selected={objet === 'seminaire'}>Séminaire</option>
-            <option value="autre">Autre</option>
+            <option value="sejour" selected={objet === 'sejour'}>{t('Séjour / réservation')}</option>
+            <option value="seminaire" selected={objet === 'seminaire'}>{t('Séminaire')}</option>
+            <option value="autre">{t('Autre')}</option>
           </select>
         </label>
-        <label>Nom<input name="nom" required autocomplete="name" maxlength="120" /></label>
-        <label>E-mail<input type="email" name="email" required autocomplete="email" maxlength="160" /></label>
-        <label>Téléphone (facultatif)<input type="tel" name="telephone" autocomplete="tel" maxlength="40" /></label>
+        <label>{t('Nom')}<input name="nom" required autocomplete="name" maxlength="120" /></label>
+        <label>{t('E-mail')}<input type="email" name="email" required autocomplete="email" maxlength="160" /></label>
+        <label>{t('Téléphone (facultatif)')}<input type="tel" name="telephone" autocomplete="tel" maxlength="40" /></label>
         <div id="sejour-fields">
-          <label>Arrivée<input type="date" name="arrivee" /></label>
-          <label>Départ<input type="date" name="depart" /></label>
+          <label>{t('Arrivée')}<input type="date" name="arrivee" /></label>
+          <label>{t('Départ')}<input type="date" name="depart" /></label>
         </div>
         <div id="seminaire-fields" hidden>
-          <label>Date souhaitée<input type="date" name="date_seminaire" /></label>
-          <label>Nombre de participants<input type="number" name="participants" min="1" max="40" placeholder="40 maximum" /></label>
+          <label>{t('Date souhaitée')}<input type="date" name="date_seminaire" /></label>
+          <label>{t('Nombre de participants')}<input type="number" name="participants" min="1" max="40" placeholder={t('40 maximum')} /></label>
         </div>
-        <label>Message<textarea name="message" rows="5" required maxlength="3000" id="message" placeholder="Dites-nous ce dont vous avez besoin : dates, nombre de personnes…"></textarea></label>
-        <p class="hp" aria-hidden="true" style="position:absolute;left:-9999px"><label>Ne pas remplir<input name="website" tabindex="-1" autocomplete="off" /></label></p>
+        <label>{t('Message')}<textarea name="message" rows="5" required maxlength="3000" id="message" placeholder={t('Dites-nous ce dont vous avez besoin : dates, nombre de personnes…')}></textarea></label>
+        <p class="hp" aria-hidden="true" style="position:absolute;left:-9999px"><label>{t('Ne pas remplir')}<input name="website" tabindex="-1" autocomplete="off" /></label></p>
         {sitekey && <div class="cf-turnstile" data-sitekey={sitekey}></div>}
-        <button class="btn" type="submit">Envoyer</button>
+        <button class="btn" type="submit">{t('Envoyer')}</button>
         <p id="form-status" role="status" aria-live="polite"></p>
       </form>
     </div>
     <div>
-      <h2>Coordonnées</h2>
+      <h2>{t('Coordonnées')}</h2>
       <p>{site.address}</p>
       <p><a href={`tel:${site.phoneHref}`}>{site.phone}</a><br /><a href={`mailto:${site.email}`}>{site.email}</a></p>
-      <iframe title="Plan d’accès" loading="lazy" style="border:0;width:100%;height:300px;border-radius:12px" src="https://www.openstreetmap.org/export/embed.html?bbox=-17.5190%2C14.7375%2C-17.5110%2C14.7425&amp;layer=mapnik&amp;marker=14.7399266%2C-17.5150638"></iframe>
-      <p><a href={site.maps} target="_blank" rel="noopener">Itinéraire sur Google Maps</a></p>
-      <p><a href={site.tripadvisor} target="_blank" rel="noopener">Voir les avis Tripadvisor</a></p>
+      <iframe title={t('Plan d’accès')} loading="lazy" style="border:0;width:100%;height:300px;border-radius:12px" src="https://www.openstreetmap.org/export/embed.html?bbox=-17.5190%2C14.7375%2C-17.5110%2C14.7425&amp;layer=mapnik&amp;marker=14.7399266%2C-17.5150638"></iframe>
+      <p><a href={site.maps} target="_blank" rel="noopener">{t('Itinéraire sur Google Maps')}</a></p>
+      <p><a href={site.tripadvisor} target="_blank" rel="noopener">{t('Voir les avis Tripadvisor')}</a></p>
     </div>
   </div></section>
   {sitekey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
+  <script type="application/json" id="i18n" set:html={JSON.stringify(msgs).replace(/</g, '\u003c')}></script>
   <script is:inline>
     (function () {
+      var m = JSON.parse(document.getElementById('i18n').textContent);
       var f = document.getElementById('contact-form');
       var sel = document.getElementById('objet');
       var sem = document.getElementById('seminaire-fields');
@@ -55,11 +77,7 @@ const objet = Astro.url.searchParams.get('objet') === 'seminaire' ? 'seminaire' 
       var msg = document.getElementById('message');
       var status = document.getElementById('form-status');
       var t0 = Date.now();
-      var hints = {
-        sejour: 'Dites-nous ce dont vous avez besoin : dates, nombre de personnes, type de chambre…',
-        seminaire: 'Pour votre devis : type d’événement, nombre de participants, date, pauses-café, déjeuner, hébergement des participants…',
-        autre: 'Votre message'
-      };
+      var hints = { sejour: m.sejour, seminaire: m.seminaire, autre: m.autre };
       function sync() {
         var v = sel.value;
         sem.hidden = v !== 'seminaire';
@@ -69,23 +87,24 @@ const objet = Astro.url.searchParams.get('objet') === 'seminaire' ? 'seminaire' 
       sel.addEventListener('change', sync); sync();
       f.addEventListener('submit', function (e) {
         e.preventDefault();
-        status.textContent = 'Envoi en cours…';
+        status.textContent = m.sending;
+        data.lang = m.lang;
         var data = Object.fromEntries(new FormData(f).entries());
         data.elapsed = Date.now() - t0;
         fetch('/api/contact', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) })
           .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; }); })
           .then(function (res) {
-            if (res.ok) { status.textContent = 'Merci, votre message a bien été envoyé. Nous vous répondons rapidement.'; f.reset(); sync(); if (window.turnstile) turnstile.reset(); return; }
+            if (res.ok) { status.textContent = m.sent; f.reset(); sync(); if (window.turnstile) turnstile.reset(); return; }
             if (res.j && res.j.error === 'not_configured') {
-              var body = ['Nom : ' + data.nom, 'E-mail : ' + data.email, 'Téléphone : ' + (data.telephone || ''), '', data.message].join('\n');
-              location.href = 'mailto:' + f.dataset.mailto + '?subject=' + encodeURIComponent('Demande : ' + data.objet) + '&body=' + encodeURIComponent(body);
-              status.textContent = 'Votre messagerie va s’ouvrir pour envoyer la demande.';
+              var body = [m.name + ': ' + data.nom, m.email + ': ' + data.email, m.phone + ': ' + (data.telephone || ''), '', data.message].join('\n');
+              location.href = 'mailto:' + f.dataset.mailto + '?subject=' + encodeURIComponent(m.subject + ': ' + data.objet) + '&body=' + encodeURIComponent(body);
+              status.textContent = m.mailto;
               return;
             }
-            status.textContent = (res.j && res.j.message) || 'Envoi impossible. Merci de réessayer ou de nous écrire à ' + f.dataset.mailto + '.';
+            status.textContent = res.j && res.j.error === 'captcha' ? m.captcha : res.j && res.j.error === 'invalid' ? m.invalid : m.failed;
             if (window.turnstile) turnstile.reset();
           })
-          .catch(function () { status.textContent = 'Erreur réseau. Merci de réessayer.'; });
+          .catch(function () { status.textContent = m.network; });
       });
     })();
   </script>

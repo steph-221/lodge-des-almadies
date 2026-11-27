@@ -2,37 +2,41 @@
 import Base from '../../layouts/Base.astro';
 import BookButton from '../../components/BookButton.astro';
 import { getContent, imgSrc, fmtFcfa, fmtEur } from '../../lib/content';
-import { getPublicTypes } from '../../lib/public-rooms';
-const c = await getContent();
-const t = c.tarifs;
+import { getPublicTypes, typeName } from '../../lib/public-rooms';
+import { langOf, localePath, makeT } from '../../lib/i18n';
+const lang = langOf(Astro.url);
+const t = makeT(lang);
+const L = (h: string) => localePath(lang, h);
+const c = await getContent(lang);
+const tf = c.tarifs;
 // Les tarifs viennent du back-office Chambres quand la base répond ; sinon, du contenu de l'admin.
 const db = await getPublicTypes();
-const roomRows = db ? db.map((r) => ({ name: r.name, building: r.building, view: r.view, count: r.count, fcfa: r.fcfa })) : t.rooms;
+const roomRows = db ? db.map((r) => ({ name: typeName(r, lang), building: r.building, view: t(r.view), count: r.count, fcfa: r.fcfa })) : tf.rooms;
 const extraBed = db?.find((r) => r.extraBed != null)?.extraBed ?? null;
 ---
-<Base title="Tarifs publics 2027 | Lodge des Almadies, Dakar" description="Tarifs publics 2027 du Lodge des Almadies : chambres, suites, restauration, en FCFA et en euros.">
-  <section class="page-hero"><img src={imgSrc(t.heroImage)} alt="" /><h1>Tarifs publics 2027</h1></section>
+<Base title={t('Tarifs publics 2027 | Lodge des Almadies, Dakar')} description={t('Tarifs publics 2027 du Lodge des Almadies : chambres, suites, restauration, en FCFA et en euros.')}>
+  <section class="page-hero"><img src={imgSrc(tf.heroImage)} alt="" /><h1>{t('Tarifs publics 2027')}</h1></section>
   <section><div class="wrap">
-    <p class="center"><strong>Hébergement</strong> · <a href="/tarifs/seminaire/">Tarifs séminaire</a></p>
-    <h2>Hébergement</h2>
-    <p>{t.intro} 1 € = {c.rate} FCFA.</p>
+    <p class="center"><strong>{t('Hébergement')}</strong> · <a href={L('/tarifs/seminaire/')}>{t('Tarifs séminaire')}</a></p>
+    <h2>{t('Hébergement')}</h2>
+    <p>{tf.intro} {lang === 'en' ? `€1 = ${c.rate} FCFA.` : `1 € = ${c.rate} FCFA.`}</p>
     <div class="tarif-table">
       {roomRows.map((r) => (
-        <div class="price"><span>{r.name} · bâtiment {r.building}{r.view ? ` · ${r.view}` : ''} <small>({r.count} {r.count > 1 ? 'chambres' : 'chambre'})</small></span><strong class="amt">{fmtFcfa(r.fcfa)} <small>{fmtEur(r.fcfa, c.rate)}</small></strong></div>
+        <div class="price"><span>{r.name} · {t('bâtiment')} {r.building}{r.view ? ` · ${r.view}` : ''} <small>({t(r.count > 1 ? '{n} chambres' : '{n} chambre', { n: r.count })})</small></span><strong class="amt">{fmtFcfa(r.fcfa, lang)} <small>{fmtEur(r.fcfa, c.rate, lang)}</small></strong></div>
       ))}
     </div>
-    <p><small>{extraBed != null && <>Lit supplémentaire : {fmtFcfa(extraBed)} par nuit. </>}Taxe de séjour : {fmtFcfa(t.taxeSejour)} par nuitée et par personne.</small></p>
+    <p><small>{extraBed != null && <>{t('Lit supplémentaire : {price} par nuit.', { price: fmtFcfa(extraBed, lang) })} </>}{t('Taxe de séjour : {price} par nuitée et par personne.', { price: fmtFcfa(tf.taxeSejour, lang) })}</small></p>
     <p><BookButton /></p>
 
-    <h2>Services et équipements en chambre</h2>
-    <ul class="ticks">{t.equipements.map((e) => <li>{e}</li>)}</ul>
+    <h2>{t('Services et équipements en chambre')}</h2>
+    <ul class="ticks">{tf.equipements.map((e) => <li>{e}</li>)}</ul>
 
-    <h2>Restauration et bar</h2>
-    {t.restauration.map((r) => <div class="price"><span>{r.label} <small>· {r.detail}</small></span><strong class="amt">{fmtFcfa(r.fcfa)} <small>{fmtEur(r.fcfa, c.rate)}</small></strong></div>)}
-    <p>{t.restaurationNote}</p>
+    <h2>{t('Restauration et bar')}</h2>
+    {tf.restauration.map((r) => <div class="price"><span>{r.label} <small>· {r.detail}</small></span><strong class="amt">{fmtFcfa(r.fcfa, lang)} <small>{fmtEur(r.fcfa, c.rate, lang)}</small></strong></div>)}
+    <p>{tf.restaurationNote}</p>
 
-    <h2>Informations complémentaires</h2>
-    {t.infos.map((i) => <div class="price"><span>{i.subject}</span><strong>{i.detail}</strong></div>)}
-    <p style="margin-top:24px"><a class="btn" href="/tarifs/seminaire/">Voir les tarifs séminaire</a></p>
+    <h2>{t('Informations complémentaires')}</h2>
+    {tf.infos.map((i) => <div class="price"><span>{i.subject}</span><strong>{i.detail}</strong></div>)}
+    <p style="margin-top:24px"><a class="btn" href={L('/tarifs/seminaire/')}>{t('Voir les tarifs séminaire')}</a></p>
   </div></section>
 </Base>

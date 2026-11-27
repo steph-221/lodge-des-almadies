@@ -1,11 +1,14 @@
 ---
 import { getContent } from '../lib/content';
+import { langOf, localePath, makeT } from '../lib/i18n';
 interface Props { class?: string; }
 const { class: cls = 'btn' } = Astro.props;
-const { booking } = await getContent();
+const lang = langOf(Astro.url);
+const t = makeT(lang);
+const { booking } = await getContent(lang);
 // Tant que la réservation Octorate n'est pas activée dans /admin, le bouton mène au formulaire de contact.
 const octorate = booking.enabled && /^https:\/\//.test(booking.url);
 ---
 {octorate
-  ? <a class={cls} href={booking.url} target="_blank" rel="noopener">Réserver</a>
-  : <a class={cls} href="/contact/">Réserver</a>}
+  ? <a class={cls} href={booking.url} target="_blank" rel="noopener">{t('Réserver')}</a>
+  : <a class={cls} href={localePath(lang, '/contact/')}>{t('Réserver')}</a>}

@@ -1,15 +1,20 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getContent, imgSrc } from '../lib/content';
-const { faq, pageHeroes } = await getContent();
+import { langOf, localePath, makeT } from '../lib/i18n';
+const lang = langOf(Astro.url);
+const t = makeT(lang);
+const L = (h: string) => localePath(lang, h);
+const { faq, pageHeroes } = await getContent(lang);
 const schema = [{
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
+  inLanguage: lang,
   mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
 }];
 ---
-<Base title="Questions fréquentes | Lodge des Almadies, Dakar" description="Emplacement, piscine, séminaire, paiement : les réponses aux questions fréquentes sur le Lodge des Almadies." schema={schema}>
-  <section class="page-hero"><img src={imgSrc(pageHeroes.faq)} alt="" /><h1>Questions fréquentes</h1></section>
+<Base title={t('Questions fréquentes | Lodge des Almadies, Dakar')} description={t('Emplacement, piscine, séminaire, paiement : les réponses aux questions fréquentes sur le Lodge des Almadies.')} schema={schema}>
+  <section class="page-hero"><img src={imgSrc(pageHeroes.faq)} alt="" /><h1>{t('Questions fréquentes')}</h1></section>
   <section><div class="wrap" style="max-width:760px">
     {faq.map((f) => <details style="border-bottom:1px solid var(--line);padding:14px 0"><summary style="cursor:pointer;font-weight:600">{f.q}</summary><p>{f.a}</p></details>)}
   </div></section>

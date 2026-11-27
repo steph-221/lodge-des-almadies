@@ -212,3 +212,10 @@ header.top nav li.sub>ul a:hover{background:rgba(255,255,255,.08)}
 details{border-bottom:1px solid var(--stone);padding:22px 0}summary{cursor:pointer;list-style:none;text-transform:uppercase;letter-spacing:.1em;font-size:.92rem;display:flex;justify-content:space-between;gap:16px}
 summary::-webkit-details-marker{display:none}summary::after{content:"+";color:var(--accent);font-size:1.4rem;line-height:1}details[open] summary::after{content:"–"}details p{color:var(--muted);margin:.8rem 0 0}
 footer h3{font-size:.8rem;letter-spacing:.25em}footer img.flogo{height:60px;filter:brightness(0) invert(1);margin-bottom:18px}
+
+/* Sélecteur de langue FR | EN */
+nav li.lang a{border:1px solid currentColor;border-radius:999px;padding:4px 10px;font-size:.72rem;letter-spacing:.12em;opacity:.8}
+header.top nav li.lang a{padding:4px 10px;font-size:.7rem}
+@media(max-width:900px){nav li.lang a{display:inline-block;padding:4px 12px;font-size:.8rem;margin:6px 0}}
+header.top nav .btn{white-space:nowrap}
+@media(min-width:901px) and (max-width:1180px){header.top nav ul{gap:16px}header.top nav a{letter-spacing:.1em}header.top .wrap{gap:10px}}

@@ -1,9 +1,13 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getContent, imgSrc } from '../lib/content';
-const { gallery, pageHeroes } = await getContent();
+import { langOf, localePath, makeT } from '../lib/i18n';
+const lang = langOf(Astro.url);
+const t = makeT(lang);
+const L = (h: string) => localePath(lang, h);
+const { gallery, pageHeroes } = await getContent(lang);
 ---
-<Base title="Galerie | Lodge des Almadies, Dakar" description="Photos de l’hôtel, des chambres, du restaurant, de la piscine et des boutiques.">
-  <section class="page-hero"><img src={imgSrc(pageHeroes.galerie)} alt="" /><h1>Galerie</h1></section>
+<Base title={t('Galerie | Lodge des Almadies, Dakar')} description={t('Photos de l’hôtel, des chambres, du restaurant, de la piscine et des boutiques.')}>
+  <section class="page-hero"><img src={imgSrc(pageHeroes.galerie)} alt="" /><h1>{t('Galerie')}</h1></section>
   <section><div class="wrap bento">{gallery.map((g) => <img src={imgSrc(g.src)} alt={g.alt} loading="lazy" />)}</div></section>
 </Base>

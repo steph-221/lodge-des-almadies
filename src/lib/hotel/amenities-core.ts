@@ -23,13 +23,16 @@ const noRoomNumbers = (label: string): string => label.replace(/\s*\(\d[\d\s,;et
 
 // Équipements d'une page qui regroupe plusieurs types : ce qui est inclus partout, puis ce qui varie.
 // Un équipement « À vérifier » dans un type est laissé de côté (il n'est affiché nulle part tant qu'il n'est pas confirmé).
-export function commonEquipment(types: { amenities: { key: string; label: string; value: AmenityValue }[] }[]): { all: string[]; some: string[] } {
+type EquipLang = 'fr' | 'en';
+const SUFFIX_EN: Partial<Record<AmenityValue, string>> = { oui: 'included', sur_demande: 'on request', supplement: 'extra charge' };
+export function commonEquipment(types: { amenities: { key: string; label: string; labelEn?: string; value: AmenityValue }[] }[], lang: EquipLang = 'fr'): { all: string[]; some: string[] } {
+  const en = lang === 'en';
   const order: string[] = [];
   const label = new Map<string, string>();
   const byKey = new Map<string, AmenityValue[]>();
   for (const t of types) {
     for (const a of t.amenities) {
-      if (!byKey.has(a.key)) { byKey.set(a.key, []); order.push(a.key); label.set(a.key, a.label); }
+      if (!byKey.has(a.key)) { byKey.set(a.key, []); order.push(a.key); label.set(a.key, (en && a.labelEn) || a.label); }
       byKey.get(a.key)!.push(a.value);
     }
   }
@@ -43,8 +46,8 @@ export function commonEquipment(types: { amenities: { key: string; label: string
     if (!kinds.length) continue;
     const varies = kinds.length > 1 || !complete || vals.includes('non');
     const name = noRoomNumbers(label.get(k)!);
-    if (kinds.length === 1 && kinds[0] === 'oui') some.push(`${name} (dans certaines chambres)`);
-    else some.push(`${name} (${kinds.map((v) => SUFFIX[v]!).join(' ou ')}${varies ? ' selon la chambre' : ''})`);
+    if (kinds.length === 1 && kinds[0] === 'oui') some.push(en ? `${name} (in some rooms)` : `${name} (dans certaines chambres)`);
+    else some.push(en ? `${name} (${kinds.map((v) => SUFFIX_EN[v]!).join(' or ')}${varies ? ', depending on the room' : ''})` : `${name} (${kinds.map((v) => SUFFIX[v]!).join(' ou ')}${varies ? ' selon la chambre' : ''})`);
   }
   return { all, some };
 }

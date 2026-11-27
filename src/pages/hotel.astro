@@ -1,10 +1,14 @@
 ---
 import Base from '../layouts/Base.astro';
 import { getContent, imgSrc } from '../lib/content';
-const { hotel } = await getContent();
+import { langOf, localePath, makeT } from '../lib/i18n';
+const lang = langOf(Astro.url);
+const t = makeT(lang);
+const L = (h: string) => localePath(lang, h);
+const { hotel } = await getContent(lang);
 ---
-<Base title="L'hôtel | Lodge des Almadies, Dakar" description="36 chambres et suites, restaurant, piscine, salle de séminaire et boutiques aux Almadies, Dakar.">
-  <section class="page-hero"><img src={imgSrc(hotel.heroImage)} alt="" /><h1>L’hôtel</h1></section>
+<Base title={t("L'hôtel | Lodge des Almadies, Dakar")} description={t("36 chambres et suites, restaurant, piscine, salle de séminaire et boutiques aux Almadies, Dakar.")}>
+  <section class="page-hero"><img src={imgSrc(hotel.heroImage)} alt="" /><h1>{t('L’hôtel')}</h1></section>
   <section>
     <div class="wrap">
       <p class="lead">{hotel.intro}</p>
@@ -15,7 +19,7 @@ const { hotel } = await getContent();
     {hotel.cards.map((c) => <article class="card"><img src={imgSrc(c.img)} alt={c.title} loading="lazy" /><div class="b"><h3>{c.title}</h3><p>{c.text}</p></div></article>)}
   </div></section>
   <section><div class="wrap">
-    <h2>L’emplacement</h2>
+    <h2>{t('L’emplacement')}</h2>
     <div class="grid g2">{hotel.location.map((l) => <div class="price"><span>{l.time}</span><strong>{l.to}</strong></div>)}</div>
   </div></section>
 </Base>
