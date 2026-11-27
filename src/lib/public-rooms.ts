@@ -5,7 +5,7 @@ import { commonEquipment, type AmenityValue } from './hotel/amenities-core';
 
 export type PublicType = {
   code: string; name: string; building: string; view: string; fcfa: number; extraBed: number | null;
-  count: number; twin: boolean; suite: boolean; amenities: { key: string; label: string; value: AmenityValue }[];
+  count: number; twin: boolean; suite: boolean; beds?: string; amenities: { key: string; label: string; value: AmenityValue }[];
 };
 
 const TTL_MS = 60_000;
@@ -26,13 +26,13 @@ async function load(): Promise<PublicType[] | null> {
   if (!dbConfigured()) return null;
   const rows = (await Promise.race([
     sql().query(
-      `select t.code, t.label, t.building, t.location, t.price_fcfa::int as fcfa, t.extra_bed_fcfa::int as "extraBed",
+      `select t.code, t.label, t.building, t.location, t.price_fcfa::int as fcfa, t.extra_bed_fcfa::int as "extraBed", t.beds,
          (select count(*)::int from rooms r where r.room_type_id = t.id and r.active) as count,
          exists(select 1 from room_type_amenities a where a.room_type_id = t.id and a.amenity_key = 'lits_twin' and a.value = 'oui') as twin
        from room_types t where t.active and t.price_fcfa is not null order by t.price_fcfa, t.position`,
     ),
     new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 3000)),
-  ])) as { code: string; label: string; building: string; location: string; fcfa: number; extraBed: number | null; count: number; twin: boolean }[];
+  ])) as { code: string; label: string; building: string; location: string; fcfa: number; extraBed: number | null; beds: string | null; count: number; twin: boolean }[];
   const am = (await sql().query(
     `select t.code, m.key, m.label_fr as label, a.value from room_type_amenities a
      join room_types t on t.id = a.room_type_id join amenities m on m.key = a.amenity_key order by m.position`,
@@ -40,7 +40,7 @@ async function load(): Promise<PublicType[] | null> {
   const out = rows.filter((r) => r.count > 0).map((r) => {
     const name = cleanName(r.label);
     return {
-      code: r.code, name, building: r.building, view: cleanView(r.location, name), fcfa: r.fcfa, extraBed: r.extraBed, count: r.count, twin: r.twin, suite: /^suite/i.test(name),
+      code: r.code, name, building: r.building, view: cleanView(r.location, name), fcfa: r.fcfa, extraBed: r.extraBed, count: r.count, twin: r.twin, beds: r.beds ?? undefined, suite: /^suite/i.test(name),
       amenities: am.filter((a) => a.code === r.code).map(({ key, label, value }) => ({ key, label, value })),
     };
   });
@@ -73,4 +73,17 @@ export function pricesFor(slug: string, types: PublicType[]): { label: string; f
   const pick = typesFor(slug, types);
   if (!pick.length) return null;
   return pick.map((t) => ({ label: [t.name, `bâtiment ${t.building}`, t.view].filter(Boolean).join(' · '), fcfa: t.fcfa }));
+}
+
+// Ligne « personnes · literie » d'une page chambre, déduite des types de la base (capacité, lit supplémentaire, double ou twin).
+export function summaryFor(slug: string, types: PublicType[]): { guests: string; beds: string } | null {
+  const pick = typesFor(slug, types);
+  if (!pick.length) return null;
+  const withExtra = pick.filter((t) => t.extraBed != null).length;
+  const guests = withExtra === 0 ? '2 personnes'
+    : withExtra === pick.length ? '2 personnes (+1 lit supplémentaire)'
+    : '2 personnes (+1 lit supplémentaire possible selon la chambre)';
+  const anyTwin = pick.some((t) => /twin/i.test(t.beds ?? '')) || slug === 'twin';
+  const beds = slug === 'twin' ? 'Lits séparés ou lit double selon la chambre' : anyTwin ? 'Lit double ou twin selon la chambre' : 'Lit double';
+  return { guests, beds };
 }
